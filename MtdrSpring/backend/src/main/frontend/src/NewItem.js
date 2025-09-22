@@ -32,6 +32,7 @@ function NewItem(props) {
     <div id="newinputform">
     <form>
       <input
+        className="text-black"
         id="newiteminput"
         placeholder="New item"
         type="text"

@@ -1,4 +1,4 @@
-          /*
+/*
 ## MyToDoReact version 1.0.
 ##
 ## Copyright (c) 2022 Oracle, Inc.
@@ -10,20 +10,19 @@
  * consistency.
  * @author  jean.de.lavarene@oracle.com
  */
+import './Dashboard.css';
 import React, { useState, useEffect } from 'react';
-import NewItem from './NewItem';
-import API_LIST from './API';
+import NewItem from '../NewItem';
+import API_LIST from '../API';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Button, TableBody, CircularProgress } from '@mui/material';
-import Moment from 'react-moment';
-
 /* In this application we're using Function Components with the State Hooks
  * to manage the states. See the doc: https://reactjs.org/docs/hooks-state.html
  * This App component represents the entire app. It renders a NewItem component
  * and two tables: one that lists the todo items that are to be done and another
  * one with the items that are already done.
  */
-function App() {
+export default function Dashboard() {
     // isLoading is true while waiting for the backend to return the list
     // of items. We use this state to display a spinning circle:
     const [isLoading, setLoading] = useState(false);
@@ -184,7 +183,8 @@ function App() {
       );
     }
     return (
-      <div className="App">
+      <div className='ml-[600px] w-1/2'>
+        <div className="App">
         <h1>MY TODO LIST</h1>
         <NewItem addItem={addItem} isInserting={isInserting}/>
         { error &&
@@ -202,7 +202,7 @@ function App() {
             <tr key={item.id}>
               <td className="description">{item.description}</td>
               { /*<td>{JSON.stringify(item, null, 2) }</td>*/ }
-              <td className="date"><Moment format="MMM Do hh:mm:ss">{item.createdAt}</Moment></td>
+              <td className="date">{item.createdAt}</td>
               <td><Button variant="contained" className="DoneButton" onClick={(event) => toggleDone(event, item.id, item.description, !item.done)} size="small">
                     Done
                   </Button></td>
@@ -220,7 +220,7 @@ function App() {
 
             <tr key={item.id}>
               <td className="description">{item.description}</td>
-              <td className="date"><Moment format="MMM Do hh:mm:ss">{item.createdAt}</Moment></td>
+              <td className="date">{item.createdAt}</td>
               <td><Button variant="contained" className="DoneButton" onClick={(event) => toggleDone(event, item.id, item.description, !item.done)} size="small">
                     Undo
                   </Button></td>
@@ -233,8 +233,7 @@ function App() {
         </table>
         </div>
         }
-
+        </div>
       </div>
     );
 }
-export default App;
