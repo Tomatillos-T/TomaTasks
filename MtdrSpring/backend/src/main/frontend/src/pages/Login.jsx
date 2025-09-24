@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
-import tomatoLogo from '../../src/assets/tomato.svg';
+import tomatoLogo from '../assets/tomato.svg';
 
 export default function Login() {
   const navigate = useNavigate();
