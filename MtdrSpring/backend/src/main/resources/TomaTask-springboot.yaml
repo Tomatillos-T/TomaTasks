@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: todolistapp-springboot-service
+  name: TomaTask-springboot-service
   annotations:
     oci.oraclecloud.com/loadbalancer-policy: "IP_HASH"
 spec:
@@ -13,16 +13,16 @@ spec:
       protocol: TCP
       targetPort: 8080
   selector:
-    app: todolistapp-springboot
+    app: TomaTask-springboot
 ---
 #this is new stuff for hosting on the load balancer
 apiVersion: v1
 kind: Service
 metadata:
-  name: todolistapp-backend-router
+  name: TomaTask-backend-router
 spec:
   selector:
-    app: todolistapp-springboot
+    app: TomaTask-springboot
   ports:
     - protocol: TCP
       port: 80
@@ -31,25 +31,25 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: todolistapp-springboot-deployment
+  name: TomaTask-springboot-deployment
 spec:
   selector:
     matchLabels:
-      app: todolistapp-springboot
+      app: TomaTask-springboot
   replicas: 2
   template:
     metadata:
       labels:
-        app: todolistapp-springboot
+        app: TomaTask-springboot
         version: v1
     spec:
       containers:
-        - name: todolistapp-springboot
-          image: %DOCKER_REGISTRY%/todolistapp-springboot:0.1
+        - name: TomaTask-springboot
+          image: %DOCKER_REGISTRY%/TomaTask-springboot:0.1
           imagePullPolicy: Always
           env:
             - name: db_user
-              value: "TODOUSER"
+              value: "TOMATITIOS"
             - name: db_url
               value: "jdbc:oracle:thin:@%TODO_PDB_NAME%_tp?TNS_ADMIN=/mtdrworkshop/creds"
             - name: todo.table.name
@@ -88,5 +88,6 @@ spec:
           whenUnsatisfiable: DoNotSchedule
           labelSelector:
             matchLabels:
-              app: todolistapp-springboot
+              app: TomaTask-springboot
 ---
+

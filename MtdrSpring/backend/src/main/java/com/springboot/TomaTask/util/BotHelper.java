@@ -1,4 +1,4 @@
-package com.springboot.MyTodoList.util;
+package com.springboot.TomaTask.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

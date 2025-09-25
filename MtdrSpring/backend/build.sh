@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export IMAGE_NAME=todolistapp-springboot
+export IMAGE_NAME=TomaTask-springboot
 export IMAGE_VERSION=0.1
 
 

@@ -1,4 +1,4 @@
-package com.springboot.MyTodoList.controller;
+package com.springboot.TomaTask.controller;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -20,12 +20,12 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import com.springboot.MyTodoList.model.ToDoItem;
-import com.springboot.MyTodoList.service.ToDoItemService;
-import com.springboot.MyTodoList.util.BotCommands;
-import com.springboot.MyTodoList.util.BotHelper;
-import com.springboot.MyTodoList.util.BotLabels;
-import com.springboot.MyTodoList.util.BotMessages;
+import com.springboot.TomaTask.model.ToDoItem;
+import com.springboot.TomaTask.service.ToDoItemService;
+import com.springboot.TomaTask.util.BotCommands;
+import com.springboot.TomaTask.util.BotHelper;
+import com.springboot.TomaTask.util.BotLabels;
+import com.springboot.TomaTask.util.BotMessages;
 
 public class ToDoItemBotController extends TelegramLongPollingBot {
 

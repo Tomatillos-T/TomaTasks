@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.springboot</groupId>
-	<artifactId>MyTodoList</artifactId>
+	<artifactId>TomaTask</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>MyTodoList</name>
+	<name>TomaTask</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>11</java.version>
@@ -71,7 +71,7 @@
 			<groupId>org.telegram</groupId>
 			<artifactId>telegrambots</artifactId>
 			<version>6.5.0</version>
-		</dependency>		
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -139,7 +139,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${project.parent.version}</version>
 				<configuration>
-					<mainClass>com.springboot.MyTodoList.MyTodoListApplication</mainClass>
+					<mainClass>com.springboot.TomaTask.TomaTaskApplication</mainClass>
 				</configuration>
 				<executions>
 					<execution>

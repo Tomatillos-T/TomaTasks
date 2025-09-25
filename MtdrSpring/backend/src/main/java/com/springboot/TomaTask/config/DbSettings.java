@@ -1,4 +1,4 @@
-package com.springboot.MyTodoList.config;
+package com.springboot.TomaTask.config;
 
 
 import org.springframework.boot.context.properties.ConfigurationProperties;

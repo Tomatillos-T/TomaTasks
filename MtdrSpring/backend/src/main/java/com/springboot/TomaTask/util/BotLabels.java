@@ -1,4 +1,4 @@
-package com.springboot.MyTodoList.util;
+package com.springboot.TomaTask.util;
 
 public enum BotLabels {
 	

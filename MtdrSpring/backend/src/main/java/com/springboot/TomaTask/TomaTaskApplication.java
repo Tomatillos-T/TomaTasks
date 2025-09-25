@@ -1,4 +1,4 @@
-package com.springboot.MyTodoList;
+package com.springboot.TomaTask;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,14 +11,17 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
-import com.springboot.MyTodoList.controller.ToDoItemBotController;
-import com.springboot.MyTodoList.service.ToDoItemService;
-import com.springboot.MyTodoList.util.BotMessages;
+import com.springboot.TomaTask.controller.ToDoItemBotController;
+import com.springboot.TomaTask.service.ToDoItemService;
+import com.springboot.TomaTask.util.BotMessages;
+
+import com.springboot.TomaTask.model.User;
+import com.springboot.TomaTask.service.UserService;
 
 @SpringBootApplication
-public class MyTodoListApplication implements CommandLineRunner {
+public class TomaTaskApplication implements CommandLineRunner {
 
-	private static final Logger logger = LoggerFactory.getLogger(MyTodoListApplication.class);
+	private static final Logger logger = LoggerFactory.getLogger(TomaTaskApplication.class);
 
 	@Autowired
 	private ToDoItemService toDoItemService;
@@ -30,7 +33,7 @@ public class MyTodoListApplication implements CommandLineRunner {
 	private String botName;
 
 	public static void main(String[] args) {
-		SpringApplication.run(MyTodoListApplication.class, args);
+		SpringApplication.run(TomaTaskApplication.class, args);
 	}
 
 	@Override

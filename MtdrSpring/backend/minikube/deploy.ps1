@@ -1,5 +1,5 @@
 # Ruta del archivo YAML
-$yamlFile = "win-todolistapp-springboot.yaml"
+$yamlFile = "win-TomaTask-springboot.yaml"
 
 # Verificar si Minikube está corriendo
 Write-Host "Verificando estado de Minikube..." -ForegroundColor Cyan
@@ -24,14 +24,14 @@ kubectl apply -f $yamlFile --namespace mtdrworkshop
 
 # Mostrar recursos creados
 Write-Host "`nRecursos desplegados:" -ForegroundColor Green
-kubectl get all | Select-String "todolistapp"
+kubectl get all | Select-String "TomaTask"
 
 # Mostrar servicios expuestos
 Write-Host "`nServicios disponibles:" -ForegroundColor Green
-kubectl get svc | Select-String "todolistapp"
+kubectl get svc | Select-String "TomaTask"
 
 # Acceder al servicio en navegador si se usa NodePort
-$nodePort = kubectl get svc todolistapp-springboot-service -o=jsonpath="{.spec.ports[0].nodePort}"
+$nodePort = kubectl get svc TomaTask-springboot-service -o=jsonpath="{.spec.ports[0].nodePort}"
 $minikubeIP = minikube ip
 $serviceURL = "http://$minikubeIP`:$nodePort"
 

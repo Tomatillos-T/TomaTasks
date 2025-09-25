@@ -1,4 +1,4 @@
-package com.springboot.MyTodoList.config;
+package com.springboot.TomaTask.config;
 
 
 import oracle.jdbc.pool.OracleDataSource;

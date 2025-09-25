@@ -41,20 +41,20 @@ fi
 echo "Creating springboot deplyoment and service"
 export CURRENTTIME=$( date '+%F_%H:%M:%S' )
 echo CURRENTTIME is $CURRENTTIME  ...this will be appended to generated deployment yaml
-cp src/main/resources/todolistapp-springboot.yaml todolistapp-springboot-$CURRENTTIME.yaml
+cp src/main/resources/TomaTask-springboot.yaml TomaTask-springboot-$CURRENTTIME.yaml
 
-sed -i "s|%DOCKER_REGISTRY%|${DOCKER_REGISTRY}|g" todolistapp-springboot-$CURRENTTIME.yaml
+sed -i "s|%DOCKER_REGISTRY%|${DOCKER_REGISTRY}|g" TomaTask-springboot-$CURRENTTIME.yaml
 
-sed -e "s|%DOCKER_REGISTRY%|${DOCKER_REGISTRY}|g" todolistapp-springboot-${CURRENTTIME}.yaml > /tmp/todolistapp-springboot-${CURRENTTIME}.yaml
-mv -- /tmp/todolistapp-springboot-$CURRENTTIME.yaml todolistapp-springboot-$CURRENTTIME.yaml
-sed -e "s|%TODO_PDB_NAME%|${TODO_PDB_NAME}|g" todolistapp-springboot-${CURRENTTIME}.yaml > /tmp/todolistapp-springboot-${CURRENTTIME}.yaml
-mv -- /tmp/todolistapp-springboot-$CURRENTTIME.yaml todolistapp-springboot-$CURRENTTIME.yaml
-sed -e "s|%OCI_REGION%|${OCI_REGION}|g" todolistapp-springboot-${CURRENTTIME}.yaml > /tmp/todolistapp-springboot-$CURRENTTIME.yaml
-mv -- /tmp/todolistapp-springboot-$CURRENTTIME.yaml todolistapp-springboot-$CURRENTTIME.yaml
-sed -e "s|%UI_USERNAME%|${UI_USERNAME}|g" todolistapp-springboot-${CURRENTTIME}.yaml > /tmp/todolistapp-springboot-$CURRENTTIME.yaml
-mv -- /tmp/todolistapp-springboot-$CURRENTTIME.yaml todolistapp-springboot-$CURRENTTIME.yaml
+sed -e "s|%DOCKER_REGISTRY%|${DOCKER_REGISTRY}|g" TomaTask-springboot-${CURRENTTIME}.yaml > /tmp/TomaTask-springboot-${CURRENTTIME}.yaml
+mv -- /tmp/TomaTask-springboot-$CURRENTTIME.yaml TomaTask-springboot-$CURRENTTIME.yaml
+sed -e "s|%TODO_PDB_NAME%|${TODO_PDB_NAME}|g" TomaTask-springboot-${CURRENTTIME}.yaml > /tmp/TomaTask-springboot-${CURRENTTIME}.yaml
+mv -- /tmp/TomaTask-springboot-$CURRENTTIME.yaml TomaTask-springboot-$CURRENTTIME.yaml
+sed -e "s|%OCI_REGION%|${OCI_REGION}|g" TomaTask-springboot-${CURRENTTIME}.yaml > /tmp/TomaTask-springboot-$CURRENTTIME.yaml
+mv -- /tmp/TomaTask-springboot-$CURRENTTIME.yaml TomaTask-springboot-$CURRENTTIME.yaml
+sed -e "s|%UI_USERNAME%|${UI_USERNAME}|g" TomaTask-springboot-${CURRENTTIME}.yaml > /tmp/TomaTask-springboot-$CURRENTTIME.yaml
+mv -- /tmp/TomaTask-springboot-$CURRENTTIME.yaml TomaTask-springboot-$CURRENTTIME.yaml
 if [ -z "$1" ]; then
-    kubectl apply -f $SCRIPT_DIR/todolistapp-springboot-$CURRENTTIME.yaml -n mtdrworkshop
+    kubectl apply -f $SCRIPT_DIR/TomaTask-springboot-$CURRENTTIME.yaml -n mtdrworkshop
 else
-    kubectl apply -f <(istioctl kube-inject -f $SCRIPT_DIR/todolistapp-springboot-$CURRENTTIME.yaml) -n mtdrworkshop
+    kubectl apply -f <(istioctl kube-inject -f $SCRIPT_DIR/TomaTask-springboot-$CURRENTTIME.yaml) -n mtdrworkshop
 fi

@@ -1,7 +1,7 @@
-package com.springboot.MyTodoList.service;
+package com.springboot.TomaTask.service;
 
-import com.springboot.MyTodoList.model.ToDoItem;
-import com.springboot.MyTodoList.repository.ToDoItemRepository;
+import com.springboot.TomaTask.model.ToDoItem;
+import com.springboot.TomaTask.repository.ToDoItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

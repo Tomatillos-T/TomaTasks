@@ -1,6 +1,6 @@
-package com.springboot.MyTodoList.controller;
-import com.springboot.MyTodoList.model.ToDoItem;
-import com.springboot.MyTodoList.service.ToDoItemService;
+package com.springboot.TomaTask.controller;
+import com.springboot.TomaTask.model.ToDoItem;
+import com.springboot.TomaTask.service.ToDoItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
