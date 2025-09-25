@@ -1,3 +1,5 @@
+![image](https://img.shields.io/badge/Versión-0.0,1-blue)
+
 # oci-react-samples
 A repository for full stack Cloud Native applications with a React JS frontend and various backends (Java, Python, DotNet, and so on) on the Oracle Cloud Infrastructure.
 
