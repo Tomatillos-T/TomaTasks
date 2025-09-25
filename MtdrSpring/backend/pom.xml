@@ -125,7 +125,7 @@
 						<configuration>
 							<outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
 							<resources>
-								<resource>
+								<resource> <!-- Cambiar de lugar -->
 									<directory>${frontend-src-dir}/build</directory>
 									<filtering>false</filtering>
 								</resource>
