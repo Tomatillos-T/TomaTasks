@@ -11,7 +11,7 @@
  * @author  jean.de.lavarene@oracle.com
  */
 import React, { useState, useEffect } from "react";
-import NewItem from "../modules/task/components/NewItem.tsx";
+import NewItem from "../modules/task/components/newItem";
 import API_LIST from "../API";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Button, TableBody, CircularProgress } from "@mui/material";
@@ -170,7 +170,6 @@ export default function Dashboard() {
       .then((response) => {
         // This API doens't return a JSON document
         console.log(response);
-        console.log();
         console.log(response.headers.location);
         // return response.json();
         if (response.ok) {
@@ -193,90 +192,88 @@ export default function Dashboard() {
       );
   }
   return (
-    <div className="ml-[600px] w-1/2">
-      <div className="App">
-        <h1>MY TODO LIST</h1>
-        <NewItem addItem={addItem} isInserting={isInserting} />
-        {error && <p>Error: {error.message}</p>}
-        {isLoading && <CircularProgress />}
-        {!isLoading && (
-          <div id="maincontent">
-            <table id="itemlistNotDone" className="itemlist">
-              <TableBody>
-                {items.map(
-                  (item) =>
-                    !item.done && (
-                      <tr key={item.id}>
-                        <td className="description">{item.description}</td>
-                        {/*<td>{JSON.stringify(item, null, 2) }</td>*/}
-                        <td className="date">{item.createdAt}</td>
-                        <td>
-                          <Button
-                            variant="contained"
-                            className="DoneButton"
-                            onClick={(event) =>
-                              toggleDone(
-                                event,
-                                item.id,
-                                item.description,
-                                !item.done
-                              )
-                            }
-                            size="small"
-                          >
-                            Done
-                          </Button>
-                        </td>
-                      </tr>
-                    )
-                )}
-              </TableBody>
-            </table>
-            <h2 id="donelist">Done items</h2>
-            <table id="itemlistDone" className="itemlist">
-              <TableBody>
-                {items.map(
-                  (item) =>
-                    item.done && (
-                      <tr key={item.id}>
-                        <td className="description">{item.description}</td>
-                        <td className="date">{item.createdAt}</td>
-                        <td>
-                          <Button
-                            variant="contained"
-                            className="DoneButton"
-                            onClick={(event) =>
-                              toggleDone(
-                                event,
-                                item.id,
-                                item.description,
-                                !item.done
-                              )
-                            }
-                            size="small"
-                          >
-                            Undo
-                          </Button>
-                        </td>
-                        <td>
-                          <Button
-                            startIcon={<DeleteIcon />}
-                            variant="contained"
-                            className="DeleteButton"
-                            onClick={() => deleteItem(item.id)}
-                            size="small"
-                          >
-                            Delete
-                          </Button>
-                        </td>
-                      </tr>
-                    )
-                )}
-              </TableBody>
-            </table>
-          </div>
-        )}
-      </div>
+    <div className="bg-neutral-500 ml-[600px] py-2 px-20 my-5 w-1/2 rounded-md">
+      <h1>MY TODO LIST</h1>
+      <NewItem addItem={addItem} isInserting={isInserting} />
+      {error && <p>Error: {error.message}</p>}
+      {isLoading && <CircularProgress />}
+      {!isLoading && (
+        <div id="maincontent">
+          <table id="itemlistNotDone" className="itemlist">
+            <TableBody>
+              {items.map(
+                (item) =>
+                  !item.done && (
+                    <tr key={item.id}>
+                      <td className="description">{item.description}</td>
+                      {/*<td>{JSON.stringify(item, null, 2) }</td>*/}
+                      <td className="date">{item.createdAt}</td>
+                      <td>
+                        <Button
+                          variant="contained"
+                          className="DoneButton"
+                          onClick={(event) =>
+                            toggleDone(
+                              event,
+                              item.id,
+                              item.description,
+                              !item.done
+                            )
+                          }
+                          size="small"
+                        >
+                          Done
+                        </Button>
+                      </td>
+                    </tr>
+                  )
+              )}
+            </TableBody>
+          </table>
+          <h2 id="donelist">Done items</h2>
+          <table id="itemlistDone" className="itemlist">
+            <TableBody>
+              {items.map(
+                (item) =>
+                  item.done && (
+                    <tr key={item.id}>
+                      <td className="description">{item.description}</td>
+                      <td className="date">{item.createdAt}</td>
+                      <td>
+                        <Button
+                          variant="contained"
+                          className="DoneButton"
+                          onClick={(event) =>
+                            toggleDone(
+                              event,
+                              item.id,
+                              item.description,
+                              !item.done
+                            )
+                          }
+                          size="small"
+                        >
+                          Undo
+                        </Button>
+                      </td>
+                      <td>
+                        <Button
+                          startIcon={<DeleteIcon />}
+                          variant="contained"
+                          className="DeleteButton"
+                          onClick={() => deleteItem(item.id)}
+                          size="small"
+                        >
+                          Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  )
+              )}
+            </TableBody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

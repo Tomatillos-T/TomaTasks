@@ -6,7 +6,7 @@
 */
 /*
  * Component that supports creating a new todo item.
- * @author  
+ * @author
  */
 
 import React, { useState, ChangeEvent, KeyboardEvent, MouseEvent } from "react";
@@ -21,7 +21,9 @@ interface NewItemProps {
 const NewItem: React.FC<NewItemProps> = ({ addItem, isInserting }) => {
   const [item, setItem] = useState<string>("");
 
-  function handleSubmit(e: MouseEvent<HTMLButtonElement> | KeyboardEvent<HTMLInputElement>) {
+  function handleSubmit(
+    e: MouseEvent<HTMLButtonElement> | KeyboardEvent<HTMLInputElement>
+  ) {
     if (!item.trim()) {
       return;
     }
