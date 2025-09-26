@@ -36,11 +36,11 @@ public class User {
     String password;
 
     @CreationTimestamp
-    @Column(name = "creationTs", updatable = false)
+    @Column(name = "creation_ts", updatable = false)
     OffsetDateTime creationTs;
 
     @UpdateTimestamp
-    @Column(name = "updateTs")
+    @Column(name = "update_ts")
     OffsetDateTime updateTs;
 
     public User(){
