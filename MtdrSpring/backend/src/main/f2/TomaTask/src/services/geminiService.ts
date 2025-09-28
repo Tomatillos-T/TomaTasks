@@ -1,4 +1,4 @@
-// services/geminiService.js
+// services/geminiService.ts
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 declare interface GeminiServiceInterface {
