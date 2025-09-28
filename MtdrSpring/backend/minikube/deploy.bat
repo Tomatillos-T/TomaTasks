@@ -15,7 +15,7 @@ echo Ejecutando scripts adicionales...
 powershell -ExecutionPolicy Bypass -File .\nm.ps1
 powershell -ExecutionPolicy Bypass -File .\wallet2k8s.ps1
 powershell -ExecutionPolicy Bypass -File .\dbpass.ps1
-powershell -ExecutionPolicy Bypass -File .\deploy.ps1
+powershell -ExecutionPolicy RemoteSigned -File .\deploy.ps1
 
 echo Proceso completado.
 pause
