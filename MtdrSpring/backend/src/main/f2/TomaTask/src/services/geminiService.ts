@@ -18,7 +18,7 @@ class GeminiService {
 
     if (!this.apiKey) {
       console.error(
-        "⚠️ REACT_APP_GEMINI_API_KEY no está configurada en las variables de entorno"
+        "⚠️ VITE_APP_GEMINI_API_KEY no está configurada en las variables de entorno"
       );
     }
 
