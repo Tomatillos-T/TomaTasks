@@ -60,11 +60,11 @@ public class Task {
     }
 
     public Task(String name, String description, String status, UserStory userStory, Sprint sprint) {
-    this.name = name;
-    this.description = description;
-    this.status = status;
-    this.userStory = userStory;
-    this.sprint = sprint;
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.userStory = userStory;
+        this.sprint = sprint;
     }
 
     public Task(String name, String description, String status, UserStory userStory,
