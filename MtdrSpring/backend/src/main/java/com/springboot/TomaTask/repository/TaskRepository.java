@@ -5,13 +5,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.springboot.TomaTask.model.User;
+import com.springboot.TomaTask.model.Task;
 
 import javax.transaction.Transactional;
+
+import java.util.List;
 
 @Repository
 @Transactional
 @EnableTransactionManagement
-public interface UserRepository extends JpaRepository<User,String> {
-
+public interface TaskRepository extends JpaRepository<Task, Long> {
+    List<Task> findByStatus(String status);
+    List<Task> findBySprintId(Long sprintId);
 }
