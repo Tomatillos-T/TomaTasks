@@ -39,7 +39,6 @@ export default function DragAndDropDemo() {
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetBucket: BucketKey) => {
     e.preventDefault();
-   
     if (!draggedItem || !draggedFrom) return;
 
     if (draggedFrom === targetBucket) {
