@@ -273,7 +273,7 @@ function Chatbot() {
         {!isGeminiAvailable && (
           <div className="mb-2 sm:mb-3 p-2 bg-yellow-100 border border-yellow-300 rounded-lg text-yellow-800 text-xs sm:text-sm">
             ⚠️ Configura tu API key de Gemini en las variables de entorno
-            (REACT_APP_GEMINI_API_KEY)
+            (VITE_APP_GEMINI_API_KEY)
           </div>
         )}
         <ChatInput
