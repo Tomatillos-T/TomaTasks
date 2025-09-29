@@ -18,7 +18,7 @@ public class UserController {
     @Autowired
     private UserService UserService;
     //@CrossOrigin
-    @GetMapping(value = "/user")
+    @GetMapping(value = "/api/user")
     public List<User> getAllUsers(){
         return UserService.findAll();
     }
