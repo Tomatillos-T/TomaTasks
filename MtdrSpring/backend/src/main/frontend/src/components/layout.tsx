@@ -1,4 +1,4 @@
-// Layout.tsx
+// Layout.jsx
 import { Outlet } from "react-router-dom";
 import Sidebar from "./sidebar";
 import { useState } from "react";
