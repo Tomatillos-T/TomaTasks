@@ -15,6 +15,7 @@ import NewItem from "../modules/task/components/newItem";
 import API_LIST from "../API";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Button, TableBody, CircularProgress } from "@mui/material";
+import DragAndDropDemo from "../components/DragAndDropDemo";
 
 // Define the shape of a todo item
 interface TodoItem {
@@ -255,6 +256,9 @@ export default function Dashboard() {
           </table>
         </div>
       )}
+      <div style={{ marginTop: '40px' }}>
+        <DragAndDropDemo />
+      </div>
     </div>
   );
 }
