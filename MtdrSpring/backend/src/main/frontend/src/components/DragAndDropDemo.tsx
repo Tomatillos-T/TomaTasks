@@ -93,7 +93,6 @@ export default function DragAndDropDemo() {
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Drag & Drop Demo</h2>
         <p className="text-gray-600">Drag cards between the To Do and Done buckets</p>
       </div>
-     
       <div className="flex gap-4">
         <Bucket
           title="To Do"
