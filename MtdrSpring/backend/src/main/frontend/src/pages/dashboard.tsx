@@ -173,7 +173,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="bg-neutral-500 ml-[600px] py-2 px-20 my-5 w-1/2 rounded-md">
+    <div className="bg-neutral-500/30 ml-[600px] py-2 px-10 my-5 w-1/2 rounded-md">
       <h1>MY TODO LIST</h1>
       <NewItem addItem={addItem} isInserting={isInserting} />
       {error && <p>Error: {error.message}</p>}
@@ -185,7 +185,7 @@ export default function Dashboard() {
               {items.map(
                 (item) =>
                   !item.done && (
-                    <tr key={item.id}>
+                    <tr key={item.id} className="flex gap-2">
                       <td className="description">{item.description}</td>
                       <td className="date">{item.createdAt}</td>
                       <td>
@@ -210,13 +210,13 @@ export default function Dashboard() {
               )}
             </TableBody>
           </table>
-          <h2 id="donelist">Done items</h2>
+          <h2 className="font-medium">Done items</h2>
           <table id="itemlistDone" className="itemlist">
             <TableBody>
               {items.map(
                 (item) =>
                   item.done && (
-                    <tr key={item.id}>
+                    <tr key={item.id} className="flex gap-2">
                       <td className="description">{item.description}</td>
                       <td className="date">{item.createdAt}</td>
                       <td>
@@ -241,6 +241,7 @@ export default function Dashboard() {
                           startIcon={<DeleteIcon />}
                           variant="contained"
                           className="DeleteButton"
+                          color="error"
                           onClick={() => deleteItem(item.id)}
                           size="small"
                         >

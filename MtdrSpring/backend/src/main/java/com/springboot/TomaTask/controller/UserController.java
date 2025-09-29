@@ -17,7 +17,7 @@ public class UserController {
     @Autowired
     private UserService UserService;
     //@CrossOrigin
-    @GetMapping(value = "/users")
+    @GetMapping(value = "/user")
     public List<User> getAllUsers(){
         return UserService.findAll();
     }
@@ -44,7 +44,7 @@ public class UserController {
                 .headers(responseHeaders).build();
     }
     //@CrossOrigin
-    @PutMapping(value = "user/{id}")
+    @PutMapping(value = "/user/{id}")
     public ResponseEntity updateUser(@RequestBody User User, @PathVariable String id){
         try{
             User User1 = UserService.updateUser(id, User);
@@ -55,7 +55,7 @@ public class UserController {
         }
     }
     //@CrossOrigin
-    @DeleteMapping(value = "user/{id}")
+    @DeleteMapping(value = "/user/{id}")
     public ResponseEntity<Boolean> deleteUser(@PathVariable("id") String id){
         Boolean flag = false;
         try{
