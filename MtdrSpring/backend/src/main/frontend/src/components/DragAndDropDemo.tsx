@@ -1,7 +1,19 @@
 import React, { useState } from 'react';
 
+interface Item {
+  id: string;
+  text: string;
+}
+
+interface Buckets {
+  todo: Item[];
+  done: Item[];
+}
+
+type BucketKey = keyof Buckets;
+
 export default function DragAndDropDemo() {
-  const [buckets, setBuckets] = useState({
+  const [buckets, setBuckets] = useState<Buckets>({
     todo: [
       { id: '1', text: 'Design mockups' },
       { id: '2', text: 'Write documentation' }
@@ -11,24 +23,23 @@ export default function DragAndDropDemo() {
       { id: '4', text: 'Install dependencies' }
     ]
   });
+  const [draggedItem, setDraggedItem] = useState<Item | null>(null);
+  const [draggedFrom, setDraggedFrom] = useState<BucketKey | null>(null);
 
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [draggedFrom, setDraggedFrom] = useState(null);
-
-  const handleDragStart = (e, item, sourceBucket) => {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, item: Item, sourceBucket: BucketKey) => {
     setDraggedItem(item);
     setDraggedFrom(sourceBucket);
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (e, targetBucket) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetBucket: BucketKey) => {
     e.preventDefault();
-    
+   
     if (!draggedItem || !draggedFrom) return;
 
     if (draggedFrom === targetBucket) {
@@ -47,7 +58,7 @@ export default function DragAndDropDemo() {
     setDraggedFrom(null);
   };
 
-  const Card = ({ item, bucket }) => (
+  const Card = ({ item, bucket }: { item: Item; bucket: BucketKey }) => (
     <div
       draggable
       onDragStart={(e) => handleDragStart(e, item, bucket)}
@@ -57,7 +68,7 @@ export default function DragAndDropDemo() {
     </div>
   );
 
-  const Bucket = ({ title, bucketKey, items }) => (
+  const Bucket = ({ title, bucketKey, items }: { title: string; bucketKey: BucketKey; items: Item[] }) => (
     <div
       onDragOver={handleDragOver}
       onDrop={(e) => handleDrop(e, bucketKey)}
@@ -83,17 +94,17 @@ export default function DragAndDropDemo() {
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Drag & Drop Demo</h2>
         <p className="text-gray-600">Drag cards between the To Do and Done buckets</p>
       </div>
-      
+     
       <div className="flex gap-4">
-        <Bucket 
-          title="To Do" 
-          bucketKey="todo" 
-          items={buckets.todo} 
+        <Bucket
+          title="To Do"
+          bucketKey="todo"
+          items={buckets.todo}
         />
-        <Bucket 
-          title="Done" 
-          bucketKey="done" 
-          items={buckets.done} 
+        <Bucket
+          title="Done"
+          bucketKey="done"
+          items={buckets.done}
         />
       </div>
     </div>
