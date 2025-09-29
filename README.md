@@ -13,7 +13,7 @@ The `mtdrworkshop` repository hosts the materiald (code, scripts and instruction
 ### Requirements
 The lab executes scripts that require the following software to run properly: (These are already installed on and included with the OCI Cloud Shell)
 * oci-cli
-* python 2.7
+* python 2.7^
 * terraform
 * kubectl
 * mvn (maven) 
