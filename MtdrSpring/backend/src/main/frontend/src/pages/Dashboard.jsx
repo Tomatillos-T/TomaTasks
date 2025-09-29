@@ -15,6 +15,7 @@ import NewItem from "../modules/task/components/newItem";
 import API_LIST from "../API";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Button, TableBody, CircularProgress } from "@mui/material";
+import DragAndDropDemo from "../components/DragAndDropDemo";
 /* In this application we're using Function Components with the State Hooks
  * to manage the states. See the doc: https://reactjs.org/docs/hooks-state.html
  * This App component represents the entire app. It renders a NewItem component
@@ -274,6 +275,9 @@ export default function Dashboard() {
           </table>
         </div>
       )}
+      <div style={{ marginTop: '40px' }}>
+        <DragAndDropDemo />
+      </div>
     </div>
   );
 }
