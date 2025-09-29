@@ -1,8 +1,8 @@
 // Layout.jsx
 import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import Sidebar from "./sidebar";
 import { useState } from "react";
-import Chatbot from "./Chatbot";
+import Chatbot from "./chatbot";
 
 export default function Layout() {
   const [open, setOpen] = useState(false);
@@ -14,12 +14,14 @@ export default function Layout() {
         {/* Modal flotante */}
         {open && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl 
+            <div
+              className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl 
                             w-full h-full sm:w-[90%] sm:h-[80%] 
                             md:w-[70%] md:h-[75%] 
                             lg:w-[60%] 
                             xl:w-[40%] 
-                            max-h-[90vh] overflow-hidden p-4">
+                            max-h-[90vh] overflow-hidden p-4"
+            >
               <Chatbot />
             </div>
           </div>

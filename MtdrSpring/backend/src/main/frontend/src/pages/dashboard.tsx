@@ -15,62 +15,61 @@ import NewItem from "../modules/task/components/newItem";
 import API_LIST from "../API";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Button, TableBody, CircularProgress } from "@mui/material";
-/* In this application we're using Function Components with the State Hooks
- * to manage the states. See the doc: https://reactjs.org/docs/hooks-state.html
- * This App component represents the entire app. It renders a NewItem component
- * and two tables: one that lists the todo items that are to be done and another
- * one with the items that are already done.
- */
-export default function Dashboard() {
-  // isLoading is true while waiting for the backend to return the list
-  // of items. We use this state to display a spinning circle:
-  const [isLoading, setLoading] = useState(false);
-  // Similar to isLoading, isInserting is true while waiting for the backend
-  // to insert a new item:
-  const [isInserting, setInserting] = useState(false);
-  // The list of todo items is stored in this state. It includes the "done"
-  // "not-done" items:
-  const [items, setItems] = useState([]);
-  // In case of an error during the API call:
-  const [error, setError] = useState();
 
-  function deleteItem(deleteId) {
-    // console.log("deleteItem("+deleteId+")")
+// Define the shape of a todo item
+interface TodoItem {
+  id: string;
+  description: string;
+  done: boolean;
+  createdAt?: string;
+}
+
+export default function Dashboard() {
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [isInserting, setInserting] = useState<boolean>(false);
+  const [items, setItems] = useState<TodoItem[]>([]);
+  const [error, setError] = useState<Error | null>(null);
+
+  function deleteItem(deleteId: string) {
     fetch(API_LIST + "/" + deleteId, {
       method: "DELETE",
     })
       .then((response) => {
-        // console.log("response=");
-        // console.log(response);
         if (response.ok) {
-          // console.log("deleteItem FETCH call is ok");
           return response;
         } else {
           throw new Error("Something went wrong ...");
         }
       })
       .then(
-        (result) => {
+        () => {
           const remainingItems = items.filter((item) => item.id !== deleteId);
           setItems(remainingItems);
         },
-        (error) => {
-          setError(error);
+        (err) => {
+          setError(err);
         }
       );
   }
-  function toggleDone(event, id, description, done) {
+
+  function toggleDone(
+    event: React.MouseEvent<HTMLButtonElement>,
+    id: string,
+    description: string,
+    done: boolean
+  ) {
     event.preventDefault();
     modifyItem(id, description, done).then(
-      (result) => {
-        reloadOneIteam(id);
+      () => {
+        reloadOneItem(id);
       },
-      (error) => {
-        setError(error);
+      (err) => {
+        setError(err);
       }
     );
   }
-  function reloadOneIteam(id) {
+
+  function reloadOneItem(id: string) {
     fetch(API_LIST + "/" + id)
       .then((response) => {
         if (response.ok) {
@@ -80,7 +79,7 @@ export default function Dashboard() {
         }
       })
       .then(
-        (result) => {
+        (result: TodoItem) => {
           const items2 = items.map((x) =>
             x.id === id
               ? {
@@ -92,14 +91,18 @@ export default function Dashboard() {
           );
           setItems(items2);
         },
-        (error) => {
-          setError(error);
+        (err) => {
+          setError(err);
         }
       );
   }
-  function modifyItem(id, description, done) {
-    // console.log("deleteItem("+deleteId+")")
-    var data = { description: description, done: done };
+
+  function modifyItem(
+    id: string,
+    description: string,
+    done: boolean
+  ): Promise<Response> {
+    const data = { description, done };
     return fetch(API_LIST + "/" + id, {
       method: "PUT",
       headers: {
@@ -107,71 +110,48 @@ export default function Dashboard() {
       },
       body: JSON.stringify(data),
     }).then((response) => {
-      // console.log("response=");
-      // console.log(response);
       if (response.ok) {
-        // console.log("deleteItem FETCH call is ok");
         return response;
       } else {
         throw new Error("Something went wrong ...");
       }
     });
   }
-  /*
-    To simulate slow network, call sleep before making API calls.
-    const sleep = (milliseconds) => {
-      return new Promise(resolve => setTimeout(resolve, milliseconds))
-    }
-    */
-  useEffect(
-    () => {
-      setLoading(true);
-      // sleep(5000).then(() => {
-      fetch(API_LIST)
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          } else {
-            throw new Error("Something went wrong ...");
-          }
-        })
-        .then(
-          (result) => {
-            setLoading(false);
-            setItems(result);
-          },
-          (error) => {
-            setLoading(false);
-            setError(error);
-          }
-        );
 
-      //})
-    },
-    // https://en.reactjs.org/docs/faq-ajax.html
-    [] // empty deps array [] means
-    // this useEffect will run once
-    // similar to componentDidMount()
-  );
-  function addItem(text) {
-    console.log("addItem(" + text + ")");
+  useEffect(() => {
+    setLoading(true);
+    fetch(API_LIST)
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Something went wrong ...");
+        }
+      })
+      .then(
+        (result: TodoItem[]) => {
+          setLoading(false);
+          setItems(result);
+        },
+        (err) => {
+          setLoading(false);
+          setError(err);
+        }
+      );
+  }, []);
+
+  function addItem(text: string) {
     setInserting(true);
-    var data = {};
-    console.log(data);
-    data.description = text;
+    const data = { description: text };
+
     fetch(API_LIST, {
       method: "POST",
-      // We convert the React state to JSON and send it as the POST body
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     })
       .then((response) => {
-        // This API doens't return a JSON document
-        console.log(response);
-        console.log(response.headers.location);
-        // return response.json();
         if (response.ok) {
           return response;
         } else {
@@ -180,19 +160,20 @@ export default function Dashboard() {
       })
       .then(
         (result) => {
-          var id = result.headers.get("location");
-          var newItem = { id: id, description: text };
+          const id = result.headers.get("location") ?? "";
+          const newItem: TodoItem = { id, description: text, done: false };
           setItems([newItem, ...items]);
           setInserting(false);
         },
-        (error) => {
+        (err) => {
           setInserting(false);
-          setError(error);
+          setError(err);
         }
       );
   }
+
   return (
-    <div className="bg-neutral-500 ml-[600px] py-2 px-20 my-5 w-1/2 rounded-md">
+    <div className="bg-neutral-500/30 ml-[600px] py-2 px-10 my-5 w-1/2 rounded-md">
       <h1>MY TODO LIST</h1>
       <NewItem addItem={addItem} isInserting={isInserting} />
       {error && <p>Error: {error.message}</p>}
@@ -204,9 +185,8 @@ export default function Dashboard() {
               {items.map(
                 (item) =>
                   !item.done && (
-                    <tr key={item.id}>
+                    <tr key={item.id} className="flex gap-2">
                       <td className="description">{item.description}</td>
-                      {/*<td>{JSON.stringify(item, null, 2) }</td>*/}
                       <td className="date">{item.createdAt}</td>
                       <td>
                         <Button
@@ -230,13 +210,13 @@ export default function Dashboard() {
               )}
             </TableBody>
           </table>
-          <h2 id="donelist">Done items</h2>
+          <h2 className="font-medium">Done items</h2>
           <table id="itemlistDone" className="itemlist">
             <TableBody>
               {items.map(
                 (item) =>
                   item.done && (
-                    <tr key={item.id}>
+                    <tr key={item.id} className="flex gap-2">
                       <td className="description">{item.description}</td>
                       <td className="date">{item.createdAt}</td>
                       <td>
@@ -261,6 +241,7 @@ export default function Dashboard() {
                           startIcon={<DeleteIcon />}
                           variant="contained"
                           className="DeleteButton"
+                          color="error"
                           onClick={() => deleteItem(item.id)}
                           size="small"
                         >

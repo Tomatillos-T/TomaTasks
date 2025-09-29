@@ -9,7 +9,8 @@
  * @author
  */
 
-import React, { useState, ChangeEvent, KeyboardEvent, MouseEvent } from "react";
+import React, { useState } from "react";
+import type { ChangeEvent, KeyboardEvent, MouseEvent } from "react";
 import Button from "@mui/material/Button";
 
 // ---- Props typing ----
@@ -37,34 +38,32 @@ const NewItem: React.FC<NewItemProps> = ({ addItem, isInserting }) => {
   }
 
   return (
-    <div id="newinputform">
-      <form>
-        <input
-          className="text-black"
-          id="newiteminput"
-          placeholder="New item"
-          type="text"
-          autoComplete="off"
-          value={item}
-          onChange={handleChange}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              handleSubmit(event);
-            }
-          }}
-        />
-        <span>&nbsp;&nbsp;</span>
-        <Button
-          className="AddButton"
-          variant="contained"
-          disabled={isInserting}
-          onClick={!isInserting ? handleSubmit : undefined}
-          size="small"
-        >
-          {isInserting ? "Adding…" : "Add"}
-        </Button>
-      </form>
-    </div>
+    <form>
+      <input
+        className="px-2"
+        id="newiteminput"
+        placeholder="New item"
+        type="text"
+        autoComplete="off"
+        value={item}
+        onChange={handleChange}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            handleSubmit(event);
+          }
+        }}
+      />
+      <span>&nbsp;&nbsp;</span>
+      <Button
+        className="AddButton"
+        variant="contained"
+        disabled={isInserting}
+        onClick={!isInserting ? handleSubmit : undefined}
+        size="small"
+      >
+        {isInserting ? "Adding…" : "Add"}
+      </Button>
+    </form>
   );
 };
 
