@@ -253,7 +253,7 @@ const TomaTaskMockup = () => {
                 onClick={toggleTheme}
                 className="p-2 rounded-lg hover:bg-background-subtle transition-colors"
               >
-                {theme == "light" ? (
+                {theme === "light" ? (
                   <Sun className="w-5 h-5 text-text-secondary" />
                 ) : (
                   <Moon className="w-5 h-5 text-text-secondary" />
