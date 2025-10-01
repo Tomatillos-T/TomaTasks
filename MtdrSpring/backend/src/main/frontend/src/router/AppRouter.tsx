@@ -3,6 +3,7 @@ import Login from "../pages/login";
 import Home from "../pages/home";
 import Dashboard from "../pages/dashboard";
 import Layout from "../components/layout";
+import ProjectForm from "../modules/projects/components/projectForm";
 
 export default function AppRouter() {
   return (

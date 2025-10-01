@@ -18,7 +18,17 @@ import com.springboot.TomaTask.util.BotMessages;
 import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.service.UserService;
 
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+
 @SpringBootApplication
+@ConfigurationPropertiesScan
+@Controller
 public class TomaTaskApplication implements CommandLineRunner {
 
 	private static final Logger logger = LoggerFactory.getLogger(TomaTaskApplication.class);
@@ -46,4 +56,14 @@ public class TomaTaskApplication implements CommandLineRunner {
 			e.printStackTrace();
 		}
 	}
+
+	@GetMapping("/**/{path:[^\\.]*}")
+	public String redirectApi() {
+		return "forward:/";
+	}
+
+	@RequestMapping(value = "/{_:^api$}/**")
+	public String send404() {
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);	}
+
 }
