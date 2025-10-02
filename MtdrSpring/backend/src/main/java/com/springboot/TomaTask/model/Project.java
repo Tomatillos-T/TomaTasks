@@ -3,7 +3,9 @@ package com.springboot.TomaTask.model;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,8 +14,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Project {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    private String id;
 
     @Column(nullable = false)
     private String name;
@@ -33,6 +37,13 @@ public class Project {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team", nullable = true)
+    private Team team;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Sprint> sprints;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -41,7 +52,6 @@ public class Project {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ===== Constructores =====
     public Project() {}
 
     public Project(String name, String status, LocalDate startDate) {
@@ -60,8 +70,7 @@ public class Project {
         this.endDate = endDate;
     }
 
-    // ===== Getters y Setters =====
-    public Long getId() { return id; }
+    public String getId() { return id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getDescription() { return description; }

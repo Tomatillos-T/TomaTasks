@@ -3,6 +3,7 @@ package com.springboot.TomaTask.model;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,8 +12,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class AcceptanceCriteria {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    private String id;
 
     @Column(length = 1000, nullable = false)
     private String description;
@@ -42,7 +45,7 @@ public class AcceptanceCriteria {
     }
 
     // ===== Getters y Setters =====
-    public Long getId() { return id; }
+    public String getId() { return id; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     public String getStatus() { return status; }

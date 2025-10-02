@@ -11,5 +11,5 @@ import javax.transaction.Transactional;
 @Repository
 @Transactional
 @EnableTransactionManagement
-public interface AcceptanceCriteriaRepository extends JpaRepository<AcceptanceCriteria, Long> {
+public interface AcceptanceCriteriaRepository extends JpaRepository<AcceptanceCriteria, String> {
 }

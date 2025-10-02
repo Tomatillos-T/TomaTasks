@@ -11,5 +11,5 @@ import javax.transaction.Transactional;
 @Repository
 @Transactional
 @EnableTransactionManagement
-public interface TeamRepository extends JpaRepository<Team, Long> {
+public interface TeamRepository extends JpaRepository<Team, String> {
 }

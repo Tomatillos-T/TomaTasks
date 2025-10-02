@@ -2,18 +2,26 @@ package com.springboot.TomaTask.model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "userstory")
 public class UserStory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    private String id;
 
     @Column(nullable = false, length = 255)
     private String name;
 
+    @Column(nullable = false)
     private Integer weight;
 
     @Column(length = 1000)
@@ -25,15 +33,22 @@ public class UserStory {
     @Column(name = "sprint_id")
     private Long sprintId;
 
+    @OneToMany(mappedBy = "userStory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Task> tasks;
+
+    @OneToMany(mappedBy = "userStory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AcceptanceCriteria> acceptanceCriteria;
+
+    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ----- Getters y setters -----
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
