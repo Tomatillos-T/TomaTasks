@@ -1,17 +1,160 @@
 @import "tailwindcss";
 
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@layer base {
+  :root {
+    --primary-main: #e63946;
+    --primary-light: #ff6b75;
+    --primary-dark: #c1121f;
+    --primary-contrast: #ffffff;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+    --secondary-main: #1d3557;
+    --secondary-light: #457b9d;
+    --secondary-dark: #0d1b2a;
+    --secondary-contrast: #ffffff;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    --tertiary-main: #2a9d8f;
+    --tertiary-light: #4ecdc4;
+    --tertiary-dark: #1b7367;
+    --tertiary-contrast: #ffffff;
+
+    --success-main: #06d6a0;
+    --success-light: #34e4b8;
+    --success-dark: #04a777;
+    --success-bg: #e8fff8;
+    --success-contrast: #014d40;
+
+    --error-main: #ef476f;
+    --error-light: #ff6b8e;
+    --error-dark: #c73659;
+    --error-bg: #ffe8ed;
+    --error-contrast: #7c1c1c;
+
+    --warning-main: #ffb703;
+    --warning-light: #ffc933;
+    --warning-dark: #d99700;
+    --warning-bg: #fff8e1;
+    --warning-contrast: #615300;
+
+    --info-main: #118ab2;
+    --info-light: #41a5c8;
+    --info-dark: #0c6b8a;
+    --info-bg: #e3f2fd;
+    --info-contrast: #0c4a6e;
+
+    --background-main: #ffffff;
+    --background-paper: #f8fafc;
+    --background-subtle: #f1f5f9;
+    --background-contrast: #e2e8f0;
+
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+  }
+
+  /* 🌑 Dark mode - Optimizado para legibilidad y contraste */
+  .dark {
+    /* Primarios - Más oscuros para dark mode */
+    --primary-main: #e63946;
+    --primary-light: #ff6b75;
+    --primary-dark: #c1121f;
+    --primary-contrast: #ffffff;
+
+    /* Secundarios - Más oscuros */
+    --secondary-main: #457b9d;
+    --secondary-light: #5ca0c7;
+    --secondary-dark: #1d3557;
+    --secondary-contrast: #ffffff;
+
+    /* Terciarios - Más oscuros */
+    --tertiary-main: #2a9d8f;
+    --tertiary-light: #4ecdc4;
+    --tertiary-dark: #1b7367;
+    --tertiary-contrast: #ffffff;
+
+    /* Success - Fondos oscuros con opacidad */
+    --success-main: #34e4b8;
+    --success-light: #6cf0d0;
+    --success-dark: #06d6a0;
+    --success-bg: #0a3f33; /* Fondo oscuro con tinte verde */
+    --success-contrast: #e8fff8; /* Texto claro */
+
+    /* Error - Fondos oscuros */
+    --error-main: #ff6b8e;
+    --error-light: #ff99af;
+    --error-dark: #ef476f;
+    --error-bg: #3d1a24; /* Fondo oscuro con tinte rojo */
+    --error-contrast: #ffe8ed; /* Texto claro */
+
+    /* Warning - Fondos oscuros */
+    --warning-main: #ffc933;
+    --warning-light: #ffd95c;
+    --warning-dark: #ffb703;
+    --warning-bg: #3d3010; /* Fondo oscuro con tinte amarillo */
+    --warning-contrast: #fff8e1; /* Texto claro */
+
+    /* Info - Fondos oscuros */
+    --info-main: #41a5c8;
+    --info-light: #6cc0da;
+    --info-dark: #118ab2;
+    --info-bg: #0d2d3d; /* Fondo oscuro con tinte azul */
+    --info-contrast: #e3f2fd; /* Texto claro */
+
+    /* Backgrounds - Escala de grises oscuros */
+    --background-main: #0a0f1a; /* Más oscuro que antes */
+    --background-paper: #131b2e; /* Tarjetas con contraste */
+    --background-subtle: #1e293b; /* Secciones elevadas */
+    --background-contrast: #334155; /* Bordes visibles */
+
+    /* Texto - Alto contraste */
+    --text-primary: #f1f5f9; /* Casi blanco para legibilidad */
+    --text-secondary: #94a3b8; /* Gris claro para secundario */
+  }
 }
 
+@theme static {
+  --color-primary-main: var(--primary-main);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-contrast: var(--primary-contrast);
+
+  --color-secondary-main: var(--secondary-main);
+  --color-secondary-light: var(--secondary-light);
+  --color-secondary-dark: var(--secondary-dark);
+  --color-secondary-contrast: var(--secondary-contrast);
+
+  --color-tertiary-main: var(--tertiary-main);
+  --color-tertiary-light: var(--tertiary-light);
+  --color-tertiary-dark: var(--tertiary-dark);
+  --color-tertiary-contrast: var(--tertiary-contrast);
+
+  --color-success-main: var(--success-main);
+  --color-success-light: var(--success-light);
+  --color-success-dark: var(--success-dark);
+  --color-success-bg: var(--success-bg);
+  --color-success-contrast: var(--success-contrast);
+
+  --color-error-main: var(--error-main);
+  --color-error-light: var(--error-light);
+  --color-error-dark: var(--error-dark);
+  --color-error-bg: var(--error-bg);
+  --color-error-contrast: var(--error-contrast);
+
+  --color-warning-main: var(--warning-main);
+  --color-warning-light: var(--warning-light);
+  --color-warning-dark: var(--warning-dark);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-contrast: var(--warning-contrast);
+
+  --color-info-main: var(--info-main);
+  --color-info-light: var(--info-light);
+  --color-info-dark: var(--info-dark);
+  --color-info-bg: var(--info-bg);
+  --color-info-contrast: var(--info-contrast);
+
+  --color-background-main: var(--background-main);
+  --color-background-paper: var(--background-paper);
+  --color-background-subtle: var(--background-subtle);
+  --color-background-contrast: var(--background-contrast);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+}
