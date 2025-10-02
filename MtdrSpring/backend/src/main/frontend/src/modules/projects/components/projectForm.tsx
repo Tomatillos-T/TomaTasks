@@ -47,7 +47,7 @@ export default function ProjectForm() {
     setSubmitStatus({ type: null, message: "" })
 
     try {
-      // Prepare payload - exclude createdAt and updatedAt as they're handled by backend
+      
       const payload = {
         name: formData.name.trim(),
         description: formData.description.trim(),
