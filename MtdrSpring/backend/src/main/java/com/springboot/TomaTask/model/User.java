@@ -12,7 +12,7 @@ import org.hibernate.annotations.UpdateTimestamp;
     in the autonomous database
  */
 @Entity
-@Table(name = "UserTable")
+@Table(name = "user_table")
 public class User {
     @Id
     @GeneratedValue(generator = "uuid")
@@ -34,6 +34,14 @@ public class User {
 
     @Column(name = "password", nullable = false)
     String password;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role", referencedColumnName = "id", nullable = false)
+    private UserRole role;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team", referencedColumnName = "id", nullable = true)
+    private Team team;
 
     @CreationTimestamp
     @Column(name = "creation_ts", updatable = false)
@@ -43,78 +51,45 @@ public class User {
     @Column(name = "update_ts")
     OffsetDateTime updateTs;
 
-    public User(){
-
-    }
-
-    public User(String firstName, String lastName, String email, String phoneNumber, String password) {
+    public User(){}
+    public User(String firstName, String lastName, String email, String phoneNumber, String password, UserRole role, Team team) {
         this.firstName = firstName;
         this.lastName  = lastName;
         this.email     = email;
         this.phoneNumber = phoneNumber;
         this.password  = password;
+        this.role      = role;
+        this.team      = team;
     }
-
-    public String getID() {
-        return id;
-    }
-
-    public void setID(String id) {
-        this.id = id;
-    }
-
+    public String getID() { return id; }
     public String getName() {
         return firstName + " " + lastName;
     }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-    
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    public UserRole getRole() { return role; }
+    public void setRole(UserRole role) { this.role = role; }
+    public Team getTeam() { return team; }
+    public void setTeam(Team team) { this.team = team; }
 
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
                 ", firstName='" + firstName +
-                ", lastName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
+                ", role=" + role +
+                ", team=" + team +
                 ", creationTs=" + creationTs +
                 '}';
     }

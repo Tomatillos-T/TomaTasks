@@ -12,6 +12,6 @@ import javax.transaction.Transactional;
 @Repository
 @Transactional
 @EnableTransactionManagement
-public interface UserStoryRepository extends JpaRepository<UserStory, Long> {
+public interface UserStoryRepository extends JpaRepository<UserStory, String> {
     UserStory findByName(String name);
 }

@@ -9,6 +9,6 @@ import java.util.List;
 
 
 @Repository
-public interface SprintRepository extends JpaRepository<Sprint, Long> {
+public interface SprintRepository extends JpaRepository<Sprint, String> {
     List<Sprint> findByStatus(String status);
 }

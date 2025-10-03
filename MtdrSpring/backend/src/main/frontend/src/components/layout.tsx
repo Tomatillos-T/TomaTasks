@@ -1,8 +1,8 @@
 // Layout.jsx
 import { Outlet } from "react-router-dom";
-import Sidebar from "./sidebar";
+import Sidebar from "./Sidebar";
 import { useState } from "react";
-import Chatbot from "./chatbot";
+import Chatbot from "./Chatbot";
 
 export default function Layout() {
   const [open, setOpen] = useState(false);

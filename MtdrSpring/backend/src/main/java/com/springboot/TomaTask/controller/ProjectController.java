@@ -22,7 +22,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public Project getProjectById(@PathVariable Long id) {
+    public Project getProjectById(@PathVariable String id) {
         return projectService.getProjectById(id);
     }
 
@@ -32,12 +32,12 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}")
-    public Project updateProject(@PathVariable Long id, @RequestBody Project details) {
+    public Project updateProject(@PathVariable String id, @RequestBody Project details) {
         return projectService.updateProject(id, details);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProject(@PathVariable Long id) {
+    public void deleteProject(@PathVariable String id) {
         projectService.deleteProject(id);
     }
 }
