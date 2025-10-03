@@ -64,6 +64,7 @@ public class TomaTaskApplication implements CommandLineRunner {
 
 	@RequestMapping(value = "/{_:^api$}/**")
 	public String send404() {
-throw new ResponseStatusException(HttpStatus.NOT_FOUND);	}
+		throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+	}
 
 }
