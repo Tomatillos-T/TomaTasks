@@ -7,22 +7,13 @@ type SidebarProps = {
 };
 
 const navItems = [
-  { id: "dashboard", icon: BarChart3, label: "Dashboard", color: "primary" },
-  { id: "tasks", icon: FileText, label: "Tareas", color: "tertiary" },
-  { id: "clients", icon: Users, label: "Clientes", color: "info" },
-  { id: "inventory", icon: Package, label: "Inventario", color: "warning" },
-  { id: "calendar", icon: Calendar, label: "Calendario", color: "secondary" },
-  { id: "settings", icon: Settings, label: "Configuración", color: "text" },
+  { id: "dashboard", icon: BarChart3, label: "Dashboard" },
+  { id: "tasks", icon: FileText, label: "Tareas" },
+  { id: "clients", icon: Users, label: "Clientes" },
+  { id: "inventory", icon: Package, label: "Inventario" },
+  { id: "calendar", icon: Calendar, label: "Calendario" },
+  { id: "settings", icon: Settings, label: "Configuración" },
 ] as const;
-
-const colorClasses = {
-  primary: { active: "bg-primary-main text-primary-contrast", inactive: "text-gray-600 hover:bg-gray-100" },
-  secondary: { active: "bg-secondary-main text-secondary-contrast", inactive: "text-gray-600 hover:bg-gray-100" },
-  tertiary: { active: "bg-tertiary-main text-tertiary-contrast", inactive: "text-gray-600 hover:bg-gray-100" },
-  warning: { active: "bg-warning-bg text-warning-contrast", inactive: "text-gray-600 hover:bg-gray-100" },
-  info: { active: "bg-info-bg text-info-contrast", inactive: "text-gray-600 hover:bg-gray-100" },
-  text: { active: "bg-gray-200 text-gray-800", inactive: "text-gray-600 hover:bg-gray-100" },
-};
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,35 +22,41 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
     <>
       {/* Botón para móviles */}
       <button
-        className="p-2 m-2 rounded-md bg-background-paper shadow-md md:hidden fixed z-50"
+        className="p-2 m-2 rounded-md bg-background-paper border border-background-contrast shadow-md md:hidden fixed z-50"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        {isOpen ? (
+          <X className="w-5 h-5 text-text-primary" />
+        ) : (
+          <Menu className="w-5 h-5 text-text-primary" />
+        )}
       </button>
 
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-full bg-background-paper border-r border-background-contrast
+          fixed top-0 left-0 h-screen overflow-y-auto bg-background-paper border-r border-background-contrast
           w-64 p-4 space-y-1 transform transition-transform duration-300
-          ${isOpen ? "translate-x-0" : "-translate-x-full"} 
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0 md:static md:block
           z-40
         `}
       >
         <nav className="space-y-1">
-          {navItems.map(({ id, icon: Icon, label, color }) => {
+          {navItems.map(({ id, icon: Icon, label }) => {
             const isActive = activeTab === id;
-            const classes = isActive ? colorClasses[color].active : colorClasses[color].inactive;
-
             return (
               <button
                 key={id}
                 onClick={() => {
                   setActiveTab(id);
-                  setIsOpen(false); // cerrar en móviles al seleccionar
+                  setIsOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-medium ${classes}`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-medium ${
+                  isActive
+                    ? "bg-primary-main text-primary-contrast"
+                    : "text-text-secondary hover:bg-background-subtle"
+                }`}
               >
                 <Icon className="w-5 h-5" />
                 <span>{label}</span>

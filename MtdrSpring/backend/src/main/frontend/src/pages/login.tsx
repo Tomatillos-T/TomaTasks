@@ -4,37 +4,27 @@ import tomatoLogo from '../assets/tomato.svg';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import Alert from '../components/Alert';
-import { useTheme } from '../hooks/useTheme';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { theme } = useTheme();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    navigate('/dashboard');
     e.preventDefault();
     if (email === 'admin' && password === 'admin') {
+      navigate('/dashboard');
     } else {
       setError('Usuario o contraseña incorrectos');
     }
   };
 
   return (
-    <div
-      className={`flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8 ${
-        theme === 'dark' ? 'bg-background-dark' : 'bg-background-default'
-      }`}
-    >
+    <div className="flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8 bg-background-main">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <img alt="Tomatasks" src={tomatoLogo} className="mx-auto h-10 w-auto" />
-        <h2
-          className={`mt-10 text-center text-2xl font-bold ${
-            theme === 'dark' ? 'text-text-primary' : 'text-text-primary'
-          }`}
-        >
+        <h2 className="mt-10 text-center text-2xl font-bold text-text-primary">
           Sign in to your account
         </h2>
       </div>
