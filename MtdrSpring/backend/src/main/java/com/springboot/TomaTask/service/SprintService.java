@@ -23,7 +23,7 @@ public class SprintService {
         return sprintRepository.findAll();
     }
 
-    public Sprint getSprintById(Long id) {
+    public Sprint getSprintById(String id) {
         return sprintRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sprint no encontrado"));
     }
@@ -37,7 +37,7 @@ public class SprintService {
         return sprintRepository.save(sprint);
     }
 
-    public Sprint updateSprint(Long id, Sprint details) {
+    public Sprint updateSprint(String id, Sprint details) {
         Sprint sprint = getSprintById(id);
 
         sprint.setDescription(details.getDescription());
@@ -55,7 +55,7 @@ public class SprintService {
         return sprintRepository.save(sprint);
     }
 
-    public void deleteSprint(Long id) {
+    public void deleteSprint(String id) {
         sprintRepository.deleteById(id);
     }
 }

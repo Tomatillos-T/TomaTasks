@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,8 +13,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Task {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    private String id;
 
     @Column(nullable = false)
     private String name;
@@ -25,12 +28,16 @@ public class Task {
     private String status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_story_id", nullable = false)
+    @JoinColumn(name = "user_story", nullable = true)
     private UserStory userStory;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sprint_id", nullable = false)
+    @JoinColumn(name = "sprint", nullable = true)
     private Sprint sprint;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "asignee", referencedColumnName = "id")
+    private User user;
 
     @Column(name = "start_date")
     private LocalDate startDate;
@@ -49,7 +56,6 @@ public class Task {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ===== Constructores =====
     public Task() {}
 
     public Task(String name, String status, UserStory userStory, Sprint sprint) {
@@ -79,8 +85,7 @@ public class Task {
         this.deliveryDate = deliveryDate;
     }
 
-    // ===== Getters y Setters =====
-    public Long getId() { return id; }
+    public String getId() { return id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getDescription() { return description; }

@@ -19,7 +19,7 @@ public class ProjectService {
         return projectRepository.findAll();
     }
 
-    public Project getProjectById(Long id) {
+    public Project getProjectById(String id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Project no encontrado"));
     }
@@ -28,7 +28,7 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public Project updateProject(Long id, Project details) {
+    public Project updateProject(String id, Project details) {
         Project project = getProjectById(id);
 
         project.setName(details.getName());
@@ -41,7 +41,7 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public void deleteProject(Long id) {
+    public void deleteProject(String id) {
         projectRepository.deleteById(id);
     }
 }

@@ -20,7 +20,7 @@ public class UserStoryService {
         return userStoryRepository.findAll();
     }
 
-    public UserStory getUserStoryById(Long id) {
+    public UserStory getUserStoryById(String id) {
         return userStoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("UserStory no encontrada"));
     }
@@ -31,7 +31,7 @@ public class UserStoryService {
         return userStoryRepository.save(userStory);
     }
 
-    public UserStory updateUserStory(Long id, UserStory details) {
+    public UserStory updateUserStory(String id, UserStory details) {
         UserStory us = getUserStoryById(id);
 
         us.setName(details.getName());
@@ -44,7 +44,7 @@ public class UserStoryService {
         return userStoryRepository.save(us);
     }
 
-    public void deleteUserStory(Long id) {
+    public void deleteUserStory(String id) {
         userStoryRepository.deleteById(id);
     }
 }

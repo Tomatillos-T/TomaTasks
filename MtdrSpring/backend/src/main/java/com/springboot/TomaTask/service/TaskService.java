@@ -32,7 +32,7 @@ public class TaskService {
         return taskRepository.findAll();
     }
 
-    public Task getTaskById(Long id) {
+    public Task getTaskById(String id) {
         return taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task no encontrada"));
     }
@@ -56,7 +56,7 @@ public class TaskService {
     }
 
     // Actualizar task
-    public Task updateTask(Long id, Task taskDetails) {
+    public Task updateTask(String id, Task taskDetails) {
         Task task = getTaskById(id);
 
         task.setName(taskDetails.getName());
@@ -81,7 +81,7 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public void deleteTask(Long id) {
+    public void deleteTask(String id) {
         taskRepository.deleteById(id);
     }
 }

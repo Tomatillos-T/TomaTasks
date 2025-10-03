@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 @Transactional
 @EnableTransactionManagement
-public interface TaskRepository extends JpaRepository<Task, Long> {
+public interface TaskRepository extends JpaRepository<Task, String> {
     List<Task> findByStatus(String status);
-    List<Task> findBySprintId(Long sprintId);
+    List<Task> findBySprintId(String sprintId);
 }

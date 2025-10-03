@@ -3,7 +3,9 @@ package com.springboot.TomaTask.model;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,8 +14,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Sprint {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    private String id;
 
     @Column(nullable = false, length = 500)
     private String description;
@@ -31,8 +35,11 @@ public class Sprint {
     private LocalDate deliveryDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project", nullable = false)
     private Project project;
+
+    @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Task> tasks;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -42,10 +49,7 @@ public class Sprint {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ===== Constructores =====
-
     public Sprint() {
-        // Constructor vacío requerido por JPA
     }
 
     public Sprint(String description, String status, LocalDate startDate, Project project) {
@@ -65,8 +69,7 @@ public class Sprint {
         this.project = project;
     }
 
-    // ===== Getters y Setters =====
-    public Long getId() { return id; }
+    public String getId() { return id; }
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
