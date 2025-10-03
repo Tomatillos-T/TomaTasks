@@ -9,8 +9,8 @@ type SidebarProps = {
 const navItems = [
   { id: "dashboard", icon: BarChart3, label: "Dashboard" },
   { id: "tasks", icon: FileText, label: "Tareas" },
-  { id: "clients", icon: Users, label: "Clientes" },
-  { id: "inventory", icon: Package, label: "Inventario" },
+  { id: "clients", icon: Users, label: "Equipos" },
+  { id: "inventory", icon: Package, label: "Proyectos" },
   { id: "calendar", icon: Calendar, label: "Calendario" },
   { id: "settings", icon: Settings, label: "Configuración" },
 ] as const;
