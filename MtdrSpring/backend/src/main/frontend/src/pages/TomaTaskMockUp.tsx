@@ -2,8 +2,12 @@ import { FileText, Package, TrendingUp, Users } from "lucide-react";
 import Alert from "../components/Alert"; 
 import StatCard from "../components/StatCard";
 import Button from "../components/Button";
+import Modal from "../components/Modal";
+import { useState } from "react";
 
 export default function TomaTaskMockUp() {
+
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="p-8">
@@ -33,6 +37,26 @@ export default function TomaTaskMockUp() {
         <StatCard title="Clientes Nuevos" value="34" change={8.1} icon={Users} status="info" />
         <StatCard title="Productos en Stock" value="1,284" change={-15.3} icon={Package} status="error" />
       </div>
+
+
+      <div className="p-8">
+        <Button onClick={() => setOpen(true)}>Modal</Button>
+
+        <Modal
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          title="Project Details"
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button variant="primary">Save</Button>
+            </>
+          }
+        >
+          <p className="text-text-secondary">Here you can edit the project details.</p>
+        </Modal>
+      </div>
+
     </div>
   );
 }

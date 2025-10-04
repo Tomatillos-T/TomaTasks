@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/userstories")
+@RequestMapping("/api/user-story")
 public class UserStoryController {
 
     private final UserStoryService userStoryService;
