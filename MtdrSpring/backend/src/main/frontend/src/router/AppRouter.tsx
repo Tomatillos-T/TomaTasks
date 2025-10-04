@@ -1,23 +1,24 @@
 import { Routes, Route } from "react-router-dom";
-import Login from "../pages/login";
-import Home from "../pages/home";
-import Dashboard from "../pages/dashboard";
-import Layout from "../components/layout";
+import Login from "../pages/Login";
+import Home from "../pages/Home";
+import Dashboard from "../pages/Dashboard";
+import Layout from "../components/Layout";
 import TomaTaskMockup from "../pages/TomaTaskMockUp";
-import ProjectForm from "../modules/projects/components/projectForm";
+import ProjectForm from "../modules/projects/components/ProjectForm";
+
 
 export default function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/palette" element={<TomaTaskMockup />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/projectForm" element={<ProjectForm />} />
-
 
       {/* Rutas del dashboard con sidebar fijo */}
       <Route path="/" element={<Layout />}>
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="/palette" element={<TomaTaskMockup />} />  
+        <Route path="/projectForm" element={<ProjectForm />} />  
+
       </Route>
     </Routes>
   );

@@ -11,7 +11,7 @@
  * @author  jean.de.lavarene@oracle.com
  */
 import React, { useState, useEffect } from "react";
-import NewItem from "../modules/task/components/newItem";
+import NewItem from "../modules/task/components/NewItem";
 import API_LIST from "../API";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Button, TableBody, CircularProgress } from "@mui/material";
