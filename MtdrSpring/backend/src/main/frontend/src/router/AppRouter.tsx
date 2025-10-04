@@ -10,6 +10,8 @@ import Kanban from "../pages/Kanban";
 import Equipos from "../pages/Equipos";
 import Proyectos from "../pages/Proyectos";
 import Calendario from "../pages/Calendario";
+import TeamForm from "../modules/teams/components/TeamForm";
+import SprintForm from "../modules/sprint/components/SprintForm";
 
 export default function AppRouter() {
   return (
@@ -27,6 +29,9 @@ export default function AppRouter() {
         <Route path="/calendario" element={<Calendario />} />
         <Route path="/palette" element={<TomaTaskMockup />} />  
         <Route path="/projectForm" element={<ProjectForm />} />  
+        <Route path="/teamForm" element={<TeamForm />} />  
+        <Route path="/sprintForm" element={<SprintForm />} />  
+
 
       </Route>
     </Routes>
