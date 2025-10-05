@@ -1,6 +1,6 @@
 package com.springboot.TomaTask.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Set;
 
