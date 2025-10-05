@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { BarChart3, Calendar, FileText, Package, Settings, Users, Menu, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { BarChart3, Calendar, FileText, Package, Settings, Users, Menu, X, Kanban } from "lucide-react";
 
 type SidebarProps = {
   activeTab: string;
@@ -7,16 +8,18 @@ type SidebarProps = {
 };
 
 const navItems = [
-  { id: "dashboard", icon: BarChart3, label: "Dashboard" },
-  { id: "tasks", icon: FileText, label: "Tareas" },
-  { id: "clients", icon: Users, label: "Equipos" },
-  { id: "inventory", icon: Package, label: "Proyectos" },
-  { id: "calendar", icon: Calendar, label: "Calendario" },
-  { id: "settings", icon: Settings, label: "Configuración" },
+  { id: "dashboard", icon: BarChart3, label: "Dashboard", path: "/dashboard" },
+  { id: "tasks", icon: FileText, label: "Tareas", path: "/tareas" },
+  { id: "kanban", icon: Kanban, label: "Kanban", path: "/kanban" },
+  { id: "clients", icon: Users, label: "Equipos", path: "/equipos" },
+  { id: "inventory", icon: Package, label: "Proyectos", path: "/proyectos" },
+  { id: "calendar", icon: Calendar, label: "Calendario", path: "/calendario" },
+  { id: "settings", icon: Settings, label: "Configuración", path: "/configuracion" },
 ] as const;
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -43,13 +46,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
         `}
       >
         <nav className="space-y-1">
-          {navItems.map(({ id, icon: Icon, label }) => {
+          {navItems.map(({ id, icon: Icon, label, path }) => {
             const isActive = activeTab === id;
             return (
               <button
                 key={id}
                 onClick={() => {
                   setActiveTab(id);
+                  navigate(path);
                   setIsOpen(false);
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-medium ${
