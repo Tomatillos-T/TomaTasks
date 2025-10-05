@@ -16,17 +16,20 @@ interface UserStoryFormData {
   updatedAt: string;
 }
 
-interface SprintOption {
-  label: string;
-  value: string;
-}
-
 interface SprintFormData {
+  id?: string;
   description: string;
   status: "planned" | "in-progress" | "completed";
   startDate: string;
   endDate: string;
-  deliveryDate: string;
+  projectId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Project {
+  id: string;
+  name: string;
 }
 
 interface ApiError {
@@ -35,6 +38,9 @@ interface ApiError {
 }
 
 export default function UserStoryForm() {
+  const API_BASE_URL = "http://localhost:8080";
+
+  // User Story State
   const [formData, setFormData] = useState<UserStoryFormData>({
     name: "",
     weight: 1,
@@ -44,67 +50,78 @@ export default function UserStoryForm() {
     createdAt: new Date().toISOString().split("T")[0],
     updatedAt: new Date().toISOString().split("T")[0],
   });
-
-  const [sprints, setSprints] = useState<SprintOption[]>([]);
+  const [sprints, setSprints] = useState<SprintFormData[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ type: "success" | "error" | null; message: string }>({ type: null, message: "" });
 
+  // Sprint Modal State
   const [isSprintModalOpen, setIsSprintModalOpen] = useState(false);
   const [sprintFormData, setSprintFormData] = useState<SprintFormData>({
     description: "",
     status: "planned",
     startDate: "",
     endDate: "",
-    deliveryDate: "",
+    projectId: "",
+    createdAt: new Date().toISOString().split("T")[0],
+    updatedAt: new Date().toISOString().split("T")[0],
   });
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [isSubmittingSprint, setIsSubmittingSprint] = useState(false);
   const [sprintSubmitStatus, setSprintSubmitStatus] = useState<{ type: "success" | "error" | null; message: string }>({ type: null, message: "" });
 
-  const API_BASE_URL = "http://localhost:8080";
-
+  // Fetch projects
   useEffect(() => {
-    async function fetchSprints() {
+    const fetchProjects = async () => {
+      setIsLoadingProjects(true);
       try {
-        const res = await fetch(`${API_BASE_URL}/api/sprints`);
-        if (res.ok) {
-          const data = await res.json();
-          const options = data.map((s: any) => ({ label: s.description, value: s.id }));
-          setSprints(options);
-        }
+        const res = await fetch(`${API_BASE_URL}/api/projects`);
+        if (!res.ok) throw new Error(`Error fetching projects: ${res.status}`);
+        const data = await res.json();
+        setProjects(data);
       } catch (err) {
-        console.error("Error fetching sprints:", err);
+        console.error(err);
+        setProjects([]);
+      } finally {
+        setIsLoadingProjects(false);
       }
-    }
-    fetchSprints();
+    };
+    fetchProjects();
   }, []);
 
+  // Handle changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "weight" ? Number(value) : value,
-      updatedAt: new Date().toISOString().split("T")[0],
-    }));
+    setFormData(prev => ({ ...prev, [name]: name === "weight" ? Number(value) : value, updatedAt: new Date().toISOString().split("T")[0] }));
   };
 
   const handleSprintChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setSprintFormData((prev) => ({ ...prev, [name]: value }));
+    setSprintFormData(prev => ({ ...prev, [name]: value, updatedAt: new Date().toISOString().split("T")[0] }));
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      weight: 1,
-      description: "",
-      status: "todo",
-      sprintId: "",
-      createdAt: new Date().toISOString().split("T")[0],
-      updatedAt: new Date().toISOString().split("T")[0],
-    });
-  };
+  const resetForm = () => setFormData({
+    name: "",
+    weight: 1,
+    description: "",
+    status: "todo",
+    sprintId: "",
+    createdAt: new Date().toISOString().split("T")[0],
+    updatedAt: new Date().toISOString().split("T")[0],
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const resetSprintForm = () => setSprintFormData({
+    description: "",
+    status: "planned",
+    startDate: "",
+    endDate: "",
+    projectId: projects[0]?.id || "",
+    createdAt: new Date().toISOString().split("T")[0],
+    updatedAt: new Date().toISOString().split("T")[0],
+  });
+
+  // Submit User Story
+  const handleSubmitUserStory = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: "" });
@@ -115,7 +132,7 @@ export default function UserStoryForm() {
         weight: formData.weight,
         description: formData.description.trim(),
         status: formData.status,
-        sprintId: formData.sprintId ? Number(formData.sprintId) : null,
+        sprintId: formData.sprintId ? { id: formData.sprintId } : null,
       };
 
       const res = await fetch(`${API_BASE_URL}/api/user-story`, {
@@ -125,35 +142,34 @@ export default function UserStoryForm() {
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw { message: errorData.message || `Server error: ${res.status}`, status: res.status } as ApiError;
+        const errData = await res.json().catch(() => ({}));
+        throw { message: errData.message || `Server error: ${res.status}`, status: res.status } as ApiError;
       }
 
-      const createdStory = await res.json();
-      setSubmitStatus({ type: "success", message: `User Story "${createdStory.name}" created successfully!` });
+      const created = await res.json();
+      setSubmitStatus({ type: "success", message: `User Story "${created.name}" created!` });
+      setTimeout(() => { resetForm(); setSubmitStatus({ type: null, message: "" }) }, 3000);
 
-      setTimeout(() => {
-        resetForm();
-        setSubmitStatus({ type: null, message: "" });
-      }, 3000);
-    } catch (error) {
-      const apiError = error as ApiError;
-      setSubmitStatus({ type: "error", message: apiError.message || "Failed to create user story. Please try again." });
+    } catch (err) {
+      const apiErr = err as ApiError;
+      setSubmitStatus({ type: "error", message: apiErr.message || "Failed to create user story." });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Submit Sprint
   const handleCreateSprint = async () => {
     setIsSubmittingSprint(true);
     setSprintSubmitStatus({ type: null, message: "" });
+
     try {
       const payload = {
         description: sprintFormData.description.trim(),
         status: sprintFormData.status,
-        startDate: sprintFormData.startDate,
+        startDate: sprintFormData.startDate || null,
         endDate: sprintFormData.endDate || null,
-        deliveryDate: sprintFormData.deliveryDate || null,
+        project: sprintFormData.projectId ? { id: sprintFormData.projectId } : null,
       };
 
       const res = await fetch(`${API_BASE_URL}/api/sprints`, {
@@ -163,24 +179,19 @@ export default function UserStoryForm() {
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw { message: errorData.message || `Server error: ${res.status}`, status: res.status } as ApiError;
+        const errData = await res.json().catch(() => ({}));
+        throw { message: errData.message || `Server error: ${res.status}`, status: res.status } as ApiError;
       }
 
-      const createdSprint = await res.json();
-      setSprintSubmitStatus({ type: "success", message: `Sprint "${createdSprint.description}" created!` });
+      const created = await res.json();
+      setSprintSubmitStatus({ type: "success", message: `Sprint "${created.description}" created!` });
+      setFormData(prev => ({ ...prev, sprintId: created.id }));
+      setSprints(prev => [...prev, created]);
+      setTimeout(() => { resetSprintForm(); setIsSprintModalOpen(false); setSprintSubmitStatus({ type: null, message: "" }) }, 1500);
 
-      setSprints((prev) => [...prev, { label: createdSprint.description, value: createdSprint.id }]);
-      setFormData((prev) => ({ ...prev, sprintId: createdSprint.id }));
-
-      setTimeout(() => {
-        setIsSprintModalOpen(false);
-        setSprintFormData({ description: "", status: "planned", startDate: "", endDate: "", deliveryDate: "" });
-        setSprintSubmitStatus({ type: null, message: "" });
-      }, 1500);
-    } catch (error) {
-      const apiError = error as ApiError;
-      setSprintSubmitStatus({ type: "error", message: apiError.message || "Failed to create sprint." });
+    } catch (err) {
+      const apiErr = err as ApiError;
+      setSprintSubmitStatus({ type: "error", message: apiErr.message || "Failed to create sprint." });
     } finally {
       setIsSubmittingSprint(false);
     }
@@ -188,21 +199,32 @@ export default function UserStoryForm() {
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-background-default">
-      <form onSubmit={handleSubmit} className="max-w-3xl w-full p-8 bg-background-paper rounded-2xl shadow-lg space-y-6">
-        <div className="flex justify-between items-center">
+      <form onSubmit={handleSubmitUserStory} className="max-w-3xl w-full p-8 bg-background-paper rounded-2xl shadow-lg space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
           <div>
-            <h2 className="text-2xl font-semibold text-text-primary">User Story Information</h2>
-            <p className="text-sm text-text-secondary">Fill in the user story details below.</p>
+            <h2 className="text-2xl font-semibold text-text-primary">User Story</h2>
+            <p className="text-sm text-text-secondary">Fill in the details below.</p>
           </div>
-          <Button type="button" variant="primary" onClick={() => setIsSprintModalOpen(true)}>Create Sprint</Button>
         </div>
 
         {submitStatus.type && <Alert type={submitStatus.type} message={submitStatus.message} />}
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <Input label="Name" name="name" value={formData.name} onChange={handleChange} placeholder="User story name..." disabled={isSubmitting} required />
-          <Input label="Weight" type="number" name="weight" value={formData.weight} onChange={handleChange} min={1} disabled={isSubmitting} />
-          <Textarea label="Description" name="description" value={formData.description} onChange={handleChange} placeholder="Describe the user story..." rows={4} disabled={isSubmitting} />
+          <Input label="Name" name="name" value={formData.name} onChange={handleChange} required disabled={isSubmitting} />
+          <Select
+            label="Weight"
+            name="weight"
+            value={formData.weight.toString()}
+            onChange={handleChange}
+            options={[
+              { label: "1", value: "1" },
+              { label: "2", value: "2" },
+              { label: "3", value: "3" },
+              { label: "4", value: "4" },
+            ]}
+            disabled={isSubmitting}
+          />
+          <Textarea label="Description" name="description" value={formData.description} onChange={handleChange} rows={4} disabled={isSubmitting} />
           <Select
             label="Status"
             name="status"
@@ -215,14 +237,39 @@ export default function UserStoryForm() {
             ]}
             disabled={isSubmitting}
           />
-          <Select
-            label="Sprint"
-            name="sprintId"
-            value={formData.sprintId}
-            onChange={handleChange}
-            options={sprints}
-            disabled={isSubmitting}
-          />
+
+          {/* Sprint Dropdown */}
+          {isLoadingProjects ? (
+            <Select
+              label="Sprint"
+              name="sprintId"
+              value=""
+              onChange={handleChange}
+              disabled
+              options={[{ label: "Cargando sprints...", value: "" }]}
+            />
+          ) : sprints.length === 0 ? (
+            <Button type="button" variant="primary" onClick={() => setIsSprintModalOpen(true)}>
+              Crear nuevo sprint
+            </Button>
+          ) : (
+            <div className="flex items-end gap-2">
+              <div className="flex-1">
+                <Select
+                  label="Sprint"
+                  name="sprintId"
+                  value={formData.sprintId}
+                  onChange={handleChange}
+                  options={sprints.map((s) => ({ label: s.description, value: s.id! }))}
+                  disabled={isSubmitting}
+                />
+              </div>
+              <Button type="button" variant="secondary" onClick={() => setIsSprintModalOpen(true)} disabled={isSubmitting}>
+                +
+              </Button>
+            </div>
+          )}
+
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -236,11 +283,11 @@ export default function UserStoryForm() {
         </div>
       </form>
 
-      {/* Modal to create sprint */}
+      {/* Sprint Creation Modal */}
       <Modal
         isOpen={isSprintModalOpen}
         onClose={() => setIsSprintModalOpen(false)}
-        title="Create New Sprint"
+        title="Create Sprint"
         footer={
           <>
             <Button variant="secondary" onClick={() => setIsSprintModalOpen(false)} disabled={isSubmittingSprint}>Cancel</Button>
@@ -255,9 +302,11 @@ export default function UserStoryForm() {
           { label: "In Progress", value: "in-progress" },
           { label: "Completed", value: "completed" },
         ]} />
+        <Select label="Project" name="projectId" value={sprintFormData.projectId} onChange={handleSprintChange} disabled={isSubmittingSprint} options={projects.map(p => ({ label: p.name, value: p.id }))} required />
         <Input label="Start Date" type="date" name="startDate" value={sprintFormData.startDate} onChange={handleSprintChange} required disabled={isSubmittingSprint} />
         <Input label="End Date" type="date" name="endDate" value={sprintFormData.endDate} onChange={handleSprintChange} disabled={isSubmittingSprint} />
-        <Input label="Delivery Date" type="date" name="deliveryDate" value={sprintFormData.deliveryDate} onChange={handleSprintChange} disabled={isSubmittingSprint} />
+        <Input label="Created At" type="date" name="createdAt" value={sprintFormData.createdAt} disabled />
+        <Input label="Updated At" type="date" name="updatedAt" value={sprintFormData.updatedAt} disabled />
       </Modal>
     </section>
   );
