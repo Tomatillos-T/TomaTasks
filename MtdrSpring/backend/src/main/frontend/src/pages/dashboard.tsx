@@ -11,10 +11,11 @@
  * @author  jean.de.lavarene@oracle.com
  */
 import React, { useState, useEffect } from "react";
-import NewItem from "../modules/task/components/newItem";
+import NewItem from "../modules/task/components/NewItem";
 import API_LIST from "../API";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Button, TableBody, CircularProgress } from "@mui/material";
+import DragAndDropDemo from "../components/DragAndDropDemo";
 
 // Define the shape of a todo item
 interface TodoItem {
@@ -255,6 +256,9 @@ export default function Dashboard() {
           </table>
         </div>
       )}
+      <div style={{ marginTop: '40px' }}>
+        <DragAndDropDemo />
+      </div>
     </div>
   );
 }
