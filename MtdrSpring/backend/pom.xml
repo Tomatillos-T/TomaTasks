@@ -74,8 +74,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.telegram</groupId>
-			<artifactId>telegrambots</artifactId>
-			<version>6.5.0</version>
+			<artifactId>telegrambots-springboot-longpolling-starter</artifactId>
+			<version>9.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.telegram</groupId>
+			<artifactId>telegrambots-client</artifactId>
+			<version>9.1.0</version>
 		</dependency>
 	</dependencies>
 	<build>
