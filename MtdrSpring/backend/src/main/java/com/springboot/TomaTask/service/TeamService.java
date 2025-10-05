@@ -32,7 +32,13 @@ public class TeamService {
         if (team.getProject() != null && team.getProject().getId() != null) {
             Project existingProject = projectRepository.findById(team.getProject().getId())
                     .orElseThrow(() -> new RuntimeException("Proyecto no encontrado"));
+
+            if (existingProject.getTeam() != null) {
+                throw new RuntimeException("Este proyecto ya está asignado a otro equipo.");
+            }
+
             team.setProject(existingProject);
+            existingProject.setTeam(team);
         }
 
         return teamRepository.save(team);

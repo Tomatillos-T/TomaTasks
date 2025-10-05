@@ -232,15 +232,27 @@ export default function ProjectForm() {
                 <Button type="button" variant="primary" onClick={() => setIsTeamModalOpen(true)}>Crear nuevo equipo</Button>
               </div>
             ) : (
-              <Select
-                label="Equipo Asignado"
-                name="teamId"
-                value={formData.teamId}
-                onChange={handleChange}
-                required
-                disabled={isSubmitting}
-                options={teams.map(team => ({ label: team.name, value: team.id }))}
-              />
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <Select
+                    label="Equipo Asignado"
+                    name="teamId"
+                    value={formData.teamId}
+                    onChange={handleChange}
+                    required
+                    disabled={isSubmitting}
+                    options={teams.map(team => ({ label: team.name, value: team.id }))}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setIsTeamModalOpen(true)}
+                  disabled={isSubmitting}
+                >
+                  +
+                </Button>
+              </div>
             )}
           </div>
 
