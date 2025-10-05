@@ -9,6 +9,9 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "sprint")
 public class Sprint {
@@ -36,6 +39,7 @@ public class Sprint {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project", nullable = false)
+    @JsonBackReference  // Prevent infinite recursion with Project.sprints
     private Project project;
 
     @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -49,8 +53,7 @@ public class Sprint {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Sprint() {
-    }
+    public Sprint() {}
 
     public Sprint(String description, String status, LocalDate startDate, Project project) {
         this.description = description;

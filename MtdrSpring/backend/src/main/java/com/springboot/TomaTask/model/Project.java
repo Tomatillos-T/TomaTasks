@@ -9,6 +9,9 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "project")
 public class Project {
@@ -39,9 +42,11 @@ public class Project {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team", nullable = true)
+    @JsonBackReference
     private Team team;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference 
     private Set<Sprint> sprints;
 
     @CreationTimestamp
@@ -61,28 +66,44 @@ public class Project {
     }
 
     public Project(String name, String description, String status,
-                   LocalDate startDate, LocalDate deliveryDate, LocalDate endDate) {
+                   LocalDate startDate, LocalDate deliveryDate, LocalDate endDate, Team team) {
         this.name = name;
         this.description = description;
         this.status = status;
         this.startDate = startDate;
         this.deliveryDate = deliveryDate;
         this.endDate = endDate;
+        this.team = team;
     }
 
+    // Getters and setters
     public String getId() { return id; }
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
     public LocalDate getStartDate() { return startDate; }
     public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+
     public LocalDate getDeliveryDate() { return deliveryDate; }
     public void setDeliveryDate(LocalDate deliveryDate) { this.deliveryDate = deliveryDate; }
+
     public LocalDate getEndDate() { return endDate; }
     public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+
+    public Team getTeam() { return team; }
+    public void setTeam(Team team) { this.team = team; }
+
+    public Set<Sprint> getSprints() { return sprints; }
+    public void setSprints(Set<Sprint> sprints) { this.sprints = sprints; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
+
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 }
