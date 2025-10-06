@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import com.springboot.TomaTask.model.Team;
 import com.springboot.TomaTask.model.Project;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.Optional;
 
 @Repository
