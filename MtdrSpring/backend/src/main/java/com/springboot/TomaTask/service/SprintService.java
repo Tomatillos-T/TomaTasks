@@ -1,8 +1,6 @@
 package com.springboot.TomaTask.service;
 
 import com.springboot.TomaTask.model.Sprint;
-import com.springboot.TomaTask.model.Project;
-import com.springboot.TomaTask.repository.ProjectRepository;
 import com.springboot.TomaTask.repository.SprintRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +10,9 @@ import java.util.List;
 public class SprintService {
 
     private final SprintRepository sprintRepository;
-    private final ProjectRepository projectRepository;
 
-    public SprintService(SprintRepository sprintRepository, ProjectRepository projectRepository) {
+    public SprintService(SprintRepository sprintRepository) {
         this.sprintRepository = sprintRepository;
-        this.projectRepository = projectRepository;
     }
 
     public List<Sprint> getAllSprints() {
@@ -29,10 +25,8 @@ public class SprintService {
     }
 
     public Sprint createSprint(Sprint sprint) {
-        if (sprint.getProject() != null && sprint.getProject().getId() != null) {
-            Project project = projectRepository.findById(sprint.getProject().getId())
-                    .orElseThrow(() -> new RuntimeException("Project no encontrado"));
-            sprint.setProject(project);
+        if (sprint.getProjectId() == null || sprint.getProjectId().isEmpty()) {
+            throw new RuntimeException("El projectId es obligatorio");
         }
         return sprintRepository.save(sprint);
     }
@@ -45,12 +39,7 @@ public class SprintService {
         sprint.setStartDate(details.getStartDate());
         sprint.setEndDate(details.getEndDate());
         sprint.setDeliveryDate(details.getDeliveryDate());
-
-        if (details.getProject() != null && details.getProject().getId() != null) {
-            Project project = projectRepository.findById(details.getProject().getId())
-                    .orElseThrow(() -> new RuntimeException("Project no encontrado"));
-            sprint.setProject(project);
-        }
+        sprint.setProjectId(details.getProjectId());
 
         return sprintRepository.save(sprint);
     }

@@ -12,6 +12,8 @@ import Proyectos from "../pages/Proyectos";
 import Calendario from "../pages/Calendario";
 import TeamForm from "../modules/teams/components/TeamForm";
 import SprintForm from "../modules/sprint/components/SprintForm";
+import UserStoryForm from "../modules/userStory/components/UserStoryForm";
+import TaskForm from "../modules/task/components/TaskForm";
 
 export default function AppRouter() {
   return (
@@ -31,6 +33,8 @@ export default function AppRouter() {
         <Route path="/projectForm" element={<ProjectForm />} />  
         <Route path="/teamForm" element={<TeamForm />} />  
         <Route path="/sprintForm" element={<SprintForm />} />  
+        <Route path="/userStoryForm" element={<UserStoryForm />} />
+        <Route path="/taskForm" element={<TaskForm />} />
 
 
       </Route>

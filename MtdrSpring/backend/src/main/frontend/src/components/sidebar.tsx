@@ -38,7 +38,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-screen overflow-y-auto bg-background-paper border-r border-background-contrast
+          fixed top-0 left-0 min-h-screen overflow-y-auto bg-background-paper border-r border-background-contrast
           w-64 p-4 space-y-1 transform transition-transform duration-300
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0 md:static md:block

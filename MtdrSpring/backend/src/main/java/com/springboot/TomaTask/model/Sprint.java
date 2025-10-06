@@ -34,9 +34,8 @@ public class Sprint {
     @Column(name = "delivery_date")
     private LocalDate deliveryDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project", nullable = false)
-    private Project project;
+    @Column(name = "project_id", nullable = false)
+    private String projectId;
 
     @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Task> tasks;
@@ -49,24 +48,23 @@ public class Sprint {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Sprint() {
-    }
+    public Sprint() {}
 
-    public Sprint(String description, String status, LocalDate startDate, Project project) {
+    public Sprint(String description, String status, LocalDate startDate, String projectId) {
         this.description = description;
         this.status = status;
         this.startDate = startDate;
-        this.project = project;
+        this.projectId = projectId;
     }
 
     public Sprint(String description, String status, LocalDate startDate, LocalDate endDate,
-                  LocalDate deliveryDate, Project project) {
+                  LocalDate deliveryDate, String projectId) {
         this.description = description;
         this.status = status;
         this.startDate = startDate;
         this.endDate = endDate;
         this.deliveryDate = deliveryDate;
-        this.project = project;
+        this.projectId = projectId;
     }
 
     public String getId() { return id; }
@@ -86,8 +84,8 @@ public class Sprint {
     public LocalDate getDeliveryDate() { return deliveryDate; }
     public void setDeliveryDate(LocalDate deliveryDate) { this.deliveryDate = deliveryDate; }
 
-    public Project getProject() { return project; }
-    public void setProject(Project project) { this.project = project; }
+    public String getProjectId() { return projectId; }
+    public void setProjectId(String projectId) { this.projectId = projectId; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
 
