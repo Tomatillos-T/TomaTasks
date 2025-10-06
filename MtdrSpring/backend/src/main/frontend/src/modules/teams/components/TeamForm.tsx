@@ -9,7 +9,8 @@ import TeamFormFields from "./TeamFormFields"
 export default function TeamForm() {
   const teamForm = useTeamForm()
   const projectModal = useProjectModalForm((projectId) => {
-    teamForm.teamFormData.projectId = projectId
+    // Actualizar correctamente el estado en lugar de mutar directamente
+    teamForm.setTeamFormData(prev => ({ ...prev, projectId }))
   })
 
   return (
@@ -20,7 +21,9 @@ export default function TeamForm() {
           <p className="text-sm text-text-secondary">Completa los detalles del equipo.</p>
         </div>
 
-        {teamForm.submitStatus.type && <Alert type={teamForm.submitStatus.type} message={teamForm.submitStatus.message} />}
+        {teamForm.submitStatus.type && (
+          <Alert type={teamForm.submitStatus.type} message={teamForm.submitStatus.message} />
+        )}
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <TeamFormFields
@@ -33,8 +36,22 @@ export default function TeamForm() {
         </div>
 
         <div className="flex justify-end gap-4 mt-4">
-          <Button type="button" variant="secondary" onClick={teamForm.resetForm} disabled={teamForm.isSubmitting}>Reiniciar</Button>
-          <Button type="submit" variant="primary" loading={teamForm.isSubmitting} disabled={teamForm.isSubmitting}>Guardar equipo</Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={teamForm.resetForm}
+            disabled={teamForm.isSubmitting}
+          >
+            Reiniciar
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            loading={teamForm.isSubmitting}
+            disabled={teamForm.isSubmitting || !teamForm.teamFormData.projectId} // asegurar Project seleccionado
+          >
+            Guardar equipo
+          </Button>
         </div>
       </form>
 
