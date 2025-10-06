@@ -169,7 +169,7 @@ export default function UserStoryForm() {
         status: sprintFormData.status,
         startDate: sprintFormData.startDate || null,
         endDate: sprintFormData.endDate || null,
-        project: sprintFormData.projectId ? { id: sprintFormData.projectId } : null,
+        project: sprintFormData.projectId ? sprintFormData.projectId : null,
       };
 
       const res = await fetch(`${API_BASE_URL}/api/sprints`, {
