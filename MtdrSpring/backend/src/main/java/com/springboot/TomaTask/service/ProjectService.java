@@ -21,10 +21,13 @@ public class ProjectService {
 
     public Project getProjectById(String id) {
         return projectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Project no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado"));
     }
 
     public Project createProject(Project project) {
+        if (project.getName() == null || project.getName().trim().isEmpty()) {
+            throw new RuntimeException("El nombre del proyecto es obligatorio");
+        }
         return projectRepository.save(project);
     }
 
