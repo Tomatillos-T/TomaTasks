@@ -26,8 +26,9 @@ public class Team {
     @Column(nullable = false)
     private String status;
 
-    @Column(name = "project_id", nullable = false)
-    private String projectId;
+    @OneToOne
+    @JoinColumn(name = "project_id", nullable = true, unique = true)
+    private Project project;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -39,14 +40,14 @@ public class Team {
 
     public Team() {}
 
-    public Team(String name, String description, String status, String projectId) {
+    public Team(String name, String description, String status, Project project) {
         this.name = name;
         this.description = description;
         this.status = status;
-        this.projectId = projectId;
+        this.project = project;
     }
 
-    // Getters y setters
+    // Getters y Setters
     public String getId() { return id; }
 
     public String getName() { return name; }
@@ -58,8 +59,8 @@ public class Team {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public String getProjectId() { return projectId; }
-    public void setProjectId(String projectId) { this.projectId = projectId; }
+    public Project getProject() { return project; }
+    public void setProject(Project project) { this.project = project; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
