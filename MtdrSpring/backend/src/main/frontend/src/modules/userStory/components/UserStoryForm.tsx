@@ -132,7 +132,7 @@ export default function UserStoryForm() {
         weight: formData.weight,
         description: formData.description.trim(),
         status: formData.status,
-        sprintId: formData.sprintId ? { id: formData.sprintId } : null,
+        sprintId: formData.sprintId || null,
       };
 
       const res = await fetch(`${API_BASE_URL}/api/user-story`, {
