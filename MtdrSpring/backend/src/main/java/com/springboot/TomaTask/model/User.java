@@ -40,7 +40,7 @@ public class User {
     private UserRole role;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team", referencedColumnName = "id", nullable = true)
+    @JoinColumn(name = "team_id")
     private Team team;
 
     @CreationTimestamp

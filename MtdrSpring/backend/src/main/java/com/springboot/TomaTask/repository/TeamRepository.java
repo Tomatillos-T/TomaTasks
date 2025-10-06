@@ -12,4 +12,5 @@ import jakarta.transaction.Transactional;
 @Transactional
 @EnableTransactionManagement
 public interface TeamRepository extends JpaRepository<Team, String> {
+    List<Team> findByProjectId(String projectId);
 }
