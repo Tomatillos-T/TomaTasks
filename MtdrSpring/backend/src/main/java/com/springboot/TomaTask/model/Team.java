@@ -2,19 +2,10 @@ package com.springboot.TomaTask.model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
-@JsonIdentityInfo(
-    generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "id"
-)
 
 @Entity
 @Table(name = "team")
@@ -35,11 +26,8 @@ public class Team {
     @Column(nullable = false)
     private String status;
 
-    @OneToOne(mappedBy = "team")
-    private Project project;
-
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<User> users;
+    @Column(name = "project_id", nullable = false)
+    private String projectId;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -51,13 +39,14 @@ public class Team {
 
     public Team() {}
 
-    public Team(String name, String description, String status) {
+    public Team(String name, String description, String status, String projectId) {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.projectId = projectId;
     }
 
-    // Getters and setters
+    // Getters y setters
     public String getId() { return id; }
 
     public String getName() { return name; }
@@ -69,11 +58,8 @@ public class Team {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public Project getProject() { return project; }
-    public void setProject(Project project) { this.project = project; }
-
-    public Set<User> getUsers() { return users; }
-    public void setUsers(Set<User> users) { this.users = users; }
+    public String getProjectId() { return projectId; }
+    public void setProjectId(String projectId) { this.projectId = projectId; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

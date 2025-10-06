@@ -281,7 +281,7 @@ export default function SprintForm() {
         </div>
 
         <div className="flex justify-end gap-4 mt-4">
-          <Button type="button" variant="secondary" onClick={resetForm} disabled={isSubmitting}>Resetear</Button>
+          <Button type="button" variant="secondary" onClick={resetForm} disabled={isSubmitting}>Reiniciar</Button>
           <Button type="submit" variant="primary" loading={isSubmitting} disabled={isSubmitting}>Guardar Sprint</Button>
         </div>
       </form>

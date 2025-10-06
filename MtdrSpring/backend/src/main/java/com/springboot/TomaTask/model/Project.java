@@ -3,19 +3,10 @@ package com.springboot.TomaTask.model;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
-@JsonIdentityInfo(
-    generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "id"
-)
 
 @Entity
 @Table(name = "project")
@@ -45,13 +36,6 @@ public class Project {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @OneToOne
-    @JoinColumn(name = "team_id")
-    private Team team;
-
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Sprint> sprints;
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -69,17 +53,15 @@ public class Project {
     }
 
     public Project(String name, String description, String status,
-                   LocalDate startDate, LocalDate deliveryDate, LocalDate endDate, Team team) {
+                   LocalDate startDate, LocalDate deliveryDate, LocalDate endDate, String teamId) {
         this.name = name;
         this.description = description;
         this.status = status;
         this.startDate = startDate;
         this.deliveryDate = deliveryDate;
-        this.endDate = endDate;
-        this.team = team;
-    }
+        this.endDate = endDate;    }
 
-    // Getters and setters
+    // Getters y Setters
     public String getId() { return id; }
 
     public String getName() { return name; }
@@ -99,12 +81,6 @@ public class Project {
 
     public LocalDate getEndDate() { return endDate; }
     public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
-
-    public Team getTeam() { return team; }
-    public void setTeam(Team team) { this.team = team; }
-
-    public Set<Sprint> getSprints() { return sprints; }
-    public void setSprints(Set<Sprint> sprints) { this.sprints = sprints; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
 
