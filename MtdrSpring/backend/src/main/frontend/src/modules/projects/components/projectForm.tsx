@@ -1,9 +1,9 @@
 // projects/components/ProjectForm.tsx
-import ProjectFormFields from "./ProjectFormFields"
-import TeamFormModal from "./TeamFormModal"
-import { useProjectForm } from "../hooks/useProjectForm"
-import { useTeamForm } from "../hooks/useTeamForm"
-import type { Team } from "../services/teamService"
+import ProjectFormFields from "./ProjectFormFields";
+import TeamFormModal from "./TeamFormModal";
+import { useProjectForm } from "../hooks/useProjectForm";
+import { useTeamForm } from "../hooks/useTeamForm";
+import type { Team } from "../services/teamService";
 
 export default function ProjectForm() {
   const {
@@ -21,15 +21,18 @@ export default function ProjectForm() {
     fetchTeams,
     setFormData,
     setSubmitStatus,
-  } = useProjectForm()
+  } = useProjectForm();
 
   // Cuando se crea un equipo, actualizamos el teamId en formData y recargamos equipos
   const onTeamCreated = (team: Team) => {
-    setFormData(prev => ({ ...prev, teamId: team.id }))
-    fetchTeams()
+    setFormData((prev) => ({ ...prev, teamId: team.id }));
+    fetchTeams();
     // También dejamos un mensaje en el formulario principal (similar al original)
-    setSubmitStatus({ type: "success", message: `Equipo "${team.name}" creado y asociado al proyecto.` })
-  }
+    setSubmitStatus({
+      type: "success",
+      message: `Equipo "${team.name}" creado y asociado al proyecto.`,
+    });
+  };
 
   const {
     teamFormData,
@@ -41,28 +44,31 @@ export default function ProjectForm() {
     closeTeamModal,
     handleCreateTeam,
     setTeamFormData,
-  } = useTeamForm(onTeamCreated)
+  } = useTeamForm(onTeamCreated);
 
   // Abrir modal para crear equipo, creando proyecto temporal si es necesario
   const handleCreateTeamClick = async () => {
     // Si ya hay proyecto temporal, abrimos directamente el modal
     if (tempProjectId) {
-      openTeamModal(tempProjectId)
+      openTeamModal(tempProjectId);
       // Prellenar projectId en el formulario de equipo
-      setTeamFormData(prev => ({ ...prev, projectId: tempProjectId }))
-      return
+      setTeamFormData((prev) => ({ ...prev, projectId: tempProjectId }));
+      return;
     }
 
-    const createdId = await createTemporaryProjectIfNeeded()
+    const createdId = await createTemporaryProjectIfNeeded();
     if (createdId) {
-      openTeamModal(createdId)
-      setTeamFormData(prev => ({ ...prev, projectId: createdId }))
+      openTeamModal(createdId);
+      setTeamFormData((prev) => ({ ...prev, projectId: createdId }));
     }
-  }
+  };
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="max-w-3xl w-full space-y-8 p-8 bg-background-paper rounded-2xl shadow-lg">
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-3xl w-full space-y-8 p-8 bg-background-paper rounded-2xl shadow-lg"
+      >
         <ProjectFormFields
           formData={formData}
           onChange={handleChange}
@@ -80,7 +86,7 @@ export default function ProjectForm() {
       <TeamFormModal
         isOpen={isTeamModalOpen}
         onClose={() => {
-          closeTeamModal()
+          closeTeamModal();
         }}
         teamFormData={teamFormData}
         onChange={handleTeamChange}
@@ -89,5 +95,5 @@ export default function ProjectForm() {
         teamSubmitStatus={teamSubmitStatus}
       />
     </>
-  )
+  );
 }
