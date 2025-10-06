@@ -325,7 +325,7 @@ while ! state_done DB_PASSWORD; do
       "name": "dbuser"
    },
    "data": {
-      "dbpassword": "${BASE64_DB_PASSWORD}"
+      "db_password": "${BASE64_DB_PASSWORD}"
    }
 }
 !
@@ -337,7 +337,7 @@ done
 while ! state_done MTDR_DB_PASSWORD_SET; do
   echo "setting admin password in mtdr_db"
   # get password from vault secret
-  DB_PASSWORD=`kubectl get secret dbuser -n mtdrworkshop --template={{.data.dbpassword}} | base64 --decode`
+  DB_PASSWORD=`kubectl get secret dbuser -n mtdrworkshop --template={{.data.db_password}} | base64 --decode`
   umask 177
   echo '{"adminPassword": "'"$DB_PASSWORD"'"}' > temp_params
   umask 22

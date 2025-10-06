@@ -10,7 +10,7 @@ $json = @"
     "name": "$secretName"
   },
   "data": {
-    "dbpassword": "$base64Password"
+    "db_password": "$base64Password"
   }
 }
 "@

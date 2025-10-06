@@ -111,7 +111,7 @@ ORDER_QUEUE=ORDERQUEUE
 
 # Get DB Password
 while true; do
-  if DB_PASSWORD=`kubectl get secret dbuser -n mtdrworkshop --template={{.data.dbpassword}} | base64 --decode`; then
+  if DB_PASSWORD=`kubectl get secret dbuser -n mtdrworkshop --template={{.data.db_password}} | base64 --decode`; then
     if ! test -z "$DB_PASSWORD"; then
       break
     fi
