@@ -1,19 +1,27 @@
 package com.springboot.TomaTask.model;
-
-
 import jakarta.persistence.*;
+
+
 import java.time.OffsetDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.Collections;
+
 /*
     representation of the User table that exists already
     in the autonomous database
  */
 @Entity
 @Table(name = "user_table")
-public class User {
+public class User implements UserDetails  {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
@@ -93,4 +101,36 @@ public class User {
                 ", creationTs=" + creationTs +
                 '}';
     }
+
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.emptyList(); // O puedes mapear roles aquí si lo necesitas
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
 }
