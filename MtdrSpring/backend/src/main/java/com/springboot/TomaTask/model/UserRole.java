@@ -1,6 +1,6 @@
 package com.springboot.TomaTask.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Set;
 
 import org.hibernate.annotations.GenericGenerator;

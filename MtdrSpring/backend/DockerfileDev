@@ -1,4 +1,5 @@
-FROM openjdk:22
+FROM openjdk:22-slim
+RUN apt-get update && apt-get install -y procps
 #COPY pom.xml /tmp/
 #COPY src /tmp/src/
 RUN mkdir -p /mtdrworkshop/creds
@@ -11,7 +12,7 @@ ENV ui_username="admin"
 ENV ui_password="none0001"
 
 ENV db_user="TOMATITOS"
-ENV dbpassword="TomaDB_TomaTask_admin_1"
+ENV db_password="TomaDB_TomaTask_admin_1"
 ENV db_url="jdbc:oracle:thin:@reacttodoi4tcl_tp?TNS_ADMIN=/mtdrworkshop/creds"
 ENV driver_class_name="oracle.jdbc.OracleDriver"
 

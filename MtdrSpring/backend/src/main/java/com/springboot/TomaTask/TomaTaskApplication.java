@@ -2,7 +2,6 @@ package com.springboot.TomaTask;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -31,32 +30,41 @@ import org.springframework.http.HttpStatus;
 @Controller
 public class TomaTaskApplication implements CommandLineRunner {
 
-	private static final Logger logger = LoggerFactory.getLogger(TomaTaskApplication.class);
+  private static final Logger logger = LoggerFactory.getLogger(TomaTaskApplication.class);
 
-	@Autowired
-	private ToDoItemService toDoItemService;
+  private final ToDoItemService toDoItemService;
+  private final String telegramBotToken;
+  private final String botName;
 
-	@Value("${telegram.bot.token}")
-	private String telegramBotToken;
+  public TomaTaskApplication(
+          ToDoItemService toDoItemService,
+          @Value("${telegram.bot.token}") String telegramBotToken,
+          @Value("${telegram.bot.name}") String botName) {
+      this.toDoItemService = toDoItemService;
+      this.telegramBotToken = telegramBotToken;
+      this.botName = botName;
+  }
 
-	@Value("${telegram.bot.name}")
-	private String botName;
+  public static void main(String[] args) {
+      SpringApplication.run(TomaTaskApplication.class, args);
+  }
 
-	public static void main(String[] args) {
-		SpringApplication.run(TomaTaskApplication.class, args);
-	}
+  @Bean
+  public CommandLineRunner initBot() {
+      return args -> {
+          try {
+              TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+              telegramBotsApi.registerBot(new ToDoItemBotController(telegramBotToken, botName, toDoItemService));
+              logger.info(BotMessages.BOT_REGISTERED_STARTED.getMessage());
+          } catch (TelegramApiException e) {
+              logger.error("Failed to register Telegram bot: {}", e.getMessage(), e);
+          }
+      };
+  }
 
-	@Override
-	public void run(String... args) throws Exception {
-		try {
-			TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-			telegramBotsApi.registerBot(new ToDoItemBotController(telegramBotToken, botName, toDoItemService));
-			logger.info(BotMessages.BOT_REGISTERED_STARTED.getMessage());
-		} catch (TelegramApiException e) {
-			e.printStackTrace();
-		}
-	}
-
+  /**
+  * Redirect any non-API routes to root (for frontend SPA handling).
+  */
 	@GetMapping("/**/{path:[^\\.]*}")
 	public String redirectApi() {
 		return "forward:/";
@@ -66,5 +74,4 @@ public class TomaTaskApplication implements CommandLineRunner {
 	public String send404() {
 		throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 	}
-
 }
