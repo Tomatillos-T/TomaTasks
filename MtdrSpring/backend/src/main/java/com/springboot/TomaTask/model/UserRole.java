@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.util.Set;
 
 import org.hibernate.annotations.GenericGenerator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "user_role")
@@ -18,8 +19,10 @@ public class UserRole {
     @Column(nullable = false, unique = true)
     private String role;
 
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<User> users;
+
 
     public UserRole() {}
 

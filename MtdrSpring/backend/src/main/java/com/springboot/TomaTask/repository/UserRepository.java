@@ -9,9 +9,11 @@ import com.springboot.TomaTask.model.User;
 
 import jakarta.transaction.Transactional;
 
+import java.util.Optional;
+
 @Repository
 @Transactional
 @EnableTransactionManagement
 public interface UserRepository extends JpaRepository<User,String> {
-
+    Optional<User> findByEmail(String email);
 }

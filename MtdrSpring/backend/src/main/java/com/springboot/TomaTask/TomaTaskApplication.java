@@ -6,9 +6,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 import com.springboot.TomaTask.config.BotProps;
 
-import com.springboot.TomaTask.model.User;
-import com.springboot.TomaTask.service.UserService;
-
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

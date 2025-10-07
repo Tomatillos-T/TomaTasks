@@ -1,19 +1,29 @@
 package com.springboot.TomaTask.model;
-
-
 import jakarta.persistence.*;
+
+
 import java.time.OffsetDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.Collection;
+import java.util.Collections;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /*
     representation of the User table that exists already
     in the autonomous database
  */
 @Entity
 @Table(name = "user_table")
-public class User {
+public class User implements UserDetails  {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
@@ -34,8 +44,8 @@ public class User {
 
     @Column(name = "password", nullable = false)
     String password;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role", referencedColumnName = "id", nullable = false)
     private UserRole role;
 
@@ -92,5 +102,47 @@ public class User {
                 ", team=" + team +
                 ", creationTs=" + creationTs +
                 '}';
+    }
+
+
+    @Override
+    @JsonIgnore  // ← AGREGAR
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (role != null) {
+            return Collections.singletonList(
+                new SimpleGrantedAuthority("ROLE_" + role.getRole())
+            );
+        }
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsername() {
+        return email;
+    }
+    
+    // CAMBIO 3: Agregar @JsonIgnore a los métodos de UserDetails
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+    
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+    
+    @Override
+    @JsonIgnore
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+    
+    @Override
+    @JsonIgnore
+    public boolean isEnabled() {
+        return true;
     }
 }
