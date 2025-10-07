@@ -4,13 +4,12 @@ package com.springboot.TomaTask.model;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 
+import org.springframework.security.core.GrantedAuthority;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
-/*
-    representation of the User table that exists already
-    in the autonomous database
- */
+
+
 @Entity
 @Table(name = "user_table")
 public class User {
@@ -36,12 +35,26 @@ public class User {
     String password;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role", referencedColumnName = "id", nullable = false)
-    private UserRole role;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
+
+    @Column(name = "telegram_chat_id")
+    private Long telegramChatId;
+
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    @ElementCollection(fetch = FetchType.EAGER)
+    private UserRole role;
+
+    public enum Role implements GrantedAuthority {
+        ROLE_DEVELOPER, ROLE_ADMIN;
+
+        @Override
+        public String getAuthority() {
+            return name();
+        }
+    }
 
     @CreationTimestamp
     @Column(name = "creation_ts", updatable = false)
