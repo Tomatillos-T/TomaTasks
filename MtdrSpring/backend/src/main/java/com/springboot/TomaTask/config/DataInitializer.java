@@ -12,19 +12,17 @@ public class DataInitializer {
     @Bean
     CommandLineRunner initRoles(UserRoleRepository userRoleRepository) {
         return args -> {
-            // Crear rol USER si no existe
-            if (userRoleRepository.findAll().stream().noneMatch(r -> r.getRole().equals("USER"))) {
-                UserRole userRole = new UserRole("USER");
-                userRoleRepository.save(userRole);
-            }
-
-            // Crear rol ADMIN si no existe
-            if (userRoleRepository.findAll().stream().noneMatch(r -> r.getRole().equals("ADMIN"))) {
+            if (userRoleRepository.count() == 0) {
                 UserRole adminRole = new UserRole("ADMIN");
+                UserRole userRole = new UserRole("USER");
+                
                 userRoleRepository.save(adminRole);
+                userRoleRepository.save(userRole);
+                
+                System.out.println("✓ Roles inicializados: ADMIN y USER");
+            } else {
+                System.out.println("✓ Roles ya existentes en la base de datos");
             }
-
-            System.out.println("Roles inicializados correctamente");
         };
     }
 }

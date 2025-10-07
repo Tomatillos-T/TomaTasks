@@ -5,7 +5,7 @@ import com.springboot.TomaTask.auth.dto.RegisterUserDto;
 import com.springboot.TomaTask.auth.dto.LoginResponse;
 import com.springboot.TomaTask.auth.service.AuthenticationService;
 import com.springboot.TomaTask.model.User;
-import com.springboot.TomaTask.security.JwtService;
+import com.springboot.TomaTask.service.JwtService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

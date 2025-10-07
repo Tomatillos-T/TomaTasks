@@ -6,9 +6,8 @@ import Modal from "../components/Modal";
 import Alert from "../components/Alert";
 import StatCard from "../components/StatCard";
 import ProjectForm from "../modules/projects/components/ProjectForm";
-import type { Project } from "../modules/projects/services/projectService";
-
-const API_BASE_URL = "http://localhost:8080/api/projects"
+import type { Project } from "../modules/teams/services/projectService";
+import { getProjects } from "../modules/teams/services/projectService";
 
 export default function Proyectos() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -19,13 +18,12 @@ export default function Proyectos() {
   // Cargar proyectos desde el backend
   const fetchProjects = async () => {
     try {
-      const resp = await fetch(API_BASE_URL)
-      const data = await resp.json()
-      setProjects(data)
+      const data = await getProjects(); 
+      setProjects(data);
     } catch (error) {
-      console.error("Error al cargar proyectos:", error)
+      console.error("Error al cargar proyectos:", error);
     }
-  }
+  };
 
   useEffect(() => {
     fetchProjects()
@@ -132,7 +130,8 @@ export default function Proyectos() {
               <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
                 <Calendar className="w-4 h-4 text-text-secondary" />
                 <span className="text-xs text-text-secondary">
-                  {project.startDate && new Date(project.startDate).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })} - {project.endDate && new Date(project.endDate).toLocaleDateString('es-MX', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {project.startDate && new Date(project.startDate).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })} - 
+                {project.deliveryDate && new Date(project.deliveryDate).toLocaleDateString('es-MX', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
               </div>
             </div>

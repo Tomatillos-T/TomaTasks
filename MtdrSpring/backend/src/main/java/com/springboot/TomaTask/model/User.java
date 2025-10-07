@@ -10,10 +10,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /*
     representation of the User table that exists already
@@ -42,8 +45,8 @@ public class User implements UserDetails  {
 
     @Column(name = "password", nullable = false)
     String password;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role", referencedColumnName = "id", nullable = false)
     private UserRole role;
 
@@ -104,33 +107,43 @@ public class User implements UserDetails  {
 
 
     @Override
+    @JsonIgnore  // ← AGREGAR
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList(); // O puedes mapear roles aquí si lo necesitas
+        if (role != null) {
+            return Collections.singletonList(
+                new SimpleGrantedAuthority("ROLE_" + role.getRole())
+            );
+        }
+        return Collections.emptyList();
     }
-
+    
     @Override
     public String getUsername() {
         return email;
     }
-
+    
+    // CAMBIO 3: Agregar @JsonIgnore a los métodos de UserDetails
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
-
+    
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return true;
     }
-
+    
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
-
+    
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return true;
     }
-
 }

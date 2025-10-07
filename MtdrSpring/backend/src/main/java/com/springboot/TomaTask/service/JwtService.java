@@ -1,4 +1,4 @@
-package com.springboot.TomaTask.security;
+package com.springboot.TomaTask.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

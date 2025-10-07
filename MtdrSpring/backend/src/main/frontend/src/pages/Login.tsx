@@ -1,22 +1,27 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import tomatoLogo from '../assets/tomato.svg';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import Alert from '../components/Alert';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login, loading, error } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (email === 'admin' && password === 'admin') {
+    
+    try {
+      await login({ email, password });
+      // Login exitoso, redirigir al dashboard
       navigate('/dashboard');
-    } else {
-      setError('Usuario o contraseña incorrectos');
+    } catch (err) {
+      // El error ya se maneja en el hook useAuth
+      console.error('Error en login:', err);
     }
   };
 
@@ -28,15 +33,15 @@ export default function Login() {
           Sign in to your account
         </h2>
       </div>
-
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
           <Input
             label="Email address"
-            type="text"
+            type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={loading}
           />
           <Input
             label="Password"
@@ -44,13 +49,15 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={loading}
           />
-
+          
+          {/* Mostrar alerta de error si existe */}
           {error && <Alert type="error" message={error} />}
-
+          
           <div className="flex justify-center items-center">
-            <Button type="submit" variant="primary">
-              Iniciar Sesión
+            <Button type="submit" variant="primary" disabled={loading}>
+              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </Button>
           </div>
         </form>

@@ -1,7 +1,7 @@
 // teams/hooks/useProjectModalForm.ts
 import { useState, useEffect } from "react"
 import { createProject, getProjects } from "../services/projectService"
-import type { ApiError } from "../services/projectService"
+import type { HttpError } from "../../../services/httpClient"
 import type { CreateProjectPayload } from "../services/projectService"
 
 export interface ProjectOption {
@@ -70,9 +70,9 @@ export function useProjectModalForm(onProjectCreated?: (id: string) => void) {
         resetProjectForm()
       }, 1500)
     } catch (err: any) {
-      const apiError = err as ApiError
-      setProjectSubmitStatus({ type: "error", message: apiError.message || "Failed to create project." })
-    } finally {
+  const apiError = err as HttpError
+  setProjectSubmitStatus({ type: "error", message: apiError.message || "Failed to create project." })
+} finally {
       setIsSubmittingProject(false)
     }
   }
