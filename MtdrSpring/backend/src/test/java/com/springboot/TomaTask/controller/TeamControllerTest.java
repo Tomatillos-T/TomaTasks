@@ -105,7 +105,7 @@ public class TeamControllerTest {
 
         ResponseEntity<Void> response = teamController.deleteTeam("id1");
 
-        assertEquals(204, response.getStatusCodeValue());
+        assertEquals(204, response.getStatusCode().value());
         verify(teamService).deleteTeam("id1");
     }
 
