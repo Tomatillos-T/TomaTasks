@@ -75,7 +75,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (Exception ex) {
-            ex.printStackTrace();
             sendUnauthorized(response, "Error al validar el token: " + ex.getMessage());
         }
     }
