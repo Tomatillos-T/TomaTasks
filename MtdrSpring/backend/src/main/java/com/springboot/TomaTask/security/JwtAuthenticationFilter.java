@@ -16,7 +16,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.springboot.TomaTask.service.JwtService;
 
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
