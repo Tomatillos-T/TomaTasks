@@ -7,9 +7,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.springboot.TomaTask.model.UserRole;
 
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 
 @Repository
 @Transactional
 @EnableTransactionManagement
 public interface UserRoleRepository extends JpaRepository<UserRole, String> {
+    Optional<UserRole> findByRole(String role);
 }
