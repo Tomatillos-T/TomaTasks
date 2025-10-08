@@ -1,8 +1,12 @@
 package com.springboot.TomaTask.auth.dto;
 
+import com.springboot.TomaTask.model.User;
+
 public class LoginResponse {
+
     private String token;
     private long expiresIn;
+    private User user; 
 
     public String getToken() {
         return token;
@@ -19,6 +23,15 @@ public class LoginResponse {
 
     public LoginResponse setExpiresIn(long expiresIn) {
         this.expiresIn = expiresIn;
+        return this;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public LoginResponse setUser(User user) {
+        this.user = user;
         return this;
     }
 }

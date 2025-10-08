@@ -1,9 +1,17 @@
 import React from "react";
 import { Bell, ChevronDown, Moon, Search, Sun } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
+import { useUserContext } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 const Navbar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
+  const { user } = useUserContext();
+  const navigate = useNavigate();
+
+  const initials = user
+    ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase()
+    : "??";
 
   return (
     <header className="bg-background-paper border-b border-background-contrast shadow-sm">
@@ -13,14 +21,13 @@ const Navbar: React.FC = () => {
           <div className="w-10 h-10 rounded-xl bg-primary-main flex items-center justify-center text-2xl">
             🍅
           </div>
-          {/* Mostrar título solo en pantallas grandes */}
           <div className="hidden md:block">
             <h1 className="text-xl font-bold text-text-primary">TomaTask</h1>
             <p className="text-xs text-text-secondary">ERP Management System</p>
           </div>
         </div>
 
-        {/* Search: mostrar solo en pantallas medianas y grandes */}
+        {/* Search */}
         <div className="flex-1 max-w-xl mx-4 hidden md:block">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-secondary" />
@@ -39,19 +46,19 @@ const Navbar: React.FC = () => {
             className="p-2 rounded-lg hover:bg-background-subtle transition-all duration-300 ease-in-out relative overflow-hidden"
           >
             <div className="relative w-5 h-5">
-              <Sun 
+              <Sun
                 className={`w-5 h-5 text-text-secondary absolute inset-0 transition-all duration-300 ease-in-out ${
-                  theme === "light" 
-                    ? "opacity-100 rotate-0 scale-100" 
+                  theme === "light"
+                    ? "opacity-100 rotate-0 scale-100"
                     : "opacity-0 rotate-90 scale-0"
-                }`} 
+                }`}
               />
-              <Moon 
+              <Moon
                 className={`w-5 h-5 text-text-secondary absolute inset-0 transition-all duration-300 ease-in-out ${
-                  theme === "dark" 
-                    ? "opacity-100 rotate-0 scale-100" 
+                  theme === "dark"
+                    ? "opacity-100 rotate-0 scale-100"
                     : "opacity-0 -rotate-90 scale-0"
-                }`} 
+                }`}
               />
             </div>
           </button>
@@ -62,15 +69,18 @@ const Navbar: React.FC = () => {
           </button>
 
           {/* Perfil */}
-          <div className="flex items-center gap-3 pl-4 border-l border-background-contrast">
-            {/* Solo icono en pantallas pequeñas */}
+          <div
+            onClick={() => navigate("/user")}
+            className="flex items-center gap-3 pl-4 border-background-contrast cursor-pointer hover:bg-background-subtle transition-colors rounded-lg px-2 py-1"
+          >
             <div className="w-9 h-9 rounded-full bg-secondary-main flex items-center justify-center text-white font-semibold">
-              JD
+              {initials}
             </div>
-            {/* Nombre solo en pantallas medianas y grandes */}
             <div className="hidden md:block">
-              <p className="text-sm font-semibold text-text-primary">John Doe</p>
-              <p className="text-xs text-text-secondary">Administrador</p>
+              <p className="text-sm font-semibold text-text-primary">
+                {user?.firstName} {user?.lastName}
+              </p>
+              <p className="text-xs text-text-secondary">{user?.role?.role}</p>
             </div>
             <ChevronDown className="w-4 h-4 text-text-secondary" />
           </div>

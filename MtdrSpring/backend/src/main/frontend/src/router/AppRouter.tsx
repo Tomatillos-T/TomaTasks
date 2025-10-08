@@ -14,6 +14,7 @@ import SprintForm from "../modules/sprint/components/SprintForm";
 import ProjectForm from "../modules/projects/components/ProjectForm";
 import UserStoryForm from "../modules/userStory/components/UserStoryForm";
 import TaskForm from "../modules/task/components/TaskForm";
+import User from "../pages/User";
 
 export default function AppRouter() {
   return (
@@ -35,6 +36,7 @@ export default function AppRouter() {
         <Route path="/sprintForm" element={<SprintForm />} />
         <Route path="/userStoryForm" element={<UserStoryForm />} />
         <Route path="/taskForm" element={<TaskForm />} />
+        <Route path="/user" element={<User />} />
       </Route>
     </Routes>
   );
