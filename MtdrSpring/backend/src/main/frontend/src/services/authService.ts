@@ -33,6 +33,7 @@ export interface User {
   };
   enabled: boolean;
   username: string;
+  telegramToken: string | null;
 }
 
 class AuthService {

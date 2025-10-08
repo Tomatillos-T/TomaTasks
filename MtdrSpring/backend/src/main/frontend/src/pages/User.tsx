@@ -20,6 +20,8 @@ export default function User() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>({ type: null, message: "" });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [telegramToken, setTelegramToken] = useState<string | null>(formData?.telegramToken || null);
+
 
   useEffect(() => {
     if (user) setFormData(user);
@@ -74,10 +76,31 @@ export default function User() {
     }
   };
 
+  const handleGenerateTelegramToken = async () => {
+    if (!formData) return;
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: "" });
+
+    try {
+      const updatedUser = await HttpClient.post<UserType>(`/api/user/${formData.id}/telegram-token`, {}, { auth: true });
+      setFormData(updatedUser);
+      setTelegramToken(updatedUser.telegramToken);
+      setSubmitStatus({
+        type: "success",
+        message: "Token generado correctamente. Úsalo en el bot de Telegram para vincular tu cuenta."
+      });
+    } catch (error: any) {
+      setSubmitStatus({ type: "error", message: error.message || "Error al generar el token." });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+
   return (
-    <section className="min-h-screen flex items-center justify-center bg-background-default">
-      <div className="max-w-2xl w-full p-8 bg-background-paper rounded-2xl shadow-lg space-y-6">
-        <div className="flex items-center justify-between">
+  <section className="min-h-screen flex items-center justify-center bg-background-default">
+    <div className="w-full h-full m-4 p-4 bg-background-paper rounded-2xl shadow-lg space-y-6">
+      <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-text-primary">User Profile</h2>
             <p className="text-sm text-text-secondary">Manage your account details below.</p>
@@ -103,6 +126,29 @@ export default function User() {
           <Input label="Phone Number" name="phoneNumber" value={formData?.phoneNumber || ""} onChange={handleChange} disabled={!isEditing} />
           <Input label="Enabled" name="enabled" value={formData?.enabled ? "Yes" : "No"} disabled />
         </div>
+
+        <div className="space-y-2">
+          <Input
+            label="Telegram Token"
+            name="telegramToken"
+            value={telegramToken || "No se ha generado un token"}
+            disabled
+          />
+          <Button
+            type="button"
+            variant="primary"
+            onClick={handleGenerateTelegramToken}
+            disabled={isSubmitting}
+          >
+            Generar Token para Telegram
+          </Button>
+          {telegramToken && (
+            <p className="text-sm text-text-secondary">
+              Copia este token y envíalo al bot de Telegram para vincular tu cuenta.
+            </p>
+          )}
+        </div>
+
 
         <div className="flex justify-between items-center mt-6">
           <Button

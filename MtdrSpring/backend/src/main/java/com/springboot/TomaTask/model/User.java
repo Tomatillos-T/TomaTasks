@@ -61,6 +61,9 @@ public class User implements UserDetails  {
     @Column(name = "update_ts")
     OffsetDateTime updateTs;
 
+    @Column(name = "telegram_token", unique = true)
+    private String telegramToken;
+
     public User(){}
     public User(String firstName, String lastName, String email, String phoneNumber, String password, UserRole role, Team team) {
         this.firstName = firstName;
@@ -90,6 +93,14 @@ public class User implements UserDetails  {
     public Team getTeam() { return team; }
     public void setTeam(Team team) { this.team = team; }
 
+    public String getTelegramToken() {
+        return telegramToken;
+    }
+
+    public void setTelegramToken(String telegramToken) {
+        this.telegramToken = telegramToken;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -106,7 +117,7 @@ public class User implements UserDetails  {
 
 
     @Override
-    @JsonIgnore  // ← AGREGAR
+    @JsonIgnore 
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role != null) {
             return Collections.singletonList(
