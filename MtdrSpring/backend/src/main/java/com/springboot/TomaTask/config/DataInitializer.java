@@ -292,7 +292,7 @@ public class DataInitializer {
                 taskRepository.save(task26);
                 taskRepository.save(task27);
 
-                logger.info("✓ Tareas inicializadas correctamente (6 insertadas)");
+                logger.info("✓ Tareas inicializadas correctamente (27 insertadas)");
             } else {
                 logger.info("✓ Proyectos, sprints y tareas ya existentes en la base de datos");
             }
