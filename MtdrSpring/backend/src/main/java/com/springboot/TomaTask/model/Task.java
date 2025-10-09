@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,8 +12,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Task {
 
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, unique = true)
     private String id;
 
@@ -24,8 +22,20 @@ public class Task {
     @Column(length = 1000)
     private String description;
 
+    @Column(name = "time_estimate")
+    private Integer timeEstimate; // in hours
+
+    public enum Status {
+        TODO,
+        IN_PROGRESS,
+        DONE,
+        PENDING,
+        TESTING
+    }
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_story", nullable = true)
@@ -35,7 +45,7 @@ public class Task {
     @JoinColumn(name = "sprint", nullable = true)
     private Sprint sprint;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "asignee", referencedColumnName = "id")
     private User user;
 
@@ -56,52 +66,131 @@ public class Task {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Task() {}
+    public Task() {
+    }
 
-    public Task(String name, String status, UserStory userStory, Sprint sprint) {
+    public Task(String name, Integer timeEstimate, Status status, UserStory userStory, Sprint sprint) {
         this.name = name;
+        this.timeEstimate = timeEstimate;
         this.status = status;
         this.userStory = userStory;
         this.sprint = sprint;
     }
 
-    public Task(String name, String description, String status, UserStory userStory, Sprint sprint) {
+    public Task(String name, Integer timeEstimate, String description, Status status, UserStory userStory,
+            Sprint sprint, User user) {
         this.name = name;
+        this.timeEstimate = timeEstimate;
         this.description = description;
         this.status = status;
         this.userStory = userStory;
         this.sprint = sprint;
+        this.user = user;
     }
 
-    public Task(String name, String description, String status, UserStory userStory,
-                Sprint sprint, LocalDate startDate, LocalDate endDate, LocalDate deliveryDate) {
+    public Task(String name, Integer timeEstimate, String description, Status status, UserStory userStory,
+            Sprint sprint, User user, LocalDate startDate, LocalDate endDate, LocalDate deliveryDate) {
         this.name = name;
+        this.timeEstimate = timeEstimate;
         this.description = description;
         this.status = status;
         this.userStory = userStory;
         this.sprint = sprint;
+        this.user = user;
         this.startDate = startDate;
         this.endDate = endDate;
         this.deliveryDate = deliveryDate;
     }
 
-    public String getId() { return id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public UserStory getUserStory() { return userStory; }
-    public void setUserStory(UserStory userStory) { this.userStory = userStory; }
-    public Sprint getSprint() { return sprint; }
-    public void setSprint(Sprint sprint) { this.sprint = sprint; }
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
-    public LocalDate getDeliveryDate() { return deliveryDate; }
-    public void setDeliveryDate(LocalDate deliveryDate) { this.deliveryDate = deliveryDate; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getTimeEstimate() {
+        return timeEstimate;
+    }
+
+    public void setTimeEstimate(Integer timeEstimate) {
+        this.timeEstimate = timeEstimate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public UserStory getUserStory() {
+        return userStory;
+    }
+
+    public void setUserStory(UserStory userStory) {
+        this.userStory = userStory;
+    }
+
+    public Sprint getSprint() {
+        return sprint;
+    }
+
+    public void setSprint(Sprint sprint) {
+        this.sprint = sprint;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public LocalDate getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(LocalDate deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

@@ -19,8 +19,8 @@ public class TaskService {
     private final SprintRepository sprintRepository;
 
     public TaskService(TaskRepository taskRepository,
-                       UserStoryRepository userStoryRepository,
-                       SprintRepository sprintRepository) {
+            UserStoryRepository userStoryRepository,
+            SprintRepository sprintRepository) {
         this.taskRepository = taskRepository;
         this.userStoryRepository = userStoryRepository;
         this.sprintRepository = sprintRepository;
@@ -28,6 +28,18 @@ public class TaskService {
 
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
+    }
+
+    public List<Task> findByUserStoryId(String userStoryId) {
+        return taskRepository.findByUserStoryId(userStoryId);
+    }
+
+    public List<Task> findBySprintId(String sprintId) {
+        return taskRepository.findBySprintId(sprintId);
+    }
+
+    public List<Task> findByUserId(String userId) {
+        return taskRepository.findByUserId(userId);
     }
 
     public Task getTaskById(String id) {

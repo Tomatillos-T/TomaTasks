@@ -22,42 +22,40 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter,
-                                 AuthenticationProvider authenticationProvider) {
+            AuthenticationProvider authenticationProvider) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationProvider = authenticationProvider;
     }
 
-@Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .authorizeHttpRequests(auth -> auth
-                // Endpoints públicos de la API
-                .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
-                
-                // Protege únicamente el namespace de API
-                .requestMatchers("/api/**").authenticated()
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .formLogin(form -> form.disable())
+                .authorizeHttpRequests(auth -> auth
+                        // Endpoints públicos de la API
+                        .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
 
-                // Todo lo demás (React, estáticos, etc.) se deja libre
-                .anyRequest().permitAll()
-        )
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authenticationProvider(authenticationProvider)
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                        // Protege únicamente el namespace de API
+                        .requestMatchers("/api/**").authenticated()
 
-    return http.build();
-}
+                        // Todo lo demás (React, estáticos, etc.) se deja libre
+                        .anyRequest().permitAll())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-
+        return http.build();
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
-            "http://localhost:3000",
-            "http://localhost:8080"
-        ));
+                "http://localhost:3000",
+                "http://localhost:8080",
+                "*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(false); // Si no usas cookies, lo recomendable es false
