@@ -1,6 +1,6 @@
 // services/httpClient.ts
 
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL;
 
 interface HttpOptions extends RequestInit {
   /** Indica si se debe incluir el token JWT automáticamente */
@@ -29,7 +29,7 @@ export class HttpClient {
   private static getHeaders(auth: boolean, headers?: HeadersInit): HeadersInit {
     const baseHeaders: Record<string, string> = {
       "Content-Type": "application/json",
-      ...(headers as Record<string, string> || {}),
+      ...((headers as Record<string, string>) || {}),
     };
 
     if (auth) {
@@ -49,7 +49,10 @@ export class HttpClient {
    * @param endpoint Endpoint relativo (por ejemplo: /api/projects)
    * @param options Configuración de la solicitud
    */
-  static async request<T>(endpoint: string, options: HttpOptions = {}): Promise<T> {
+  static async request<T>(
+    endpoint: string,
+    options: HttpOptions = {}
+  ): Promise<T> {
     const { auth = false, headers, ...rest } = options;
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -60,7 +63,8 @@ export class HttpClient {
     // Si la respuesta no es exitosa, lanzar error detallado
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.message || `Error en la solicitud: ${response.status}`;
+      const errorMessage =
+        errorData.message || `Error en la solicitud: ${response.status}`;
 
       // Manejo centralizado de errores comunes
       if (response.status === 401) {
@@ -93,7 +97,11 @@ export class HttpClient {
   /**
    * Atajo para solicitudes POST
    */
-  static post<T>(endpoint: string, body?: any, options?: HttpOptions): Promise<T> {
+  static post<T>(
+    endpoint: string,
+    body?: unknown,
+    options?: HttpOptions
+  ): Promise<T> {
     return this.request<T>(endpoint, {
       ...options,
       method: "POST",
@@ -104,7 +112,11 @@ export class HttpClient {
   /**
    * Atajo para solicitudes PUT
    */
-  static put<T>(endpoint: string, body?: any, options?: HttpOptions): Promise<T> {
+  static put<T>(
+    endpoint: string,
+    body?: unknown,
+    options?: HttpOptions
+  ): Promise<T> {
     return this.request<T>(endpoint, {
       ...options,
       method: "PUT",

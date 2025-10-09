@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
 import java.util.Optional;
 
@@ -18,29 +17,38 @@ public class UserService {
 
     @Autowired
     private UserRepository UserRepository;
-    public List<User> findAll(){
+
+    public List<User> findAll() {
         List<User> Users = UserRepository.findAll();
         return Users;
     }
 
-    public ResponseEntity<User> getUserById(String id){
+    public ResponseEntity<User> getUserById(String id) {
         Optional<User> todoData = UserRepository.findById(id);
-        if (todoData.isPresent()){
+        if (todoData.isPresent()) {
             return new ResponseEntity<>(todoData.get(), HttpStatus.OK);
-        }else{
+        } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    public User addUser(User User){
+    public User findByEmail(String email) {
+        return UserRepository.findByEmail(email).orElse(null);
+    }
+
+    public boolean emailExists(String email) {
+        return UserRepository.findByEmail(email).isPresent();
+    }
+
+    public User addUser(User User) {
         return UserRepository.save(User);
     }
 
-    public boolean deleteUser(String id){
-        try{
+    public boolean deleteUser(String id) {
+        try {
             UserRepository.deleteById(id);
             return true;
-        }catch(Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
