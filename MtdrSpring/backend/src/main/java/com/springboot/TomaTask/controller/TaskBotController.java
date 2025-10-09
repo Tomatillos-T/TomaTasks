@@ -79,16 +79,93 @@ public class TaskBotController implements SpringLongPollingBot, LongPollingSingl
 			actions.setUserService(userService);
 		}
 
-		actions.fnStart();
-		actions.fnDone();
-		actions.fnUndo();
-		actions.fnDelete();
-		actions.fnHide();
-		actions.fnListAll();
-		actions.fnAddItem();
-		actions.fnLogin();
-		actions.fnLogout();
-		actions.fnElse();
+		// Controller-driven dispatch using BotActions predicates
+		// Priority: if a login pending state exists, let fnLogin handle the message
+		if (actions.hasPendingLogin() || actions.isLoginCommand()) {
+			actions.fnLogin();
+			return;
+		}
+
+		// Logout handled first if explicit
+		if (actions.isLogoutCommand()) {
+			actions.fnLogout();
+			return;
+		}
+
+		// Start / introduction
+		if (actions.isStartCommand()) {
+			if (actions.hasSession()) {
+				actions.fnStart();
+			} else {
+				actions.fnLogin();
+			}
+			return;
+		}
+
+		// List items
+		if (actions.isListCommand()) {
+			if (actions.hasSession()) {
+				actions.fnListAll();
+			} else {
+				actions.fnLogin();
+			}
+			return;
+		}
+
+		// Add item flow
+		if (actions.isAddCommand()) {
+			if (actions.hasSession()) {
+				actions.fnAddItem();
+			} else {
+				actions.fnLogin();
+			}
+			return;
+		}
+
+		// Done / Undo / Delete commands (contain the action label)
+		if (actions.containsDone()) {
+			if (actions.hasSession()) {
+				actions.fnDone();
+			} else {
+				actions.fnLogin();
+			}
+			return;
+		}
+
+		if (actions.containsUndo()) {
+			if (actions.hasSession()) {
+				actions.fnUndo();
+			} else {
+				actions.fnLogin();
+			}
+			return;
+		}
+
+		if (actions.containsDelete()) {
+			if (actions.hasSession()) {
+				actions.fnDelete();
+			} else {
+				actions.fnLogin();
+			}
+			return;
+		}
+
+		// Hide
+		if (actions.isHideCommand()) {
+			actions.fnHide();
+			return;
+		}
+
+		// If user has a session, fallback to fnElse to create a new item; otherwise
+		// prompt login
+		if (actions.hasSession()) {
+			actions.fnElse();
+			return;
+		} else {
+			// No session and no other command matched -> prompt login
+			actions.fnLogin();
+			return;
+		}
 	}
 
 	@AfterBotRegistration
