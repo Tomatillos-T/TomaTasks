@@ -9,6 +9,11 @@ import com.springboot.TomaTask.repository.UserStoryRepository;
 
 import org.springframework.stereotype.Service;
 
+import com.springboot.TomaTask.dto.TaskDTO;
+import com.springboot.TomaTask.mapper.TaskMapper;
+import java.util.stream.Collectors;
+
+
 import java.util.List;
 
 @Service
@@ -26,9 +31,14 @@ public class TaskService {
         this.sprintRepository = sprintRepository;
     }
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public List<TaskDTO> getAllTasks() {
+        List<Task> tasks = taskRepository.findAll();
+        List<TaskDTO> taskDTOs = tasks.stream()
+                                    .map(TaskMapper::toDTO)
+                                    .collect(Collectors.toList());
+        return taskDTOs;
     }
+
 
     public List<Task> findByUserStoryId(String userStoryId) {
         return taskRepository.findByUserStoryId(userStoryId);
