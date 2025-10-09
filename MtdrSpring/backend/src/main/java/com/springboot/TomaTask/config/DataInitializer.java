@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.springboot.TomaTask.model.*;
+import com.springboot.TomaTask.model.Task.Status;
 import com.springboot.TomaTask.repository.*;
 
 @Configuration
@@ -37,13 +38,13 @@ public class DataInitializer {
                     .orElseGet(() -> userRoleRepository.save(new UserRole("USER")));
 
             // ========== USERS ==========
-            userRepository.findByEmail("admin@tomatask.com")
+            User adminUser = userRepository.findByEmail("admin@tomatask.com")
                     .orElseGet(() -> userRepository.save(new User(
                             "Adrián", "Treviño", "admin@tomatask.com",
                             "+52 811-123-4567", passwordEncoder.encode("admin123"),
                             adminRole, null)));
 
-            userRepository.findByEmail("maria@tomatask.com")
+            User developerUser = userRepository.findByEmail("maria@tomatask.com")
                     .orElseGet(() -> userRepository.save(new User(
                             "María", "García", "maria@tomatask.com",
                             "+52 811-765-4321", passwordEncoder.encode("user123"), userRole,
@@ -124,54 +125,60 @@ public class DataInitializer {
                 // ========== TASKS ==========
                 Task task1 = new Task(
                         "Configurar base de datos",
+                        8,
                         "Crear esquema inicial y conexión con PostgreSQL",
-                        "FINALIZADA",
-                        null, sprint1,
+                        Status.DONE,
+                        null, sprint1, adminUser,
                         LocalDate.of(2025, 1, 15),
                         LocalDate.of(2025, 1, 20),
                         LocalDate.of(2025, 1, 20));
 
                 Task task2 = new Task(
                         "Implementar modelo de usuarios",
+                        12,
                         "Definir entidad User y relación con roles",
-                        "FINALIZADA",
-                        null, sprint1,
+                        Status.DONE,
+                        null, sprint1, adminUser,
                         LocalDate.of(2025, 1, 20),
                         LocalDate.of(2025, 1, 28),
                         LocalDate.of(2025, 1, 28));
 
                 Task task3 = new Task(
                         "Diseñar endpoints de autenticación",
+                        10,
                         "Agregar login y registro de usuarios",
-                        "EN_PROGRESO",
-                        null, sprint2,
+                        Status.IN_PROGRESS,
+                        null, sprint2, developerUser,
                         LocalDate.of(2025, 2, 1),
                         LocalDate.of(2025, 2, 10),
                         null);
 
                 Task task4 = new Task(
                         "Integrar control de permisos",
+                        7,
                         "Asignar roles ADMIN y USER en controladores",
-                        "PENDIENTE",
-                        null, sprint2,
+                        Status.IN_PROGRESS,
+                        null, sprint2, developerUser,
                         LocalDate.of(2025, 2, 11),
                         LocalDate.of(2025, 2, 20),
                         null);
 
                 Task task5 = new Task(
                         "Diseñar mockups del portal",
+                        6,
                         "Prototipos en Figma para vistas principales",
-                        "PLANIFICADA",
-                        null, sprint3,
+                        Status.PENDING,
+                        null, sprint3, adminUser,
                         LocalDate.of(2025, 5, 1),
                         LocalDate.of(2025, 5, 10),
                         null);
 
                 Task task6 = new Task(
                         "Implementar sincronización offline",
+                        15,
                         "Permitir uso sin conexión y sincronización posterior",
-                        "EN_PRUEBAS",
-                        null, sprint4,
+                        Status.TESTING,
+                        null, sprint4, null,
                         LocalDate.of(2024, 9, 5),
                         LocalDate.of(2024, 9, 25),
                         null);

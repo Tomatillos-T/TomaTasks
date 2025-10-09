@@ -15,17 +15,17 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 
-import com.springboot.TomaTask.service.ToDoItemService;
+import com.springboot.TomaTask.service.TaskService;
 import com.springboot.TomaTask.service.UserService;
 
 import com.springboot.TomaTask.util.BotActions;
 import com.springboot.TomaTask.config.BotProps;
 
 @Component
-public class ToDoItemBotController implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
+public class TaskBotController implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
 
-	private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
-	private ToDoItemService toDoItemService;
+	private static final Logger logger = LoggerFactory.getLogger(TaskBotController.class);
+	private TaskService taskService;
 	private final UserService userService;
 	private final TelegramClient telegramClient;
 
@@ -43,10 +43,10 @@ public class ToDoItemBotController implements SpringLongPollingBot, LongPollingS
 		}
 	}
 
-	public ToDoItemBotController(BotProps bp, ToDoItemService tsvc, UserService usvc) {
+	public TaskBotController(BotProps bp, TaskService tsvc, UserService usvc) {
 		this.botProps = bp;
 		telegramClient = new OkHttpTelegramClient(getBotToken());
-		toDoItemService = tsvc;
+		taskService = tsvc;
 		this.userService = usvc;
 	}
 
@@ -66,12 +66,12 @@ public class ToDoItemBotController implements SpringLongPollingBot, LongPollingS
 
 		logger.info("consume(): received message from chat {}: '{}'", chatId, messageTextFromTelegram);
 
-		BotActions actions = new BotActions(telegramClient, toDoItemService, userService);
+		BotActions actions = new BotActions(telegramClient, taskService, userService);
 		actions.setRequestText(messageTextFromTelegram);
 		actions.setChatId(chatId);
-		if (actions.getTodoService() == null) {
+		if (actions.getTaskService() == null) {
 			logger.info("todosvc error");
-			actions.setTodoService(toDoItemService);
+			actions.setTaskService(taskService);
 		}
 
 		if (actions.getUserService() == null) {
@@ -86,9 +86,9 @@ public class ToDoItemBotController implements SpringLongPollingBot, LongPollingS
 		actions.fnHide();
 		actions.fnListAll();
 		actions.fnAddItem();
-		actions.fnElse();
 		actions.fnLogin();
-
+		actions.fnLogout();
+		actions.fnElse();
 	}
 
 	@AfterBotRegistration

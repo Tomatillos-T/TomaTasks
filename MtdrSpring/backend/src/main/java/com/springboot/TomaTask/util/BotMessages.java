@@ -15,6 +15,9 @@ public enum BotMessages {
 			"You are already logged in! Select /todolist to view your todo items, or /start to go to the main screen."),
 	LOGIN_ERROR("An error occurred during login. Please try again later."),
 	LOGIN_SUCCESS("Login successful! Select /todolist to view your todo items, or /start to go to the main screen."),
+	LOGOUT_SUCCESS("You have been logged out. Select /start or /login to login again."),
+	NOT_LOGGED_IN(
+			"You are not logged in. Please select /start or /login to login first."),
 	BOT_REGISTERED_STARTED("Bot registered and started succesfully!"),
 	ITEM_DONE("Item done! Select /todolist to return to the list of todo items, or /start to go to the main screen."),
 	ITEM_UNDONE(
