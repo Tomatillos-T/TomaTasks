@@ -90,17 +90,17 @@ public class UserService {
 
     @Transactional
     public User validateTelegramToken(String token, String chatId) {
-        Optional<User> userOpt = UserRepository.findAll().stream()
-            .filter(u -> token.equals(u.getTelegramToken()))
-            .findFirst();
+        Optional<User> userOpt = UserRepository.findByTelegramToken(token);
 
         if (userOpt.isEmpty()) {
             throw new RuntimeException("Invalid Telegram token");
         }
 
         User user = userOpt.get();
-        user.setTelegramToken(null); 
+        user.setTelegramToken(null);
+
         return UserRepository.save(user);
     }
+
 
 }
