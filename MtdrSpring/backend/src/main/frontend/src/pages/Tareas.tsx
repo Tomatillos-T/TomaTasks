@@ -3,6 +3,7 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import Alert from "../components/Alert";
 import Modal from "../components/Modal";
+import Select from "../components/Select";
 import Textarea from "../components/TextArea";
 import { HttpClient } from "../services/httpClient";
 import type { HttpError } from "../services/httpClient";
@@ -168,103 +169,131 @@ export default function Tareas() {
     );
 
   return (
-    <section className="min-h-screen p-8 bg-background-default">
-      <h1 className="text-3xl font-bold text-text-primary mb-6">Tareas</h1>
 
-      {submitStatus.type && <Alert type={submitStatus.type} message={submitStatus.message} />}
+<section className="min-h-screen p-4 md:p-8 bg-background-default">
+  <div className="flex justify-between flex-wrap gap-4 mb-6">
+      <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-6">Tareas</h1>
+      <Button
+      variant="primary"
+      onClick={() => setIsAddModalOpen(true)}
+      disabled={isSubmitting}
+    >
+      Agregar Tarea
+    </Button>
+  </div>
 
-      <div className="flex flex-wrap gap-4 mb-6">
-        <Button variant="primary" onClick={() => setIsAddModalOpen(true)} disabled={isSubmitting}>
-          Agregar Tarea
+
+  {submitStatus.type && <Alert type={submitStatus.type} message={submitStatus.message} />}
+
+
+
+  <ul className="divide-y divide-gray-700">
+    {tasks.map((task) => (
+      <li
+        key={task.id}
+        className="py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0"
+      >
+        <div className="flex-1">
+          <div className="font-semibold text-text-primary">{task.name}</div>
+          <div className="text-sm text-text-secondary mt-1 flex flex-wrap gap-2">
+            <span>Status: <span className={`font-medium ${getStatusColor(task.status)}`}>{task.status}</span></span>
+            {task.sprint && <span>Sprint: {task.sprint.name}</span>}
+            {task.user && <span>Usuario: {task.user.name}</span>}
+            {task.timeEstimate && <span>Estimación: {task.timeEstimate}h</span>}
+            {task.actualHours && <span>Horas reales: {task.actualHours}h</span>}
+          </div>
+        </div>
+        {task.status !== "DONE" && (
+          <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
+            <Input
+              type="numbers"
+              label=""
+              placeholder="Horas reales"
+              value={hoursToComplete[task.id] ?? ""}
+              onChange={(e) =>
+                setHoursToComplete({ ...hoursToComplete, [task.id]: Number(e.target.value) })
+              }
+            />
+            <Button
+              variant="secondary"
+              onClick={() => completeTask(task)}
+              disabled={isSubmitting}
+            >
+              <Check />
+            </Button>
+          </div>
+        )}
+      </li>
+    ))}
+  </ul>
+
+  <Modal
+    isOpen={isAddModalOpen}
+    onClose={() => setIsAddModalOpen(false)}
+    title="Agregar Nueva Tarea"
+    footer={
+      <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+        <Button
+          variant="secondary"
+          onClick={() => setIsAddModalOpen(false)}
+          disabled={isSubmitting}
+        >
+          Cancelar
+        </Button>
+        <Button
+          variant="primary"
+          onClick={addTask}
+          loading={isSubmitting}
+          disabled={isSubmitting || !newTaskName}
+        >
+          Guardar
         </Button>
       </div>
+    }
+  >
+    <div className="flex flex-col gap-4">
+      <Input
+        label="Nombre de la tarea"
+        name="name"
+        value={newTaskName}
+        onChange={(e) => setNewTaskName(e.target.value)}
+        required
+      />
+      <Textarea
+        label="Descripción"
+        name="description"
+        value={newTaskDescription}
+        onChange={(e) => setNewTaskDescription(e.target.value)}
+        rows={3}
+      />
+      <Select
+        label="Estimación de tiempo (horas)"
+        value={newTaskTimeEstimate.toString()}
+        onChange={(e) => setNewTaskTimeEstimate(Number(e.target.value))}
+        options={[
+          { value: "1", label: "1" },
+          { value: "2", label: "2" },
+          { value: "3", label: "3" },
+          { value: "4", label: "4" },
+        ]}
+      />
+      <Select
+        label="Asignar a usuario"
+        value={selectedUserId}
+        onChange={(e) => setSelectedUserId(e.target.value)}
+        options={[
+          { value: "", label: "Seleccione un usuario" },
+          ...users.map((user) => ({
+            value: user.id,
+            label: user.name,
+          })),
+        ]}
+      />
+    </div>
+  </Modal>
+</section>
 
-      <ul className="divide-y divide-gray-700">
-        {tasks.map((task) => (
-          <li key={task.id} className="py-4 flex justify-between items-center">
-            <div>
-              <div className="font-semibold text-text-primary">{task.name}</div>
-              <div className="text-sm text-text-secondary mt-1">
-                Status: <span className={`font-medium ${getStatusColor(task.status)}`}>{task.status}</span>
-                {task.sprint && <span> | Sprint: {task.sprint.name}</span>}
-                {task.user && <span> | Usuario: {task.user.name}</span>}
-                {task.timeEstimate && <span> | Estimación: {task.timeEstimate}h</span>}
-                {task.actualHours && <span> | Horas reales: {task.actualHours}h</span>}
-              </div>
-            </div>
-            {task.status !== "DONE" && (
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  label="Horas invertidas"
-                  placeholder="Horas reales"
-                  value={hoursToComplete[task.id] ?? ""}
-                  onChange={(e) => setHoursToComplete({ ...hoursToComplete, [task.id]: Number(e.target.value) })}
-                  className="w-24 p-1 border rounded"
-                />
-                <Button variant="secondary" onClick={() => completeTask(task)} disabled={isSubmitting}>
-                  <Check />
-                </Button>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
 
-      {/* Modal para agregar tarea */}
-      <Modal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        title="Agregar Nueva Tarea"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setIsAddModalOpen(false)} disabled={isSubmitting}>
-              Cancelar
-            </Button>
-            <Button variant="primary" onClick={addTask} loading={isSubmitting} disabled={isSubmitting || !newTaskName}>
-              Guardar
-            </Button>
-          </>
-        }
-      >
-        <Input
-          label="Nombre de la tarea"
-          name="name"
-          value={newTaskName}
-          onChange={(e) => setNewTaskName(e.target.value)}
-          required
-        />
-        <Textarea
-          label="Descripción"
-          name="description"
-          value={newTaskDescription}
-          onChange={(e) => setNewTaskDescription(e.target.value)}
-          rows={3}
-        />
-        <Input
-          label="Estimación de tiempo (horas)"
-          type="number"
-          name="timeEstimate"
-          value={newTaskTimeEstimate}
-          onChange={(e) => setNewTaskTimeEstimate(Number(e.target.value))}
-        />
-        <div className="mt-4">
-          <label className="block mb-1 font-medium text-text-primary">Asignar a usuario</label>
-          <select
-            className="w-full p-2 border rounded border-gray-300"
-            value={selectedUserId}
-            onChange={(e) => setSelectedUserId(e.target.value)}
-          >
-            <option value="">Seleccione un usuario</option>
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </Modal>
-    </section>
   );
 }
 
