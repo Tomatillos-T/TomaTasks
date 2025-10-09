@@ -49,43 +49,33 @@ export class HttpClient {
    * @param endpoint Endpoint relativo (por ejemplo: /api/projects)
    * @param options Configuración de la solicitud
    */
-  static async request<T>(
-    endpoint: string,
-    options: HttpOptions = {}
-  ): Promise<T> {
-    const { auth = false, headers, ...rest } = options;
+static async request<T>(
+  endpoint: string,
+  options: HttpOptions = {}
+): Promise<T> {
+  const { auth = false, headers, ...rest } = options;
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...rest,
-      headers: this.getHeaders(auth, headers),
-    });
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...rest,
+    headers: this.getHeaders(auth, headers),
+  });
 
-    // Si la respuesta no es exitosa, lanzar error detallado
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage =
-        errorData.message || `Error en la solicitud: ${response.status}`;
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage = errorData.message || `Error en la solicitud: ${response.status}`;
 
-      // Manejo centralizado de errores comunes
-      if (response.status === 401) {
-        console.error("Token expirado o inválido. Redirigiendo al login...");
-        localStorage.removeItem("jwtToken");
-        window.location.href = "/login";
-      }
-
-      throw {
-        message: errorMessage,
-        status: response.status,
-      } as HttpError;
-    }
-
-    // Si no hay contenido (ej. DELETE 204), retornar vacío
-    if (response.status === 204) {
-      return {} as T;
-    }
-
-    return response.json();
+    // Lanzar el error sin redirigir
+    throw {
+      message: errorMessage,
+      status: response.status,
+    } as HttpError;
   }
+
+  if (response.status === 204) return {} as T;
+
+  return response.json();
+}
+
 
   /**
    * Atajo para solicitudes GET

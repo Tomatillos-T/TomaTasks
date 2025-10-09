@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "task")
@@ -23,7 +24,7 @@ public class Task {
     private String description;
 
     @Column(name = "time_estimate")
-    private Integer timeEstimate; // in hours
+    private Integer timeEstimate;
 
     public enum Status {
         TODO,
@@ -37,14 +38,17 @@ public class Task {
     @Column(nullable = false)
     private Status status;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_story", nullable = true)
     private UserStory userStory;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sprint", nullable = true)
     private Sprint sprint;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "asignee", referencedColumnName = "id")
     private User user;
