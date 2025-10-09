@@ -18,7 +18,7 @@ public enum BotMessages {
 	LOGOUT_SUCCESS("You have been logged out. Select /start or /login to login again."),
 	NOT_LOGGED_IN(
 			"You are not logged in. Please select /start or /login to login first."),
-	BOT_REGISTERED_STARTED("Bot registered and started succesfully!"),
+	BOT_REGISTERED_STARTED("Bot registered and started successfully!"),
 	ITEM_DONE("Item done! Select /todolist to return to the list of todo items, or /start to go to the main screen."),
 	ITEM_UNDONE(
 			"Item undone! Select /todolist to return to the list of todo items, or /start to go to the main screen."),
