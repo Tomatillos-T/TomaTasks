@@ -113,7 +113,7 @@ public class BotActions {
                             null);
                     exit = true;
                     return;
-                } else if (!userService.emailExsist(email)) {
+                } else if (!userService.emailExists(email)) {
                     BotHelper.sendMessageToTelegram(chatId, BotMessages.EMAIL_NOT_FOUND.getMessage(), telegramClient,
                             null);
                     exit = true;
