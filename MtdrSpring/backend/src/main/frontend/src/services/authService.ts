@@ -18,6 +18,7 @@ export interface RegisterData {
 export interface LoginResponse {
   token: string;
   expiresIn: number;
+  user: User;
 }
 
 export interface User {
@@ -32,6 +33,7 @@ export interface User {
   };
   enabled: boolean;
   username: string;
+  telegramToken: string | null;
 }
 
 class AuthService {

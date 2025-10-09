@@ -65,4 +65,28 @@ public class UserController {
             return new ResponseEntity<>(flag,HttpStatus.NOT_FOUND);
         }
     }
+
+    @PostMapping("/{id}/telegram-token")
+    public ResponseEntity<User> generateTelegramToken(@PathVariable String id) {
+        try {
+            User user = UserService.generateTelegramToken(id);
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/telegram/validate")
+    public ResponseEntity<User> validateTelegramToken(
+            @RequestParam String token,
+            @RequestParam String chatId) {
+        try {
+            User user = UserService.validateTelegramToken(token, chatId);
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
 }
