@@ -1,7 +1,9 @@
 package com.springboot.TomaTask.controller;
 
-import com.springboot.TomaTask.model.Sprint;
+import com.springboot.TomaTask.dto.SprintDTO;
 import com.springboot.TomaTask.service.SprintService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -9,7 +11,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/sprints")
 public class SprintController {
-
     private final SprintService sprintService;
 
     public SprintController(SprintService sprintService) {

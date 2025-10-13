@@ -10,19 +10,16 @@ public class AcceptanceCriteriaDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public AcceptanceCriteriaDTO() {
-    }
+    // Constructors
+    public AcceptanceCriteriaDTO() {}
 
-    public AcceptanceCriteriaDTO(String id, String description, String status, String userStoryId,
-                                 LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public AcceptanceCriteriaDTO(String id, String description, String status) {
         this.id = id;
         this.description = description;
         this.status = status;
-        this.userStoryId = userStoryId;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
+    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

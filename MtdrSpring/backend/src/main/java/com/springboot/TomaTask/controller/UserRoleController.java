@@ -1,6 +1,6 @@
 package com.springboot.TomaTask.controller;
 
-import com.springboot.TomaTask.model.UserRole;
+import com.springboot.TomaTask.dto.UserRoleDTO;
 import com.springboot.TomaTask.service.UserRoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,54 +19,35 @@ public class UserRoleController {
         this.userRoleService = userRoleService;
     }
 
-    /**
-     * Creates a new user role.
-     */
     @PostMapping
-    public ResponseEntity<UserRole> createUserRole(@RequestBody UserRole userRole) {
-        UserRole createdRole = userRoleService.createUserRole(userRole);
+    public ResponseEntity<UserRoleDTO> createUserRole(@RequestBody UserRoleDTO userRoleDTO) {
+        UserRoleDTO createdRole = userRoleService.createUserRole(userRoleDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdRole);
     }
 
-    /**
-     * Retrieves all user roles.
-     */
     @GetMapping
-    public ResponseEntity<List<UserRole>> getAllUserRoles() {
+    public ResponseEntity<List<UserRoleDTO>> getAllUserRoles() {
         return ResponseEntity.ok(userRoleService.getAllUserRoles());
     }
 
-    /**
-     * Retrieves a specific user role by ID.
-     */
     @GetMapping("/{id}")
-    public ResponseEntity<UserRole> getUserRoleById(@PathVariable String id) {
+    public ResponseEntity<UserRoleDTO> getUserRoleById(@PathVariable String id) {
         return ResponseEntity.ok(userRoleService.getUserRoleById(id));
     }
 
-    /**
-     * Updates a user role by ID.
-     */
     @PutMapping("/{id}")
-    public ResponseEntity<UserRole> updateUserRole(
+    public ResponseEntity<UserRoleDTO> updateUserRole(
             @PathVariable String id,
-            @RequestBody UserRole updatedRole
-    ) {
+            @RequestBody UserRoleDTO updatedRole) {
         return ResponseEntity.ok(userRoleService.updateUserRole(id, updatedRole));
     }
 
-    /**
-     * Deletes a user role by ID.
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserRole(@PathVariable String id) {
         userRoleService.deleteUserRole(id);
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Global exception handler for entity not found scenarios.
-     */
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());

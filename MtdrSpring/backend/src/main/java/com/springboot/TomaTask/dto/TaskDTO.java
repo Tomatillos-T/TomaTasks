@@ -1,5 +1,6 @@
 package com.springboot.TomaTask.dto;
 
+import com.springboot.TomaTask.model.Task.Status;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -8,8 +9,7 @@ public class TaskDTO {
     private String name;
     private String description;
     private Integer timeEstimate;
-    private String status; // Evita depender del enum del modelo
-
+    private Status status;
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalDate deliveryDate;
@@ -18,7 +18,6 @@ public class TaskDTO {
     private String sprintId;
     private String assigneeId;
 
-    // Optional nested DTOs for detailed responses
     private UserDTO assignee;
     private SprintDTO sprint;
     private UserStoryDTO userStory;
@@ -26,14 +25,11 @@ public class TaskDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public TaskDTO() {
-    }
+    // Constructors
+    public TaskDTO() {}
 
-    public TaskDTO(String id, String name, String description, Integer timeEstimate, String status,
-                   LocalDate startDate, LocalDate endDate, LocalDate deliveryDate,
-                   String userStoryId, String sprintId, String assigneeId,
-                   UserDTO assignee, SprintDTO sprint, UserStoryDTO userStory,
-                   LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public TaskDTO(String id, String name, String description, Integer timeEstimate, Status status,
+                   LocalDate startDate, LocalDate endDate, LocalDate deliveryDate) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -42,16 +38,9 @@ public class TaskDTO {
         this.startDate = startDate;
         this.endDate = endDate;
         this.deliveryDate = deliveryDate;
-        this.userStoryId = userStoryId;
-        this.sprintId = sprintId;
-        this.assigneeId = assigneeId;
-        this.assignee = assignee;
-        this.sprint = sprint;
-        this.userStory = userStory;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
+    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -64,8 +53,8 @@ public class TaskDTO {
     public Integer getTimeEstimate() { return timeEstimate; }
     public void setTimeEstimate(Integer timeEstimate) { this.timeEstimate = timeEstimate; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
 
     public LocalDate getStartDate() { return startDate; }
     public void setStartDate(LocalDate startDate) { this.startDate = startDate; }

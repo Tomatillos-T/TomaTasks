@@ -1,22 +1,23 @@
 package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "sprint")
 public class Sprint {
-
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id")
+    @Column(name = "id", updatable = false, nullable = false, unique = true)
     private String id;
 
     @Column(nullable = false, length = 500)
@@ -54,26 +55,29 @@ public class Sprint {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Constructors
     public Sprint() {}
 
-    public Sprint(String description, String status, LocalDate startDate, String projectId) {
+    public Sprint(String description, String status, LocalDate startDate, Project project) {
         this.description = description;
         this.status = status;
         this.startDate = startDate;
-        this.projectId = projectId;
+        this.project = project;
     }
 
     public Sprint(String description, String status, LocalDate startDate, LocalDate endDate,
-                  LocalDate deliveryDate, String projectId) {
+                  LocalDate deliveryDate, Project project) {
         this.description = description;
         this.status = status;
         this.startDate = startDate;
         this.endDate = endDate;
         this.deliveryDate = deliveryDate;
-        this.projectId = projectId;
+        this.project = project;
     }
 
+    // Getters and Setters
     public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
@@ -90,10 +94,15 @@ public class Sprint {
     public LocalDate getDeliveryDate() { return deliveryDate; }
     public void setDeliveryDate(LocalDate deliveryDate) { this.deliveryDate = deliveryDate; }
 
-    public String getProjectId() { return projectId; }
-    public void setProjectId(String projectId) { this.projectId = projectId; }
+    public Project getProject() { return project; }
+    public void setProject(Project project) { this.project = project; }
+
+    public Set<Task> getTasks() { return tasks; }
+    public void setTasks(Set<Task> tasks) { this.tasks = tasks; }
+
+    public Set<UserStory> getUserStories() { return userStories; }
+    public void setUserStories(Set<UserStory> userStories) { this.userStories = userStories; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
-
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

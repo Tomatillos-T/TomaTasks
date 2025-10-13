@@ -1,107 +1,125 @@
 package com.springboot.TomaTask.service;
 
+import com.springboot.TomaTask.dto.TaskDTO;
+import com.springboot.TomaTask.mapper.TaskMapper;
 import com.springboot.TomaTask.model.Sprint;
 import com.springboot.TomaTask.model.Task;
+import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.model.UserStory;
 import com.springboot.TomaTask.repository.SprintRepository;
 import com.springboot.TomaTask.repository.TaskRepository;
+import com.springboot.TomaTask.repository.UserRepository;
 import com.springboot.TomaTask.repository.UserStoryRepository;
-
 import org.springframework.stereotype.Service;
-
-import com.springboot.TomaTask.dto.TaskDTO;
-import com.springboot.TomaTask.mapper.TaskMapper;
-import java.util.stream.Collectors;
-
-
 import java.util.List;
 
 @Service
 public class TaskService {
-
     private final TaskRepository taskRepository;
     private final UserStoryRepository userStoryRepository;
     private final SprintRepository sprintRepository;
+    private final UserRepository userRepository;
 
     public TaskService(TaskRepository taskRepository,
-            UserStoryRepository userStoryRepository,
-            SprintRepository sprintRepository) {
+                       UserStoryRepository userStoryRepository,
+                       SprintRepository sprintRepository,
+                       UserRepository userRepository) {
         this.taskRepository = taskRepository;
         this.userStoryRepository = userStoryRepository;
         this.sprintRepository = sprintRepository;
+        this.userRepository = userRepository;
     }
 
     public List<TaskDTO> getAllTasks() {
-        List<Task> tasks = taskRepository.findAll();
-        List<TaskDTO> taskDTOs = tasks.stream()
-                                    .map(TaskMapper::toDTO)
-                                    .collect(Collectors.toList());
-        return taskDTOs;
+        return TaskMapper.toDTOList(taskRepository.findAll());
     }
 
-
-    public List<Task> findByUserStoryId(String userStoryId) {
-        return taskRepository.findByUserStoryId(userStoryId);
+    public TaskDTO getTaskById(String id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found with ID: " + id));
+        return TaskMapper.toDTOWithNested(task, true);
     }
 
-    public List<Task> findBySprintId(String sprintId) {
-        return taskRepository.findBySprintId(sprintId);
-    }
+    public TaskDTO createTask(TaskDTO taskDTO) {
+        Task task = TaskMapper.toEntity(taskDTO);
 
-    public List<Task> findByUserId(String userId) {
-        return taskRepository.findByUserId(userId);
-    }
-
-    public Task getTaskById(String id) {
-        return taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Task no encontrada"));
-    }
-
-    // Crear task
-    public Task createTask(Task task) {
-        // Buscar las entidades relacionadas
-        if (task.getUserStory() != null && task.getUserStory().getId() != null) {
-            UserStory userStory = userStoryRepository.findById(task.getUserStory().getId())
-                    .orElseThrow(() -> new RuntimeException("UserStory no encontrada"));
+        // Set UserStory
+        if (taskDTO.getUserStoryId() != null) {
+            UserStory userStory = userStoryRepository.findById(taskDTO.getUserStoryId())
+                    .orElseThrow(() -> new RuntimeException("UserStory not found with ID: " + taskDTO.getUserStoryId()));
             task.setUserStory(userStory);
         }
 
-        if (task.getSprint() != null && task.getSprint().getId() != null) {
-            Sprint sprint = sprintRepository.findById(task.getSprint().getId())
-                    .orElseThrow(() -> new RuntimeException("Sprint no encontrado"));
+        // Set Sprint
+        if (taskDTO.getSprintId() != null) {
+            Sprint sprint = sprintRepository.findById(taskDTO.getSprintId())
+                    .orElseThrow(() -> new RuntimeException("Sprint not found with ID: " + taskDTO.getSprintId()));
             task.setSprint(sprint);
         }
 
-        return taskRepository.save(task);
+        // Set Assignee
+        if (taskDTO.getAssigneeId() != null) {
+            User user = userRepository.findById(taskDTO.getAssigneeId())
+                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + taskDTO.getAssigneeId()));
+            task.setUser(user);
+        }
+
+        Task savedTask = taskRepository.save(task);
+        return TaskMapper.toDTOWithNested(savedTask, true);
     }
 
-    // Actualizar task
-    public Task updateTask(String id, Task taskDetails) {
-        Task task = getTaskById(id);
+    public TaskDTO updateTask(String id, TaskDTO taskDTO) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found with ID: " + id));
 
-        task.setName(taskDetails.getName());
-        task.setDescription(taskDetails.getDescription());
-        task.setStatus(taskDetails.getStatus());
-        task.setStartDate(taskDetails.getStartDate());
-        task.setEndDate(taskDetails.getEndDate());
-        task.setDeliveryDate(taskDetails.getDeliveryDate());
+        task.setName(taskDTO.getName());
+        task.setDescription(taskDTO.getDescription());
+        task.setTimeEstimate(taskDTO.getTimeEstimate());
+        task.setStatus(taskDTO.getStatus());
+        task.setStartDate(taskDTO.getStartDate());
+        task.setEndDate(taskDTO.getEndDate());
+        task.setDeliveryDate(taskDTO.getDeliveryDate());
 
-        if (taskDetails.getUserStory() != null && taskDetails.getUserStory().getId() != null) {
-            UserStory userStory = userStoryRepository.findById(taskDetails.getUserStory().getId())
-                    .orElseThrow(() -> new RuntimeException("UserStory no encontrada"));
+        // Update UserStory
+        if (taskDTO.getUserStoryId() != null) {
+            UserStory userStory = userStoryRepository.findById(taskDTO.getUserStoryId())
+                    .orElseThrow(() -> new RuntimeException("UserStory not found with ID: " + taskDTO.getUserStoryId()));
             task.setUserStory(userStory);
         }
 
-        if (taskDetails.getSprint() != null && taskDetails.getSprint().getId() != null) {
-            Sprint sprint = sprintRepository.findById(taskDetails.getSprint().getId())
-                    .orElseThrow(() -> new RuntimeException("Sprint no encontrado"));
+        // Update Sprint
+        if (taskDTO.getSprintId() != null) {
+            Sprint sprint = sprintRepository.findById(taskDTO.getSprintId())
+                    .orElseThrow(() -> new RuntimeException("Sprint not found with ID: " + taskDTO.getSprintId()));
             task.setSprint(sprint);
         }
 
-        return taskRepository.save(task);
+        // Update Assignee
+        if (taskDTO.getAssigneeId() != null) {
+            User user = userRepository.findById(taskDTO.getAssigneeId())
+                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + taskDTO.getAssigneeId()));
+            task.setUser(user);
+        } else {
+            task.setUser(null);
+        }
+
+        Task updatedTask = taskRepository.save(task);
+        return TaskMapper.toDTOWithNested(updatedTask, true);
     }
 
     public void deleteTask(String id) {
         taskRepository.deleteById(id);
+    }
+
+    public List<TaskDTO> getTasksBySprintId(String sprintId) {
+        return TaskMapper.toDTOList(taskRepository.findBySprintId(sprintId));
+    }
+
+    public List<TaskDTO> getTasksByUserStoryId(String userStoryId) {
+        return TaskMapper.toDTOList(taskRepository.findByUserStoryId(userStoryId));
+    }
+
+    public List<TaskDTO> getTasksByAssigneeId(String assigneeId) {
+        return TaskMapper.toDTOList(taskRepository.findByUserId(assigneeId));
     }
 }

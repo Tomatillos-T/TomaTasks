@@ -1,50 +1,79 @@
 package com.springboot.TomaTask.service;
 
+import com.springboot.TomaTask.dto.SprintDTO;
+import com.springboot.TomaTask.mapper.SprintMapper;
+import com.springboot.TomaTask.model.Project;
 import com.springboot.TomaTask.model.Sprint;
+import com.springboot.TomaTask.repository.ProjectRepository;
 import com.springboot.TomaTask.repository.SprintRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
 public class SprintService {
-
     private final SprintRepository sprintRepository;
+    private final ProjectRepository projectRepository;
 
-    public SprintService(SprintRepository sprintRepository) {
+    public SprintService(SprintRepository sprintRepository,
+                        ProjectRepository projectRepository) {
         this.sprintRepository = sprintRepository;
+        this.projectRepository = projectRepository;
     }
 
-    public List<Sprint> getAllSprints() {
-        return sprintRepository.findAll();
+    public List<SprintDTO> getAllSprints() {
+        return SprintMapper.toDTOList(sprintRepository.findAll());
     }
 
-    public Sprint getSprintById(String id) {
-        return sprintRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sprint no encontrado"));
+    public SprintDTO getSprintById(String id) {
+        Sprint sprint = sprintRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sprint not found with ID: " + id));
+        return SprintMapper.toDTOWithNested(sprint, true);
     }
 
-    public Sprint createSprint(Sprint sprint) {
-        if (sprint.getProjectId() == null || sprint.getProjectId().isEmpty()) {
-            throw new RuntimeException("El projectId es obligatorio");
+    public SprintDTO createSprint(SprintDTO sprintDTO) {
+        Sprint sprint = SprintMapper.toEntity(sprintDTO);
+
+        // Set Project
+        if (sprintDTO.getProjectId() != null) {
+            Project project = projectRepository.findById(sprintDTO.getProjectId())
+                    .orElseThrow(() -> new RuntimeException("Project not found with ID: " + sprintDTO.getProjectId()));
+            sprint.setProject(project);
+        } else {
+            throw new RuntimeException("Project ID is required");
         }
-        return sprintRepository.save(sprint);
+
+        Sprint savedSprint = sprintRepository.save(sprint);
+        return SprintMapper.toDTOWithNested(savedSprint, true);
     }
 
-    public Sprint updateSprint(String id, Sprint details) {
-        Sprint sprint = getSprintById(id);
+    public SprintDTO updateSprint(String id, SprintDTO sprintDTO) {
+        Sprint sprint = sprintRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sprint not found with ID: " + id));
 
-        sprint.setDescription(details.getDescription());
-        sprint.setStatus(details.getStatus());
-        sprint.setStartDate(details.getStartDate());
-        sprint.setEndDate(details.getEndDate());
-        sprint.setDeliveryDate(details.getDeliveryDate());
-        sprint.setProjectId(details.getProjectId());
+        sprint.setDescription(sprintDTO.getDescription());
+        sprint.setStatus(sprintDTO.getStatus());
+        sprint.setStartDate(sprintDTO.getStartDate());
+        sprint.setEndDate(sprintDTO.getEndDate());
+        sprint.setDeliveryDate(sprintDTO.getDeliveryDate());
 
-        return sprintRepository.save(sprint);
+        // Update Project
+        if (sprintDTO.getProjectId() != null) {
+            Project project = projectRepository.findById(sprintDTO.getProjectId())
+                    .orElseThrow(() -> new RuntimeException("Project not found with ID: " + sprintDTO.getProjectId()));
+            sprint.setProject(project);
+        }
+
+        Sprint updatedSprint = sprintRepository.save(sprint);
+        return SprintMapper.toDTOWithNested(updatedSprint, true);
     }
 
     public void deleteSprint(String id) {
         sprintRepository.deleteById(id);
+    }
+
+    public List<SprintDTO> getSprintsByProjectId(String projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found with ID: " + projectId));
+        return SprintMapper.toDTOList(project.getSprints().stream().toList());
     }
 }

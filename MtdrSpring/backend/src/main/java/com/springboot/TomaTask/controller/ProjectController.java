@@ -1,7 +1,9 @@
 package com.springboot.TomaTask.controller;
 
-import com.springboot.TomaTask.model.Project;
+import com.springboot.TomaTask.dto.ProjectDTO;
 import com.springboot.TomaTask.service.ProjectService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -9,7 +11,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectController {
-
     private final ProjectService projectService;
 
     public ProjectController(ProjectService projectService) {
@@ -39,5 +40,6 @@ public class ProjectController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable String id) {
         projectService.deleteProject(id);
+        return ResponseEntity.noContent().build();
     }
 }

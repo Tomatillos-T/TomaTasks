@@ -17,31 +17,15 @@ public class SprintDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public SprintDTO() {
-    }
+    // Constructors
+    public SprintDTO() {}
 
     public SprintDTO(String id, String description) {
         this.id = id;
         this.description = description;
     }
 
-    public SprintDTO(String id, String description, String status, LocalDate startDate,
-                     LocalDate endDate, LocalDate deliveryDate, String projectId,
-                     Set<TaskDTO> tasks, Set<UserStoryDTO> userStories,
-                     LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
-        this.description = description;
-        this.status = status;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.deliveryDate = deliveryDate;
-        this.projectId = projectId;
-        this.tasks = tasks;
-        this.userStories = userStories;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
+    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

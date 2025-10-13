@@ -1,10 +1,9 @@
 package com.springboot.TomaTask.controller;
 
 import com.springboot.TomaTask.dto.TaskDTO;
-import com.springboot.TomaTask.model.Task;
 import com.springboot.TomaTask.service.TaskService;
-import com.springboot.TomaTask.mapper.TaskMapper;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,32 +11,27 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
-
     private final TaskService taskService;
 
     public TaskController(TaskService taskService) {
         this.taskService = taskService;
     }
 
-    // Obtener todas las tareas como DTOs
     @GetMapping
     public ResponseEntity<List<TaskDTO>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
     }
 
-    // Obtener tarea por id como DTO
     @GetMapping("/{id}")
     public ResponseEntity<TaskDTO> getTaskById(@PathVariable String id) {
         return ResponseEntity.ok(taskService.getTaskById(id));
     }
 
-    // Crear tarea (recibe Task y devuelve DTO)
     @PostMapping
     public ResponseEntity<TaskDTO> createTask(@RequestBody TaskDTO taskDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(taskService.createTask(taskDTO));
     }
 
-    // Actualizar tarea (recibe Task y devuelve DTO)
     @PutMapping("/{id}")
     public ResponseEntity<TaskDTO> updateTask(@PathVariable String id, @RequestBody TaskDTO taskDTO) {
         return ResponseEntity.ok(taskService.updateTask(id, taskDTO));

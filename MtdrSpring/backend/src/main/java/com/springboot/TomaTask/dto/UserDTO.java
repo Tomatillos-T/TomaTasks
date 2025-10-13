@@ -1,5 +1,6 @@
 package com.springboot.TomaTask.dto;
 
+import com.springboot.TomaTask.model.UserRole;
 import java.time.LocalDateTime;
 
 public class UserDTO {
@@ -13,23 +14,17 @@ public class UserDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public UserDTO() {
-    }
+    // Constructors
+    public UserDTO() {}
 
-    public UserDTO(String id, String firstName, String lastName, String email,
-                   String phoneNumber, UserRoleDTO role, String teamId,
-                   LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public UserDTO(String id, String firstName, String lastName, String email) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.role = role;
-        this.teamId = teamId;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
+    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

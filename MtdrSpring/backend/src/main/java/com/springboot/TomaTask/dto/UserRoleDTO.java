@@ -4,14 +4,15 @@ public class UserRoleDTO {
     private String id;
     private String role;
 
-    public UserRoleDTO() {
-    }
+    // Constructors
+    public UserRoleDTO() {}
 
     public UserRoleDTO(String id, String role) {
         this.id = id;
         this.role = role;
     }
 
+    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

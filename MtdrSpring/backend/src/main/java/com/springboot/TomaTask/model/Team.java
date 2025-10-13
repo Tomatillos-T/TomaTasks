@@ -1,20 +1,22 @@
 package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "team")
 public class Team {
-
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id")
+    @Column(name = "id", updatable = false, nullable = false, unique = true)
     private String id;
 
     @Column(nullable = false)
@@ -42,6 +44,7 @@ public class Team {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Constructors
     public Team() {}
 
     public Team(String name, String description, String status, Project project) {
@@ -51,8 +54,9 @@ public class Team {
         this.project = project;
     }
 
-    // Getters y Setters
+    // Getters and Setters
     public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -65,6 +69,9 @@ public class Team {
 
     public Project getProject() { return project; }
     public void setProject(Project project) { this.project = project; }
+
+    public Set<User> getMembers() { return members; }
+    public void setMembers(Set<User> members) { this.members = members; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

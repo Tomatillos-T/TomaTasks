@@ -15,30 +15,15 @@ public class UserStoryDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public UserStoryDTO() {
-    }
+    // Constructors
+    public UserStoryDTO() {}
 
     public UserStoryDTO(String id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public UserStoryDTO(String id, String name, Integer weight, String description,
-                        String status, String sprintId, Set<TaskDTO> tasks,
-                        Set<AcceptanceCriteriaDTO> acceptanceCriteria,
-                        LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
-        this.name = name;
-        this.weight = weight;
-        this.description = description;
-        this.status = status;
-        this.sprintId = sprintId;
-        this.tasks = tasks;
-        this.acceptanceCriteria = acceptanceCriteria;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
+    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

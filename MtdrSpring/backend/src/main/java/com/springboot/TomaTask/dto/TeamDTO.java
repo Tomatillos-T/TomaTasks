@@ -13,22 +13,10 @@ public class TeamDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public TeamDTO() {
-    }
+    // Constructors
+    public TeamDTO() {}
 
-    public TeamDTO(String id, String name, String description, String status,
-                   String projectId, Set<UserDTO> members,
-                   LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.status = status;
-        this.projectId = projectId;
-        this.members = members;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
+    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

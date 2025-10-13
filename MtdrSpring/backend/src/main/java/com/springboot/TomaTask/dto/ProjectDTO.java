@@ -17,26 +17,10 @@ public class ProjectDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public ProjectDTO() {
-    }
+    // Constructors
+    public ProjectDTO() {}
 
-    public ProjectDTO(String id, String name, String description, String status,
-                      LocalDate startDate, LocalDate deliveryDate, LocalDate endDate,
-                      String teamId, Set<SprintDTO> sprints,
-                      LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.status = status;
-        this.startDate = startDate;
-        this.deliveryDate = deliveryDate;
-        this.endDate = endDate;
-        this.teamId = teamId;
-        this.sprints = sprints;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
+    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

@@ -1,7 +1,9 @@
 package com.springboot.TomaTask.controller;
 
-import com.springboot.TomaTask.model.UserStory;
+import com.springboot.TomaTask.dto.UserStoryDTO;
 import com.springboot.TomaTask.service.UserStoryService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -9,7 +11,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user-stories")
 public class UserStoryController {
-
     private final UserStoryService userStoryService;
 
     public UserStoryController(UserStoryService userStoryService) {
