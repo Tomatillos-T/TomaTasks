@@ -15,7 +15,7 @@ public class Project {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    @Column(name = "id")
     private String id;
 
     @Column(nullable = false)
@@ -35,6 +35,14 @@ public class Project {
 
     @Column(name = "end_date")
     private LocalDate endDate;
+
+    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Team team;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<Sprint> sprints = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

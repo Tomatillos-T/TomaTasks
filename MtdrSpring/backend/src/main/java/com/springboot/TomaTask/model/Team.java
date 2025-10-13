@@ -14,7 +14,7 @@ public class Team {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    @Column(name = "id")
     private String id;
 
     @Column(nullable = false)
@@ -27,8 +27,12 @@ public class Team {
     private String status;
 
     @OneToOne
-    @JoinColumn(name = "project_id", nullable = true, unique = true)
+    @JoinColumn(name = "project_id", nullable = false, unique = true)
     private Project project;
+
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<User> members = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

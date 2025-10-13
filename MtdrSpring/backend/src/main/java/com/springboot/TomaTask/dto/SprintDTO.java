@@ -3,6 +3,17 @@ package com.springboot.TomaTask.dto;
 public class SprintDTO {
     private String id;
     private String description;
+    private String status;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private LocalDate deliveryDate;
+    private String projectId;
+    private Set<TaskDTO> tasks;
+    private Set<UserStoryDTO> userStories;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    // Constructors, Getters, Setters...
 
     public SprintDTO() {}
     public SprintDTO(String id, String description) {

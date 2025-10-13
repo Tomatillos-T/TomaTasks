@@ -23,43 +23,47 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 @Entity
 @Table(name = "user_table")
-public class User implements UserDetails  {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    @Column(name = "id")
     private String id;
 
     @Column(name = "firstName")
-    String firstName;
+    private String firstName;
 
     @Column(name = "lastName")
-    String lastName;
+    private String lastName;
 
-    @Column(name = "email")
-    String email;
+    @Column(name = "email", unique = true)
+    private String email;
 
     @Column(name = "phoneNumber")
-    String phoneNumber;
+    private String phoneNumber;
 
     @Column(name = "password", nullable = false)
-    String password;
+    private String password;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private UserRole role;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<Task> tasks = new HashSet<>();
+
     @CreationTimestamp
-    @Column(name = "creation_ts", updatable = false)
-    OffsetDateTime creationTs;
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "update_ts")
-    OffsetDateTime updateTs;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @Column(name = "telegram_token", unique = true)
     private String telegramToken;

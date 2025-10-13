@@ -14,7 +14,7 @@ public class AcceptanceCriteria {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    @Column(name = "id")
     private String id;
 
     @Column(length = 1000, nullable = false)

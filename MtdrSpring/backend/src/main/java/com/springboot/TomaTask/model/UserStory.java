@@ -15,7 +15,7 @@ public class UserStory {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    @Column(name = "id")
     private String id;
 
     @Column(nullable = false, length = 255)
@@ -30,14 +30,17 @@ public class UserStory {
     @Column(length = 60)
     private String status;
 
-    @Column(name = "sprint_id")
-    private Long sprintId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sprint_id", nullable = false)
+    private Sprint sprint;
 
     @OneToMany(mappedBy = "userStory", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Task> tasks;
+    @JsonIgnore
+    private Set<Task> tasks = new HashSet<>();
 
     @OneToMany(mappedBy = "userStory", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AcceptanceCriteria> acceptanceCriteria;
+    @JsonIgnore
+    private Set<AcceptanceCriteria> acceptanceCriteria = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

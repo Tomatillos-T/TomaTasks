@@ -11,10 +11,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "task")
 public class Task {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    @Column(name = "id")
     private String id;
 
     @Column(nullable = false)
@@ -27,30 +26,23 @@ public class Task {
     private Integer timeEstimate;
 
     public enum Status {
-        TODO,
-        IN_PROGRESS,
-        DONE,
-        PENDING,
-        TESTING
+        TODO, IN_PROGRESS, DONE, PENDING, TESTING
     }
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_story", nullable = true)
+    @JoinColumn(name = "user_story_id", nullable = false)
     private UserStory userStory;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sprint", nullable = true)
+    @JoinColumn(name = "sprint_id", nullable = false)
     private Sprint sprint;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "asignee", referencedColumnName = "id")
+    @JoinColumn(name = "assignee_id")
     private User user;
 
     @Column(name = "start_date")

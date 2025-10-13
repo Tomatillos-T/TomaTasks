@@ -16,7 +16,7 @@ public class Sprint {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    @Column(name = "id")
     private String id;
 
     @Column(nullable = false, length = 500)
@@ -34,11 +34,17 @@ public class Sprint {
     @Column(name = "delivery_date")
     private LocalDate deliveryDate;
 
-    @Column(name = "project_id", nullable = false)
-    private String projectId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
     @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Task> tasks;
+    @JsonIgnore
+    private Set<Task> tasks = new HashSet<>();
+
+    @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<UserStory> userStories = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

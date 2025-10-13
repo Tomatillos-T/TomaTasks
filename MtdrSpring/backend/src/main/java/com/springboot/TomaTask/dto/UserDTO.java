@@ -2,7 +2,16 @@ package com.springboot.TomaTask.dto;
 
 public class UserDTO {
     private String id;
-    private String name;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phoneNumber;
+    private UserRoleDTO role;
+    private String teamId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    // Constructors, Getters, Setters...
 
     public UserDTO() {}
     public UserDTO(String id, String name) {

@@ -8,14 +8,24 @@ public class TaskDTO {
     private String name;
     private String description;
     private Integer timeEstimate;
-    private Status status;
+    private Task.Status status;
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalDate deliveryDate;
-
-    private UserDTO user;
+    
+    private String userStoryId;
+    private String sprintId;
+    private String assigneeId;
+    
+    // Optional nested DTOs for full details
+    private UserDTO assignee;
     private SprintDTO sprint;
     private UserStoryDTO userStory;
+    
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    // Constructors, Getters, Setters...
 
     public TaskDTO() {}
 
