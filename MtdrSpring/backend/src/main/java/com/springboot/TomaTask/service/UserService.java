@@ -9,38 +9,49 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
+
+import java.util.Base64;
 
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository UserRepository;
-    public List<User> findAll(){
+
+    public List<User> findAll() {
         List<User> Users = UserRepository.findAll();
         return Users;
     }
 
-    public ResponseEntity<User> getUserById(String id){
+    public ResponseEntity<User> getUserById(String id) {
         Optional<User> todoData = UserRepository.findById(id);
-        if (todoData.isPresent()){
+        if (todoData.isPresent()) {
             return new ResponseEntity<>(todoData.get(), HttpStatus.OK);
-        }else{
+        } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    public User addUser(User User){
+    public User findByEmail(String email) {
+        return UserRepository.findByEmail(email).orElse(null);
+    }
+
+    public boolean emailExists(String email) {
+        return UserRepository.findByEmail(email).isPresent();
+    }
+
+    public User addUser(User User) {
         return UserRepository.save(User);
     }
 
-    public boolean deleteUser(String id){
-        try{
+    public boolean deleteUser(String id) {
+        try {
             UserRepository.deleteById(id);
             return true;
-        }catch(Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
@@ -65,5 +76,39 @@ public class UserService {
         // updatedAt is automatically handled by @UpdateTimestamp
         return UserRepository.save(existingUser);
     }
+
+    @Transactional
+    public User generateTelegramToken(String userId) {
+        Optional<User> userOpt = UserRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("User not found with ID: " + userId);
+        }
+
+        User user = userOpt.get();
+
+        // Generar un token seguro (32 bytes → 43 caracteres base64)
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[32];
+        random.nextBytes(bytes);
+        String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+
+        user.setTelegramToken(token);
+        return UserRepository.save(user);
+    }
+
+    @Transactional
+    public User validateTelegramToken(String token, String chatId) {
+        Optional<User> userOpt = UserRepository.findByTelegramToken(token);
+
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("Invalid Telegram token");
+        }
+
+        User user = userOpt.get();
+        user.setTelegramToken(null);
+
+        return UserRepository.save(user);
+    }
+
 
 }

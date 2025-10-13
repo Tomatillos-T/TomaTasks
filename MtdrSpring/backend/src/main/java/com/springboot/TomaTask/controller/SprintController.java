@@ -22,7 +22,7 @@ public class SprintController {
     }
 
     @GetMapping("/{id}")
-    public Sprint getSprintById(@PathVariable Long id) {
+    public Sprint getSprintById(@PathVariable String id) {
         return sprintService.getSprintById(id);
     }
 
@@ -32,12 +32,12 @@ public class SprintController {
     }
 
     @PutMapping("/{id}")
-    public Sprint updateSprint(@PathVariable Long id, @RequestBody Sprint details) {
+    public Sprint updateSprint(@PathVariable String id, @RequestBody Sprint details) {
         return sprintService.updateSprint(id, details);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteSprint(@PathVariable Long id) {
+    public void deleteSprint(@PathVariable String id) {
         sprintService.deleteSprint(id);
     }
 }

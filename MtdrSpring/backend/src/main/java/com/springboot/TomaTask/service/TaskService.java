@@ -9,7 +9,10 @@ import com.springboot.TomaTask.repository.UserStoryRepository;
 
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import com.springboot.TomaTask.dto.TaskDTO;
+import com.springboot.TomaTask.mapper.TaskMapper;
+import java.util.stream.Collectors;
+
 
 import java.util.List;
 
@@ -21,18 +24,35 @@ public class TaskService {
     private final SprintRepository sprintRepository;
 
     public TaskService(TaskRepository taskRepository,
-                       UserStoryRepository userStoryRepository,
-                       SprintRepository sprintRepository) {
+            UserStoryRepository userStoryRepository,
+            SprintRepository sprintRepository) {
         this.taskRepository = taskRepository;
         this.userStoryRepository = userStoryRepository;
         this.sprintRepository = sprintRepository;
     }
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public List<TaskDTO> getAllTasks() {
+        List<Task> tasks = taskRepository.findAll();
+        List<TaskDTO> taskDTOs = tasks.stream()
+                                    .map(TaskMapper::toDTO)
+                                    .collect(Collectors.toList());
+        return taskDTOs;
     }
 
-    public Task getTaskById(Long id) {
+
+    public List<Task> findByUserStoryId(String userStoryId) {
+        return taskRepository.findByUserStoryId(userStoryId);
+    }
+
+    public List<Task> findBySprintId(String sprintId) {
+        return taskRepository.findBySprintId(sprintId);
+    }
+
+    public List<Task> findByUserId(String userId) {
+        return taskRepository.findByUserId(userId);
+    }
+
+    public Task getTaskById(String id) {
         return taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task no encontrada"));
     }
@@ -56,7 +76,7 @@ public class TaskService {
     }
 
     // Actualizar task
-    public Task updateTask(Long id, Task taskDetails) {
+    public Task updateTask(String id, Task taskDetails) {
         Task task = getTaskById(id);
 
         task.setName(taskDetails.getName());
@@ -81,7 +101,7 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public void deleteTask(Long id) {
+    public void deleteTask(String id) {
         taskRepository.deleteById(id);
     }
 }

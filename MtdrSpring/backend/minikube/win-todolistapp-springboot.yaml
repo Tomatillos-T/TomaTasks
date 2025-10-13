@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: TomaTask-springboot-service
+  name: tomatask-springboot-service
   annotations:
     oci.oraclecloud.com/loadbalancer-policy: "IP_HASH"
 spec:
@@ -13,16 +13,16 @@ spec:
       protocol: TCP
       targetPort: 8080
   selector:
-    app: TomaTask-springboot
+    app: tomatask-springboot
 ---
 #this is new stuff for hosting on the load balancer
 apiVersion: v1
 kind: Service
 metadata:
-  name: TomaTask-backend-router
+  name: tomatask-backend-router
 spec:
   selector:
-    app: TomaTask-springboot
+    app: tomatask-springboot
   ports:
     - protocol: TCP
       port: 80
@@ -31,20 +31,20 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: TomaTask-springboot-deployment
+  name: tomatask-springboot-deployment
 spec:
   selector:
     matchLabels:
-      app: TomaTask-springboot
+      app: tomatask-springboot
   replicas: 2
   template:
     metadata:
       labels:
-        app: TomaTask-springboot
+        app: tomatask-springboot
         version: v1
     spec:
       containers:
-        - name: TomaTask-springboot
+        - name: tomatask-springboot
           image: agileimage:0.1
           imagePullPolicy: IfNotPresent
           env:
@@ -58,11 +58,11 @@ spec:
               value: "oracle.jdbc.OracleDriver"
             - name: OCI_REGION
               value: "OCI_REGION"
-            - name: dbpassword
+            - name: db_password
               valueFrom:
                 secretKeyRef:
                   name: dbuser
-                  key: dbpassword
+                  key: db_password
                   optional: true
             - name: ui_username
               value: "admin"
@@ -84,6 +84,6 @@ spec:
           whenUnsatisfiable: DoNotSchedule
           labelSelector:
             matchLabels:
-              app: TomaTask-springboot
+              app: tomatask-springboot
 ---
 

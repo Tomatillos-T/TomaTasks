@@ -9,21 +9,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.net.URI;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/user")
 public class UserController {
     @Autowired
     private UserService UserService;
     //@CrossOrigin
-    @GetMapping(value = "/users")
+    @GetMapping
     public List<User> getAllUsers(){
         return UserService.findAll();
     }
     //@CrossOrigin
-    @GetMapping(value = "/user/{id}")
+    @GetMapping(value = "/{id}")
     public ResponseEntity<User> getUserById(@PathVariable String id){
         try{
             ResponseEntity<User> responseEntity = UserService.getUserById(id);
@@ -33,7 +32,7 @@ public class UserController {
         }
     }
     //@CrossOrigin
-    @PostMapping(value = "/user")
+    @PostMapping
     public ResponseEntity addUser(@RequestBody User User) throws Exception{
         User td = UserService.addUser(User);
         HttpHeaders responseHeaders = new HttpHeaders();
@@ -45,7 +44,7 @@ public class UserController {
                 .headers(responseHeaders).build();
     }
     //@CrossOrigin
-    @PutMapping(value = "user/{id}")
+    @PutMapping(value = "/{id}")
     public ResponseEntity updateUser(@RequestBody User User, @PathVariable String id){
         try{
             User User1 = UserService.updateUser(id, User);
@@ -56,7 +55,7 @@ public class UserController {
         }
     }
     //@CrossOrigin
-    @DeleteMapping(value = "user/{id}")
+    @DeleteMapping(value = "/{id}")
     public ResponseEntity<Boolean> deleteUser(@PathVariable("id") String id){
         Boolean flag = false;
         try{
@@ -66,4 +65,28 @@ public class UserController {
             return new ResponseEntity<>(flag,HttpStatus.NOT_FOUND);
         }
     }
+
+    @PostMapping("/{id}/telegram-token")
+    public ResponseEntity<User> generateTelegramToken(@PathVariable String id) {
+        try {
+            User user = UserService.generateTelegramToken(id);
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/telegram/validate")
+    public ResponseEntity<User> validateTelegramToken(
+            @RequestParam String token,
+            @RequestParam String chatId) {
+        try {
+            User user = UserService.validateTelegramToken(token, chatId);
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
 }

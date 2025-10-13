@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/userstories")
+@RequestMapping("/api/user-story")
 public class UserStoryController {
 
     private final UserStoryService userStoryService;
@@ -22,7 +22,7 @@ public class UserStoryController {
     }
 
     @GetMapping("/{id}")
-    public UserStory getUserStoryById(@PathVariable Long id) {
+    public UserStory getUserStoryById(@PathVariable String id) {
         return userStoryService.getUserStoryById(id);
     }
 
@@ -32,12 +32,12 @@ public class UserStoryController {
     }
 
     @PutMapping("/{id}")
-    public UserStory updateUserStory(@PathVariable Long id, @RequestBody UserStory details) {
+    public UserStory updateUserStory(@PathVariable String id, @RequestBody UserStory details) {
         return userStoryService.updateUserStory(id, details);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUserStory(@PathVariable Long id) {
+    public void deleteUserStory(@PathVariable String id) {
         userStoryService.deleteUserStory(id);
     }
 }

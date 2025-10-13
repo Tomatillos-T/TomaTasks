@@ -6,12 +6,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.springboot.TomaTask.model.UserStory;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 
 @Repository
 @Transactional
 @EnableTransactionManagement
-public interface UserStoryRepository extends JpaRepository<UserStory, Long> {
+public interface UserStoryRepository extends JpaRepository<UserStory, String> {
     UserStory findByName(String name);
 }

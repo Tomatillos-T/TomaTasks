@@ -1,13 +1,16 @@
 import "./global.css";
-import AppRouter from "./router/AppRouter.jsx";
-import { BrowserRouter as Router } from "react-router-dom";
+import AppRouter from "./router/AppRouter";
+import { BrowserRouter } from "react-router-dom";
+import { UserProvider } from "./context/UserContext";
 
 function App() {
   return (
     <>
-      <Router>
-        <AppRouter />
-      </Router>
+      <BrowserRouter>
+        <UserProvider>
+          <AppRouter />
+        </UserProvider>
+      </BrowserRouter>
     </>
   );
 }

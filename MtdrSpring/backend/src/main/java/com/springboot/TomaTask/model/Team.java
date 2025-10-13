@@ -1,8 +1,9 @@
 package com.springboot.TomaTask.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,8 +12,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Team {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(name = "id", updatable = false, nullable = false, unique = true)
+    private String id;
 
     @Column(nullable = false)
     private String name;
@@ -23,8 +26,8 @@ public class Team {
     @Column(nullable = false)
     private String status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "project_id", nullable = true, unique = true)
     private Project project;
 
     @CreationTimestamp
@@ -35,14 +38,7 @@ public class Team {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ===== Constructores =====
     public Team() {}
-
-    public Team(String name, String status, Project project) {
-        this.name = name;
-        this.status = status;
-        this.project = project;
-    }
 
     public Team(String name, String description, String status, Project project) {
         this.name = name;
@@ -51,8 +47,8 @@ public class Team {
         this.project = project;
     }
 
-    // ===== Getters y Setters =====
-    public Long getId() { return id; }
+    // Getters y Setters
+    public String getId() { return id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -67,6 +63,5 @@ public class Team {
     public void setProject(Project project) { this.project = project; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
-
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

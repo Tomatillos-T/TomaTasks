@@ -6,10 +6,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.springboot.TomaTask.model.AcceptanceCriteria;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 @Repository
 @Transactional
 @EnableTransactionManagement
-public interface AcceptanceCriteriaRepository extends JpaRepository<AcceptanceCriteria, Long> {
+public interface AcceptanceCriteriaRepository extends JpaRepository<AcceptanceCriteria, String> {
 }

@@ -7,11 +7,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.springboot.TomaTask.model.User;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
+
+import java.util.Optional;
 
 @Repository
 @Transactional
 @EnableTransactionManagement
 public interface UserRepository extends JpaRepository<User,String> {
-
+    Optional<User> findByEmail(String email);
+    Optional<User> findByTelegramToken(String telegramToken);
 }
