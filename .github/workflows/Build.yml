@@ -18,5 +18,7 @@ jobs:
           native-image --version
       - name: Example step using Maven plugin  # https://graalvm.github.io/native-build-tools/latest/maven-plugin.html
         run: mvn -Pnative package
-      - name: Example step using Gradle plugin # https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html
-        run: gradlew nativeCompile
+      - name: "Build"
+        run: cd MtdrSpring;
+             source env.sh;
+             (cd backend;source build.sh)
