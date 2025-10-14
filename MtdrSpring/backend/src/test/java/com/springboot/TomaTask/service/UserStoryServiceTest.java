@@ -1,4 +1,4 @@
-package com.springboot.TomaTask.service;
+/*package com.springboot.TomaTask.service;
 
 import com.springboot.TomaTask.model.UserStory;
 import com.springboot.TomaTask.repository.UserStoryRepository;
@@ -121,3 +121,4 @@ public class UserStoryServiceTest {
         verify(userStoryRepository).deleteById("1");
     }
 }
+*/

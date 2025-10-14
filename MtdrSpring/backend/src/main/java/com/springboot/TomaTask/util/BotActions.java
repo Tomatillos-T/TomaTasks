@@ -5,19 +5,18 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import com.springboot.TomaTask.model.Task;
+import com.springboot.TomaTask.dto.TaskDTO;
+import com.springboot.TomaTask.mapper.TaskMapper;
 import com.springboot.TomaTask.service.TaskService;
 import com.springboot.TomaTask.service.UserService;
+import com.springboot.TomaTask.model.User;
+import com.springboot.TomaTask.model.Task.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
-import com.springboot.TomaTask.model.User;
-import com.springboot.TomaTask.model.Task.Status;
 
 public class BotActions {
 
@@ -170,9 +169,9 @@ public class BotActions {
 
         String done = requestText.substring(0, requestText.lastIndexOf(BotLabels.DASH.getLabel()));
         try {
-            Task item = taskService.getTaskById(done);
-            item.setStatus(Status.DONE);
-            taskService.updateTask(done, item);
+            TaskDTO taskDto = taskService.getTaskById(done);
+            taskDto.setStatus(Status.DONE);
+            taskService.updateTask(done, taskDto);
             BotHelper.sendMessageToTelegram(chatId, BotMessages.ITEM_DONE.getMessage(), telegramClient);
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -186,9 +185,9 @@ public class BotActions {
         String undo = requestText.substring(0,
                 requestText.lastIndexOf(BotLabels.DASH.getLabel()));
         try {
-            Task item = taskService.getTaskById(undo);
-            item.setStatus(Status.IN_PROGRESS);
-            taskService.updateTask(undo, item);
+            TaskDTO taskDto = taskService.getTaskById(undo);
+            taskDto.setStatus(Status.DONE);
+            taskService.updateTask(undo, taskDto);
             BotHelper.sendMessageToTelegram(chatId, BotMessages.ITEM_UNDONE.getMessage(), telegramClient);
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -223,7 +222,7 @@ public class BotActions {
                 || requestText.equals(BotLabels.MY_TODO_LIST.getLabel())))
             return;
         logger.info("todoSvc: " + taskService);
-        List<Task> allItems = taskService.findByUserId(sessionByChat.get(chatId).getID());
+        List<TaskDTO> allItems = taskService.getTasksByAssigneeId(sessionByChat.get(chatId).getID());
         ReplyKeyboardMarkup keyboardMarkup = ReplyKeyboardMarkup.builder()
                 .resizeKeyboard(true)
                 .oneTimeKeyboard(false)
@@ -245,20 +244,20 @@ public class BotActions {
         TomaTaskTitleRow.add(BotLabels.MY_TODO_LIST.getLabel());
         keyboard.add(TomaTaskTitleRow);
 
-        List<Task> activeItems = allItems.stream().filter(item -> item.getStatus() != Status.DONE)
+        List<TaskDTO> activeItems = allItems.stream().filter(item -> item.getStatus() != Status.DONE)
                 .collect(Collectors.toList());
 
-        for (Task item : activeItems) {
+        for (TaskDTO item : activeItems) {
             KeyboardRow currentRow = new KeyboardRow();
             currentRow.add(item.getName());
             currentRow.add(item.getId() + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
             keyboard.add(currentRow);
         }
 
-        List<Task> doneItems = allItems.stream().filter(item -> item.getStatus() == Status.DONE)
+        List<TaskDTO> doneItems = allItems.stream().filter(item -> item.getStatus() == Status.DONE)
                 .collect(Collectors.toList());
 
-        for (Task item : doneItems) {
+        for (TaskDTO item : doneItems) {
             KeyboardRow currentRow = new KeyboardRow();
             currentRow.add(item.getName());
             currentRow.add(item.getId() + BotLabels.DASH.getLabel() + BotLabels.UNDO.getLabel());
@@ -294,7 +293,7 @@ public class BotActions {
         newItem.setStatus(Status.IN_PROGRESS);
         newItem.setUser(sessionByChat.get(chatId));
         newItem.setTimeEstimate(2);
-        taskService.createTask(newItem);
+        taskService.createTask(TaskMapper.toDTO(newItem));
 
         BotHelper.sendMessageToTelegram(chatId, BotMessages.NEW_ITEM_ADDED.getMessage(), telegramClient, null);
     }

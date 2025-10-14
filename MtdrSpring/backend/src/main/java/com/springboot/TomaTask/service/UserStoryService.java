@@ -9,6 +9,7 @@ import com.springboot.TomaTask.repository.UserStoryRepository;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserStoryService {
@@ -77,6 +78,6 @@ public class UserStoryService {
     public List<UserStoryDTO> getUserStoriesBySprintId(String sprintId) {
         Sprint sprint = sprintRepository.findById(sprintId)
                 .orElseThrow(() -> new RuntimeException("Sprint not found with ID: " + sprintId));
-        return UserStoryMapper.toDTOList(sprint.getUserStories().stream().toList());
+        return UserStoryMapper.toDTOList(sprint.getUserStories().stream().collect(Collectors.toList()));
     }
 }

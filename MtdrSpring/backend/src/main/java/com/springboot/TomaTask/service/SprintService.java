@@ -8,6 +8,7 @@ import com.springboot.TomaTask.repository.ProjectRepository;
 import com.springboot.TomaTask.repository.SprintRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SprintService {
@@ -74,6 +75,8 @@ public class SprintService {
     public List<SprintDTO> getSprintsByProjectId(String projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found with ID: " + projectId));
-        return SprintMapper.toDTOList(project.getSprints().stream().toList());
+        return SprintMapper.toDTOList(
+            project.getSprints().stream().collect(Collectors.toList())
+        );
     }
 }
