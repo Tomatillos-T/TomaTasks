@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import Input from "../components/Input";
-import Button from "../components/Button";
-import Alert from "../components/Alert";
-import Modal from "../components/Modal";
-import Textarea from "../components/TextArea";
-import { HttpClient } from "../services/httpClient";
-import type { HttpError } from "../services/httpClient";
-import { Check } from 'lucide-react';
+import Input from "../../components/Input";
+import Button from "../../components//Button";
+import Alert from "../../components//Alert";
+import Modal from "../../components//Modal";
+import Textarea from "../../components//TextArea";
+import { HttpClient } from "../../services/httpClient";
+import type { HttpError } from "../../services/httpClient";
+import { Check } from "lucide-react";
 
 export interface User {
   id: string;
@@ -42,14 +42,19 @@ export default function Tareas() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>({ type: null, message: "" });
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>({
+    type: null,
+    message: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newTaskName, setNewTaskName] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [newTaskTimeEstimate, setNewTaskTimeEstimate] = useState<number>(0);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
-  const [hoursToComplete, setHoursToComplete] = useState<Record<string, number>>({});
+  const [hoursToComplete, setHoursToComplete] = useState<
+    Record<string, number>
+  >({});
 
   useEffect(() => {
     fetchData();
@@ -66,7 +71,10 @@ export default function Tareas() {
       setUsers(usersData);
     } catch (err: any) {
       const e = err as HttpError;
-      setSubmitStatus({ type: "error", message: `Error al cargar datos: ${e.message}` });
+      setSubmitStatus({
+        type: "error",
+        message: `Error al cargar datos: ${e.message}`,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +83,10 @@ export default function Tareas() {
   // ---------------------- Agregar tarea ----------------------
   const addTask = async () => {
     if (!selectedUserId) {
-      setSubmitStatus({ type: "error", message: "Debe seleccionar un usuario para la tarea." });
+      setSubmitStatus({
+        type: "error",
+        message: "Debe seleccionar un usuario para la tarea.",
+      });
       return;
     }
     setIsSubmitting(true);
@@ -93,7 +104,10 @@ export default function Tareas() {
         { auth: true }
       );
       setTasks((prev) => [...prev, newTask]);
-      setSubmitStatus({ type: "success", message: `Tarea '${newTask.name}' agregada correctamente.` });
+      setSubmitStatus({
+        type: "success",
+        message: `Tarea '${newTask.name}' agregada correctamente.`,
+      });
       setIsAddModalOpen(false);
       setNewTaskName("");
       setNewTaskDescription("");
@@ -107,7 +121,10 @@ export default function Tareas() {
           message: "Su sesión ha expirado. Por favor inicie sesión nuevamente.",
         });
       } else {
-        setSubmitStatus({ type: "error", message: `Error al agregar tarea: ${e.message}` });
+        setSubmitStatus({
+          type: "error",
+          message: `Error al agregar tarea: ${e.message}`,
+        });
       }
     } finally {
       setIsSubmitting(false);
@@ -115,11 +132,19 @@ export default function Tareas() {
   };
 
   // ---------------------- Actualizar tarea ----------------------
-  const updateTask = async (taskId: string, updates: Partial<Task>, successMessage: string) => {
+  const updateTask = async (
+    taskId: string,
+    updates: Partial<Task>,
+    successMessage: string
+  ) => {
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: "" });
     try {
-      const updatedTask = await HttpClient.put<Task>(`/api/tasks/${taskId}`, updates, { auth: true });
+      const updatedTask = await HttpClient.put<Task>(
+        `/api/tasks/${taskId}`,
+        updates,
+        { auth: true }
+      );
       setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
       setSubmitStatus({ type: "success", message: successMessage });
     } catch (err: any) {
@@ -141,7 +166,10 @@ export default function Tareas() {
   const completeTask = (task: Task) => {
     const hours = hoursToComplete[task.id] ?? 0;
     if (!hours) {
-      setSubmitStatus({ type: "error", message: "Debe indicar las horas reales para completar la tarea." });
+      setSubmitStatus({
+        type: "error",
+        message: "Debe indicar las horas reales para completar la tarea.",
+      });
       return;
     }
     updateTask(
@@ -171,10 +199,16 @@ export default function Tareas() {
     <section className="min-h-screen p-8 bg-background-default">
       <h1 className="text-3xl font-bold text-text-primary mb-6">Tareas</h1>
 
-      {submitStatus.type && <Alert type={submitStatus.type} message={submitStatus.message} />}
+      {submitStatus.type && (
+        <Alert type={submitStatus.type} message={submitStatus.message} />
+      )}
 
       <div className="flex flex-wrap gap-4 mb-6">
-        <Button variant="primary" onClick={() => setIsAddModalOpen(true)} disabled={isSubmitting}>
+        <Button
+          variant="primary"
+          onClick={() => setIsAddModalOpen(true)}
+          disabled={isSubmitting}
+        >
           Agregar Tarea
         </Button>
       </div>
@@ -185,11 +219,18 @@ export default function Tareas() {
             <div>
               <div className="font-semibold text-text-primary">{task.name}</div>
               <div className="text-sm text-text-secondary mt-1">
-                Status: <span className={`font-medium ${getStatusColor(task.status)}`}>{task.status}</span>
+                Status:{" "}
+                <span className={`font-medium ${getStatusColor(task.status)}`}>
+                  {task.status}
+                </span>
                 {task.sprint && <span> | Sprint: {task.sprint.name}</span>}
                 {task.user && <span> | Usuario: {task.user.name}</span>}
-                {task.timeEstimate && <span> | Estimación: {task.timeEstimate}h</span>}
-                {task.actualHours && <span> | Horas reales: {task.actualHours}h</span>}
+                {task.timeEstimate && (
+                  <span> | Estimación: {task.timeEstimate}h</span>
+                )}
+                {task.actualHours && (
+                  <span> | Horas reales: {task.actualHours}h</span>
+                )}
               </div>
             </div>
             {task.status !== "DONE" && (
@@ -199,10 +240,19 @@ export default function Tareas() {
                   label="Horas invertidas"
                   placeholder="Horas reales"
                   value={hoursToComplete[task.id] ?? ""}
-                  onChange={(e) => setHoursToComplete({ ...hoursToComplete, [task.id]: Number(e.target.value) })}
+                  onChange={(e) =>
+                    setHoursToComplete({
+                      ...hoursToComplete,
+                      [task.id]: Number(e.target.value),
+                    })
+                  }
                   className="w-24 p-1 border rounded"
                 />
-                <Button variant="secondary" onClick={() => completeTask(task)} disabled={isSubmitting}>
+                <Button
+                  variant="secondary"
+                  onClick={() => completeTask(task)}
+                  disabled={isSubmitting}
+                >
                   <Check />
                 </Button>
               </div>
@@ -218,10 +268,19 @@ export default function Tareas() {
         title="Agregar Nueva Tarea"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setIsAddModalOpen(false)} disabled={isSubmitting}>
+            <Button
+              variant="secondary"
+              onClick={() => setIsAddModalOpen(false)}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
-            <Button variant="primary" onClick={addTask} loading={isSubmitting} disabled={isSubmitting || !newTaskName}>
+            <Button
+              variant="primary"
+              onClick={addTask}
+              loading={isSubmitting}
+              disabled={isSubmitting || !newTaskName}
+            >
               Guardar
             </Button>
           </>
@@ -249,7 +308,9 @@ export default function Tareas() {
           onChange={(e) => setNewTaskTimeEstimate(Number(e.target.value))}
         />
         <div className="mt-4">
-          <label className="block mb-1 font-medium text-text-primary">Asignar a usuario</label>
+          <label className="block mb-1 font-medium text-text-primary">
+            Asignar a usuario
+          </label>
           <select
             className="w-full p-2 border rounded border-gray-300"
             value={selectedUserId}
