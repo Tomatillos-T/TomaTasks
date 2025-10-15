@@ -10,6 +10,13 @@ jobs:
           java-version: '22'      # See 'Options' for more details
           distribution: 'graalvm' # See 'Supported distributions' for available options
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Java version
+        run: |
+          echo "GRAALVM_HOME: $GRAALVM_HOME"
+          echo "JAVA_HOME: $JAVA_HOME"
+          java --version
+          native-image --version
+
       - name: "Extract files and Docker login"
         run:  cd MtdrSpring;
               wget https://objectstorage.mx-queretaro-1.oraclecloud.com/n/axohot8ponib/b/reacttodo-uazrb/o/deployment_config.tgz
