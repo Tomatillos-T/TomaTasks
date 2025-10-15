@@ -19,7 +19,7 @@ jobs:
 
       - name: "Extract files"
         run:  cd MtdrSpring && \
-              wget https://objectstorage.mx-queretaro-1.oraclecloud.com/n/axohot8ponib/b/reacttodo-uazrb/o/deployment_config.tgz && \
+              curl -O https://objectstorage.mx-queretaro-1.oraclecloud.com/n/axohot8ponib/b/reacttodo-uazrb/o/deployment_config.tgz && \
               tar -xzvf deployment_config.tgz && \
               source env.sh
 
