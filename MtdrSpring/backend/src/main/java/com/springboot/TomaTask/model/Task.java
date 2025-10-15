@@ -35,12 +35,12 @@ public class Task {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_story_id", nullable = false)
+    @JoinColumn(name = "user_story_id", nullable = true)
     private UserStory userStory;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sprint_id", nullable = false)
+    @JoinColumn(name = "sprint_id", nullable = true)
     private Sprint sprint;
 
     @JsonIgnore
