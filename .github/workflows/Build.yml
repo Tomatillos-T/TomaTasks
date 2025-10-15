@@ -24,7 +24,8 @@ jobs:
               source env.sh;
 
       - name: "Docker Login"
-        run: cat at.cfg | docker login -u "axohot8ponib/a01198666@tec.mx" --password-stdin mx-
+        run:  cd MtdrSpring;
+              cat at.cfg | docker login -u "axohot8ponib/a01198666@tec.mx" --password-stdin mx-;
         
       - name: "Build"
         run: cd MtdrSpring;
