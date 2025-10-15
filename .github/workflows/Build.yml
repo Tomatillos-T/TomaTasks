@@ -7,10 +7,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '25'      # See 'Options' for more details
+          java-version: '22'      # See 'Options' for more details
           distribution: 'graalvm' # See 'Supported distributions' for available options
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: "Docker Login"
+      - name: "Extract files and Docker login"
         run:  cd MtdrSpring;
               wget https://objectstorage.mx-queretaro-1.oraclecloud.com/n/axohot8ponib/b/reacttodo-uazrb/o/deployment_config.tgz
               tar -xzvf deployment_config.tgz;
