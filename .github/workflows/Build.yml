@@ -21,7 +21,7 @@ jobs:
       - name: "Docker Login"
         run:  |
               cd MtdrSpring;
-              cat at.cfg | docker login -u "axohot8ponib/a01198666@tec.mx" --password-stdin mx-queretaro-1.ocir.io;
+              cat at.cfg | docker login -u "axohot8ponib/a01198666@tec.mx" --password-stdin mx-queretaro-1.ocir.io
         
       - name: "Build"
         run: |
