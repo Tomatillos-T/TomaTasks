@@ -17,7 +17,6 @@ jobs:
               wget https://objectstorage.mx-queretaro-1.oraclecloud.com/n/axohot8ponib/b/reacttodo-uazrb/o/deployment_config.tgz;
               tar -xzvf deployment_config.tgz;
               source env.sh;
-              cat at.cfg | docker login -u "axohot8ponib/a01198666@tec.mx" --password-stdin mx-queretaro-1.ocir.io;
 
       - name: "Docker Login"
         run:  |
