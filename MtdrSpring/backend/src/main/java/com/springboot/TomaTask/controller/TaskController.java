@@ -1,10 +1,9 @@
 package com.springboot.TomaTask.controller;
 
 import com.springboot.TomaTask.dto.TaskDTO;
-import com.springboot.TomaTask.model.Task;
 import com.springboot.TomaTask.service.TaskService;
-import com.springboot.TomaTask.mapper.TaskMapper;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,42 +11,50 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
-
     private final TaskService taskService;
 
     public TaskController(TaskService taskService) {
         this.taskService = taskService;
     }
 
-    // Obtener todas las tareas como DTOs
     @GetMapping
-    public List<TaskDTO> getAllTasks() {
-        return taskService.getAllTasks();
+    public ResponseEntity<List<TaskDTO>> getAllTasks() {
+        return ResponseEntity.ok(taskService.getAllTasks());
     }
 
-    // Obtener tarea por id como DTO
     @GetMapping("/{id}")
-    public TaskDTO getTaskById(@PathVariable String id) {
-        Task task = taskService.getTaskById(id);
-        return TaskMapper.toDTO(task);
+    public ResponseEntity<TaskDTO> getTaskById(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.getTaskById(id));
     }
 
-    // Crear tarea (recibe Task y devuelve DTO)
     @PostMapping
-    public TaskDTO createTask(@RequestBody Task task) {
-        Task savedTask = taskService.createTask(task);
-        return TaskMapper.toDTO(savedTask);
+    public ResponseEntity<TaskDTO> createTask(@RequestBody TaskDTO taskDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskService.createTask(taskDTO));
     }
 
-    // Actualizar tarea (recibe Task y devuelve DTO)
     @PutMapping("/{id}")
-    public TaskDTO updateTask(@PathVariable String id, @RequestBody Task taskDetails) {
-        Task updatedTask = taskService.updateTask(id, taskDetails);
-        return TaskMapper.toDTO(updatedTask);
+    public ResponseEntity<TaskDTO> updateTask(@PathVariable String id, @RequestBody TaskDTO taskDTO) {
+        return ResponseEntity.ok(taskService.updateTask(id, taskDTO));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteTask(@PathVariable String id) {
+    public ResponseEntity<Void> deleteTask(@PathVariable String id) {
         taskService.deleteTask(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/sprint/{sprintId}")
+    public ResponseEntity<List<TaskDTO>> getTasksBySprintId(@PathVariable String sprintId) {
+        return ResponseEntity.ok(taskService.getTasksBySprintId(sprintId));
+    }
+
+    @GetMapping("/user-story/{userStoryId}")
+    public ResponseEntity<List<TaskDTO>> getTasksByUserStoryId(@PathVariable String userStoryId) {
+        return ResponseEntity.ok(taskService.getTasksByUserStoryId(userStoryId));
+    }
+
+    @GetMapping("/assignee/{assigneeId}")
+    public ResponseEntity<List<TaskDTO>> getTasksByAssigneeId(@PathVariable String assigneeId) {
+        return ResponseEntity.ok(taskService.getTasksByAssigneeId(assigneeId));
     }
 }

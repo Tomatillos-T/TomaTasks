@@ -1,17 +1,19 @@
 package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "project")
 public class Project {
-
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
@@ -36,6 +38,14 @@ public class Project {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Team team;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<Sprint> sprints = new HashSet<>();
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -44,6 +54,7 @@ public class Project {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Constructors
     public Project() {}
 
     public Project(String name, String status, LocalDate startDate) {
@@ -52,17 +63,19 @@ public class Project {
         this.startDate = startDate;
     }
 
-    public Project(String name, String description, String status,
-                   LocalDate startDate, LocalDate deliveryDate, LocalDate endDate, String teamId) {
+    public Project(String name, String description, String status, LocalDate startDate,
+                   LocalDate deliveryDate, LocalDate endDate) {
         this.name = name;
         this.description = description;
         this.status = status;
         this.startDate = startDate;
         this.deliveryDate = deliveryDate;
-        this.endDate = endDate;    }
+        this.endDate = endDate;
+    }
 
-    // Getters y Setters
+    // Getters and Setters
     public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -82,7 +95,12 @@ public class Project {
     public LocalDate getEndDate() { return endDate; }
     public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public Team getTeam() { return team; }
+    public void setTeam(Team team) { this.team = team; }
 
+    public Set<Sprint> getSprints() { return sprints; }
+    public void setSprints(Set<Sprint> sprints) { this.sprints = sprints; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

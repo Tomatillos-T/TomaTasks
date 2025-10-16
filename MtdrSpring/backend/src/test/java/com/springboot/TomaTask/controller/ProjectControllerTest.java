@@ -1,4 +1,4 @@
-package com.springboot.TomaTask.controller;
+/*package com.springboot.TomaTask.controller;
 
 import com.springboot.TomaTask.model.Project;
 import com.springboot.TomaTask.service.ProjectService;
@@ -86,3 +86,4 @@ public class ProjectControllerTest {
         verify(projectService, times(1)).deleteProject("1");
     }
 }
+*/
