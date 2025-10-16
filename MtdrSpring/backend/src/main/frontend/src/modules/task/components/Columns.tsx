@@ -12,7 +12,7 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: "estimation",
-    header: "Estimacion (hrs)",
+    header: "Estimación (hrs)",
   },
   {
     accessorKey: "asignee",
