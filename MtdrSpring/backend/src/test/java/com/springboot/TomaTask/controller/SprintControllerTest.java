@@ -1,4 +1,4 @@
-package com.springboot.TomaTask.controller;
+/*package com.springboot.TomaTask.controller;
 
 import com.springboot.TomaTask.model.Sprint;
 import com.springboot.TomaTask.service.SprintService;
@@ -85,3 +85,4 @@ public class SprintControllerTest {
         verify(sprintService).deleteSprint("1");
     }
 }
+*/

@@ -88,7 +88,7 @@ public class DataInitializer {
                         "EN_PROGRESO",
                         LocalDate.of(2025, 1, 15),
                         LocalDate.of(2025, 12, 31),
-                        null, null);
+                        null);
 
                 Project project2 = new Project(
                         "Portal de Clientes",
@@ -96,7 +96,7 @@ public class DataInitializer {
                         "PLANIFICADO",
                         LocalDate.of(2025, 5, 1),
                         LocalDate.of(2026, 2, 28),
-                        null, null);
+                        null);
 
                 Project project3 = new Project(
                         "Aplicación Móvil TomaTask",
@@ -104,7 +104,7 @@ public class DataInitializer {
                         "EN_PRUEBAS",
                         LocalDate.of(2024, 9, 1),
                         LocalDate.of(2025, 6, 30),
-                        null, null);
+                        null);
 
                 projectRepository.save(project1);
                 projectRepository.save(project2);
@@ -119,7 +119,8 @@ public class DataInitializer {
                         LocalDate.of(2025, 1, 15),
                         LocalDate.of(2025, 1, 31),
                         LocalDate.of(2025, 2, 1),
-                        project1.getId());
+                        project1
+                );
 
                 Sprint sprint2 = new Sprint(
                         "Sprint 2 - Autenticación y permisos",
@@ -127,7 +128,8 @@ public class DataInitializer {
                         LocalDate.of(2025, 2, 1),
                         LocalDate.of(2025, 2, 20),
                         null,
-                        project1.getId());
+                        project1
+                );
 
                 Sprint sprint3 = new Sprint(
                         "Sprint 1 - Diseño de UI y prototipos",
@@ -135,7 +137,8 @@ public class DataInitializer {
                         LocalDate.of(2025, 5, 1),
                         LocalDate.of(2025, 5, 20),
                         null,
-                        project2.getId());
+                        project2
+                );
 
                 Sprint sprint4 = new Sprint(
                         "Sprint 1 - Implementación offline",
@@ -143,7 +146,8 @@ public class DataInitializer {
                         LocalDate.of(2024, 9, 5),
                         LocalDate.of(2024, 9, 30),
                         null,
-                        project3.getId());
+                        project3
+                );
 
                 sprintRepository.save(sprint1);
                 sprintRepository.save(sprint2);

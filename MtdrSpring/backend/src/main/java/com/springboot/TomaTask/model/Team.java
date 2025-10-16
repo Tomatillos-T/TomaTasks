@@ -1,15 +1,17 @@
 package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "team")
 public class Team {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, unique = true)
@@ -25,8 +27,12 @@ public class Team {
     private String status;
 
     @OneToOne
-    @JoinColumn(name = "project_id", nullable = true, unique = true)
+    @JoinColumn(name = "project_id", nullable = false, unique = true)
     private Project project;
+
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<User> members = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -36,8 +42,8 @@ public class Team {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Team() {
-    }
+    // Constructors
+    public Team() {}
 
     public Team(String name, String description, String status, Project project) {
         this.name = name;
@@ -90,4 +96,9 @@ public class Team {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+    public Set<User> getMembers() { return members; }
+    public void setMembers(Set<User> members) { this.members = members; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

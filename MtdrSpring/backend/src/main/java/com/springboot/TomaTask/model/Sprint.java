@@ -1,17 +1,18 @@
 package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Set;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "sprint")
 public class Sprint {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, unique = true)
@@ -32,11 +33,17 @@ public class Sprint {
     @Column(name = "delivery_date")
     private LocalDate deliveryDate;
 
-    @Column(name = "project_id", nullable = false)
-    private String projectId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
     @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Task> tasks;
+    @JsonIgnore
+    private Set<Task> tasks = new HashSet<>();
+
+    @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<UserStory> userStories = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -46,24 +53,22 @@ public class Sprint {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Sprint() {
-    }
+    // Constructors
+    public Sprint() {}
 
-    public Sprint(String description, String status, LocalDate startDate, String projectId) {
+    public Sprint(String description, String status, LocalDate startDate, Project project) {
         this.description = description;
         this.status = status;
         this.startDate = startDate;
-        this.projectId = projectId;
+        this.project = project;
     }
 
-    public Sprint(String description, String status, LocalDate startDate, LocalDate endDate,
-            LocalDate deliveryDate, String projectId) {
+    public Sprint(String description, String status, LocalDate startDate, LocalDate endDate, Project project) {
         this.description = description;
         this.status = status;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.deliveryDate = deliveryDate;
-        this.projectId = projectId;
+        this.project = project;
     }
 
     public String getId() {
@@ -110,19 +115,15 @@ public class Sprint {
         this.deliveryDate = deliveryDate;
     }
 
-    public String getProjectId() {
-        return projectId;
-    }
+    public Project getProject() { return project; }
+    public void setProject(Project project) { this.project = project; }
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
+    public Set<Task> getTasks() { return tasks; }
+    public void setTasks(Set<Task> tasks) { this.tasks = tasks; }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public Set<UserStory> getUserStories() { return userStories; }
+    public void setUserStories(Set<UserStory> userStories) { this.userStories = userStories; }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

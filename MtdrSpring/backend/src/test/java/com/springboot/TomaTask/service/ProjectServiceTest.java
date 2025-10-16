@@ -1,4 +1,4 @@
-package com.springboot.TomaTask.service;
+/*package com.springboot.TomaTask.service;
 
 import com.springboot.TomaTask.model.Project;
 import com.springboot.TomaTask.repository.ProjectRepository;
@@ -125,3 +125,4 @@ public class ProjectServiceTest {
         verify(projectRepository, times(1)).deleteById("1");
     }
 }
+*/

@@ -1,5 +1,7 @@
 package com.springboot.TomaTask.service;
 
+import com.springboot.TomaTask.dto.UserRoleDTO;
+import com.springboot.TomaTask.mapper.UserRoleMapper;
 import com.springboot.TomaTask.model.UserRole;
 import com.springboot.TomaTask.repository.UserRoleRepository;
 import org.springframework.stereotype.Service;
@@ -7,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -18,59 +21,36 @@ public class UserRoleService {
         this.userRoleRepository = userRoleRepository;
     }
 
-    /**
-     * Creates a new UserRole.
-     *
-     * @param userRole the role to be created
-     * @return the persisted UserRole entity
-     */
-    public UserRole createUserRole(UserRole userRole) {
-        return userRoleRepository.save(userRole);
+    public UserRoleDTO createUserRole(UserRoleDTO userRoleDTO) {
+        UserRole role = UserRoleMapper.toEntity(userRoleDTO);
+        UserRole savedRole = userRoleRepository.save(role);
+        return UserRoleMapper.toDTO(savedRole);
     }
 
-    /**
-     * Retrieves all user roles.
-     *
-     * @return a list of UserRole entities
-     */
-    public List<UserRole> getAllUserRoles() {
-        return userRoleRepository.findAll();
+    public List<UserRoleDTO> getAllUserRoles() {
+        return userRoleRepository.findAll().stream()
+                .map(UserRoleMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Retrieves a UserRole by its ID.
-     *
-     * @param id the role ID
-     * @return the found UserRole entity
-     * @throws EntityNotFoundException if the role is not found
-     */
-    public UserRole getUserRoleById(String id) {
-        return userRoleRepository.findById(id)
+    public UserRoleDTO getUserRoleById(String id) {
+        UserRole role = userRoleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User role not found with ID: " + id));
+        return UserRoleMapper.toDTO(role);
     }
 
-    /**
-     * Updates an existing UserRole.
-     *
-     * @param id the ID of the role to update
-     * @param updatedRole the updated role data
-     * @return the updated UserRole entity
-     * @throws EntityNotFoundException if the role is not found
-     */
-    public UserRole updateUserRole(String id, UserRole updatedRole) {
-        UserRole existingRole = getUserRoleById(id);
-        existingRole.setRole(updatedRole.getRole());
-        return userRoleRepository.save(existingRole);
+    public UserRoleDTO updateUserRole(String id, UserRoleDTO updatedRoleDTO) {
+        UserRole existingRole = userRoleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User role not found with ID: " + id));
+        
+        existingRole.setRole(updatedRoleDTO.getRole());
+        UserRole updatedRole = userRoleRepository.save(existingRole);
+        return UserRoleMapper.toDTO(updatedRole);
     }
 
-    /**
-     * Deletes a UserRole by its ID.
-     *
-     * @param id the role ID
-     * @throws EntityNotFoundException if the role is not found
-     */
     public void deleteUserRole(String id) {
-        UserRole existingRole = getUserRoleById(id);
+        UserRole existingRole = userRoleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User role not found with ID: " + id));
         userRoleRepository.delete(existingRole);
     }
 }

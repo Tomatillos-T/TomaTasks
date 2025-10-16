@@ -1,25 +1,19 @@
 package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
-
-import java.time.OffsetDateTime;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.Collection;
-import java.util.Collections;
-
+import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-/*
-    representation of the User table that exists already
-    in the autonomous database
- */
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "user_table")
 public class User implements UserDetails {
@@ -29,44 +23,47 @@ public class User implements UserDetails {
     private String id;
 
     @Column(name = "firstName")
-    String firstName;
+    private String firstName;
 
     @Column(name = "lastName")
-    String lastName;
+    private String lastName;
 
-    @Column(name = "email")
-    String email;
+    @Column(name = "email", unique = true)
+    private String email;
 
     @Column(name = "phoneNumber")
-    String phoneNumber;
+    private String phoneNumber;
 
     @Column(name = "password", nullable = false)
-    String password;
+    private String password;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private UserRole role;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<Task> tasks = new HashSet<>();
+
     @CreationTimestamp
-    @Column(name = "creation_ts", updatable = false)
-    OffsetDateTime creationTs;
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "update_ts")
-    OffsetDateTime updateTs;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @Column(name = "telegram_token", unique = true)
     private String telegramToken;
 
-    public User() {
-    }
+    // Constructors
+    public User() {}
 
-    public User(String firstName, String lastName, String email, String phoneNumber, String password, UserRole role,
-            Team team) {
+    public User(String firstName, String lastName, String email, String phoneNumber, String password, UserRole role, Team team) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -76,92 +73,44 @@ public class User implements UserDetails {
         this.team = team;
     }
 
-    public String getID() {
-        return id;
-    }
+    // Getters and Setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public String getName() {
-        return firstName + " " + lastName;
-    }
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
 
-    public String getFirstName() {
-        return firstName;
-    }
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+    public String getName() { return firstName + " " + lastName; }
+    public String getID() { return id; }
 
-    public String getLastName() {
-        return lastName;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public UserRole getRole() { return role; }
+    public void setRole(UserRole role) { this.role = role; }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
+    public Team getTeam() { return team; }
+    public void setTeam(Team team) { this.team = team; }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
+    public Set<Task> getTasks() { return tasks; }
+    public void setTasks(Set<Task> tasks) { this.tasks = tasks; }
 
-    public String getPassword() {
-        return password;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public String getTelegramToken() { return telegramToken; }
+    public void setTelegramToken(String telegramToken) { this.telegramToken = telegramToken; }
 
-    public UserRole getRole() {
-        return role;
-    }
-
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
-
-    public Team getTeam() {
-        return team;
-    }
-
-    public void setTeam(Team team) {
-        this.team = team;
-    }
-
-    public String getTelegramToken() {
-        return telegramToken;
-    }
-
-    public void setTelegramToken(String telegramToken) {
-        this.telegramToken = telegramToken;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", firstName='" + firstName +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", role=" + role +
-                ", team=" + team +
-                ", creationTs=" + creationTs +
-                '}';
-    }
-
+    // UserDetails methods
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -173,32 +122,32 @@ public class User implements UserDetails {
     }
 
     @Override
-    public String getUsername() {
-        return email;
-    }
-
-    // CAMBIO 3: Agregar @JsonIgnore a los métodos de UserDetails
-    @Override
     @JsonIgnore
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
     @JsonIgnore
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
     @JsonIgnore
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
     @JsonIgnore
-    public boolean isEnabled() {
-        return true;
+    public boolean isEnabled() { return true; }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", firstName='" + firstName +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", role=" + role +
+                ", team=" + team +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }
