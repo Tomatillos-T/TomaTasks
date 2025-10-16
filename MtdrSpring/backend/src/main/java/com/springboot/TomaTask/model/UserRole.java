@@ -3,7 +3,6 @@ package com.springboot.TomaTask.model;
 import jakarta.persistence.*;
 import java.util.Set;
 
-import org.hibernate.annotations.GenericGenerator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -11,8 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class UserRole {
 
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, unique = true)
     private String id;
 
@@ -23,14 +21,22 @@ public class UserRole {
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<User> users;
 
-
-    public UserRole() {}
+    public UserRole() {
+    }
 
     public UserRole(String role) {
         this.role = role;
     }
 
-    public String getId() { return id; }
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public String getId() {
+        return id;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }
