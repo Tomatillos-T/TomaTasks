@@ -29,7 +29,6 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.domain.Sort;
 
-import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
