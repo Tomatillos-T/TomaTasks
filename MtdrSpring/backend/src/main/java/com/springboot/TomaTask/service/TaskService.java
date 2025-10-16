@@ -6,7 +6,6 @@ import com.springboot.TomaTask.model.Sprint;
 import com.springboot.TomaTask.model.Task;
 import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.model.UserStory;
-import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.repository.SprintRepository;
 import com.springboot.TomaTask.repository.TaskRepository;
 import com.springboot.TomaTask.repository.UserRepository;
