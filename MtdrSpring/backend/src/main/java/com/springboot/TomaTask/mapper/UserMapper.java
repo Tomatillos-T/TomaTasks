@@ -23,10 +23,7 @@ public class UserMapper {
         dto.setPhoneNumber(user.getPhoneNumber());
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
-
-        if (user.getRole() != null) {
-            dto.setRole(UserRoleMapper.toDTO(user.getRole()));
-        }
+        dto.setRole(user.getRole());
 
         if (user.getTeam() != null) {
             dto.setTeamId(user.getTeam().getId());

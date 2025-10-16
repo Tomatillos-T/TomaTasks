@@ -27,7 +27,7 @@ public class Team {
     private String status;
 
     @OneToOne
-    @JoinColumn(name = "project_id", nullable = false, unique = true)
+    @JoinColumn(name = "project_id", nullable = true, unique = true)
     private Project project;
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -43,7 +43,12 @@ public class Team {
     private LocalDateTime updatedAt;
 
     // Constructors
-    public Team() {}
+    public Team() {
+    }
+
+    public Team(String id) {
+        this.id = id;
+    }
 
     public Team(String name, String description, String status, Project project) {
         this.name = name;
@@ -89,6 +94,14 @@ public class Team {
         this.project = project;
     }
 
+    public Set<User> getMembers() {
+        return members;
+    }
+
+    public void setMembers(Set<User> members) {
+        this.members = members;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -96,9 +109,4 @@ public class Team {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
-    public Set<User> getMembers() { return members; }
-    public void setMembers(Set<User> members) { this.members = members; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

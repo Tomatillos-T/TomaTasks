@@ -2,7 +2,6 @@ package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -51,7 +50,12 @@ public class UserStory {
     private LocalDateTime updatedAt;
 
     // Constructors
-    public UserStory() {}
+    public UserStory() {
+    }
+
+    public UserStory(String id) {
+        this.id = id;
+    }
 
     public UserStory(String name, Integer weight, String description, String status, Sprint sprint) {
         this.name = name;
@@ -62,8 +66,10 @@ public class UserStory {
     }
 
     // Getters and Setters
-    public String getId() { return id; }
-  
+    public String getId() {
+        return id;
+    }
+
     public String getName() {
         return name;
     }
@@ -79,14 +85,30 @@ public class UserStory {
     public void setWeight(Integer weight) {
         this.weight = weight;
     }
-    public Sprint getSprint() { return sprint; }
-    public void setSprint(Sprint sprint) { this.sprint = sprint; }
 
-    public Set<Task> getTasks() { return tasks; }
-    public void setTasks(Set<Task> tasks) { this.tasks = tasks; }
+    public Sprint getSprint() {
+        return sprint;
+    }
 
-    public Set<AcceptanceCriteria> getAcceptanceCriteria() { return acceptanceCriteria; }
-    public void setAcceptanceCriteria(Set<AcceptanceCriteria> acceptanceCriteria) { this.acceptanceCriteria = acceptanceCriteria; }
+    public void setSprint(Sprint sprint) {
+        this.sprint = sprint;
+    }
+
+    public Set<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(Set<Task> tasks) {
+        this.tasks = tasks;
+    }
+
+    public Set<AcceptanceCriteria> getAcceptanceCriteria() {
+        return acceptanceCriteria;
+    }
+
+    public void setAcceptanceCriteria(Set<AcceptanceCriteria> acceptanceCriteria) {
+        this.acceptanceCriteria = acceptanceCriteria;
+    }
 
     public String getDescription() {
         return description;
@@ -107,5 +129,8 @@ public class UserStory {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

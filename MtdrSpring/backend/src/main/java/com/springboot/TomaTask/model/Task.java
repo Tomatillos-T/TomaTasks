@@ -66,7 +66,8 @@ public class Task {
     private LocalDateTime updatedAt;
 
     // Constructors
-    public Task() {}
+    public Task() {
+    }
 
     public Task(String name, Integer timeEstimate, Status status, UserStory userStory, Sprint sprint) {
         this.name = name;
@@ -77,7 +78,7 @@ public class Task {
     }
 
     public Task(String name, Integer timeEstimate, String description, Status status, UserStory userStory,
-                Sprint sprint, User user) {
+            Sprint sprint, User user) {
         this.name = name;
         this.timeEstimate = timeEstimate;
         this.description = description;
@@ -88,7 +89,7 @@ public class Task {
     }
 
     public Task(String name, Integer timeEstimate, String description, Status status, UserStory userStory,
-                Sprint sprint, User user, LocalDate startDate, LocalDate endDate, LocalDate deliveryDate) {
+            Sprint sprint, User user, LocalDate startDate, LocalDate endDate, LocalDate deliveryDate) {
         this.name = name;
         this.timeEstimate = timeEstimate;
         this.description = description;
@@ -102,39 +103,95 @@ public class Task {
     }
 
     // Getters and Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getName() {
+        return name;
+    }
 
-    public Integer getTimeEstimate() { return timeEstimate; }
-    public void setTimeEstimate(Integer timeEstimate) { this.timeEstimate = timeEstimate; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public Integer getTimeEstimate() {
+        return timeEstimate;
+    }
 
-    public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
+    public void setTimeEstimate(Integer timeEstimate) {
+        this.timeEstimate = timeEstimate;
+    }
 
-    public UserStory getUserStory() { return userStory; }
-    public void setUserStory(UserStory userStory) { this.userStory = userStory; }
+    public String getDescription() {
+        return description;
+    }
 
-    public Sprint getSprint() { return sprint; }
-    public void setSprint(Sprint sprint) { this.sprint = sprint; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public Status getStatus() {
+        return status;
+    }
 
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+    public UserStory getUserStory() {
+        return userStory;
+    }
 
-    public LocalDate getDeliveryDate() { return deliveryDate; }
-    public void setDeliveryDate(LocalDate deliveryDate) { this.deliveryDate = deliveryDate; }
+    public void setUserStory(UserStory userStory) {
+        this.userStory = userStory;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public Sprint getSprint() {
+        return sprint;
+    }
+
+    public void setSprint(Sprint sprint) {
+        this.sprint = sprint;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public LocalDate getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(LocalDate deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

@@ -7,7 +7,7 @@ import com.springboot.TomaTask.model.UserStory;
 import com.springboot.TomaTask.repository.SprintRepository;
 import com.springboot.TomaTask.repository.UserStoryRepository;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +17,7 @@ public class UserStoryService {
     private final SprintRepository sprintRepository;
 
     public UserStoryService(UserStoryRepository userStoryRepository,
-                           SprintRepository sprintRepository) {
+            SprintRepository sprintRepository) {
         this.userStoryRepository = userStoryRepository;
         this.sprintRepository = sprintRepository;
     }
@@ -34,8 +34,6 @@ public class UserStoryService {
 
     public UserStoryDTO createUserStory(UserStoryDTO userStoryDTO) {
         UserStory userStory = UserStoryMapper.toEntity(userStoryDTO);
-        userStory.setCreatedAt(LocalDateTime.now());
-        userStory.setUpdatedAt(LocalDateTime.now());
 
         // Set Sprint
         if (userStoryDTO.getSprintId() != null) {
@@ -58,7 +56,6 @@ public class UserStoryService {
         userStory.setWeight(userStoryDTO.getWeight());
         userStory.setDescription(userStoryDTO.getDescription());
         userStory.setStatus(userStoryDTO.getStatus());
-        userStory.setUpdatedAt(LocalDateTime.now());
 
         // Update Sprint
         if (userStoryDTO.getSprintId() != null) {

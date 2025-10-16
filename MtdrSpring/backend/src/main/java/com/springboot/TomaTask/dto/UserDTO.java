@@ -1,7 +1,8 @@
 package com.springboot.TomaTask.dto;
 
-import com.springboot.TomaTask.model.UserRole;
 import java.time.LocalDateTime;
+
+import com.springboot.TomaTask.model.User.UserRole;
 
 public class UserDTO {
     private String id;
@@ -9,13 +10,14 @@ public class UserDTO {
     private String lastName;
     private String email;
     private String phoneNumber;
-    private UserRoleDTO role;
+    private UserRole role;
     private String teamId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     // Constructors
-    public UserDTO() {}
+    public UserDTO() {
+    }
 
     public UserDTO(String id, String firstName, String lastName, String email) {
         this.id = id;
@@ -25,30 +27,75 @@ public class UserDTO {
     }
 
     // Getters and Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getFirstName() { return firstName; }
-    public void setFirstName(String firstName) { this.firstName = firstName; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getLastName() { return lastName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
+    public String getFirstName() {
+        return firstName;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-    public String getPhoneNumber() { return phoneNumber; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public String getLastName() {
+        return lastName;
+    }
 
-    public UserRoleDTO getRole() { return role; }
-    public void setRole(UserRoleDTO role) { this.role = role; }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-    public String getTeamId() { return teamId; }
-    public void setTeamId(String teamId) { this.teamId = teamId; }
+    public String getEmail() {
+        return email;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public UserRole getRole() {
+        return this.role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

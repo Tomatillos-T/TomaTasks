@@ -1,7 +1,6 @@
 package com.springboot.TomaTask.controller;
 
 import com.springboot.TomaTask.dto.UserDTO;
-import com.springboot.TomaTask.mapper.UserMapper;
 import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

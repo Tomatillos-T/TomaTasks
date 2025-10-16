@@ -54,7 +54,12 @@ public class Sprint {
     private LocalDateTime updatedAt;
 
     // Constructors
-    public Sprint() {}
+    public Sprint() {
+    }
+
+    public Sprint(String id) {
+        this.id = id;
+    }
 
     public Sprint(String description, String status, LocalDate startDate, Project project) {
         this.description = description;
@@ -63,11 +68,13 @@ public class Sprint {
         this.project = project;
     }
 
-    public Sprint(String description, String status, LocalDate startDate, LocalDate endDate, Project project) {
+    public Sprint(String description, String status, LocalDate startDate, LocalDate endDate, LocalDate deliveryDate,
+            Project project) {
         this.description = description;
         this.status = status;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.deliveryDate = deliveryDate;
         this.project = project;
     }
 
@@ -115,15 +122,35 @@ public class Sprint {
         this.deliveryDate = deliveryDate;
     }
 
-    public Project getProject() { return project; }
-    public void setProject(Project project) { this.project = project; }
+    public Project getProject() {
+        return project;
+    }
 
-    public Set<Task> getTasks() { return tasks; }
-    public void setTasks(Set<Task> tasks) { this.tasks = tasks; }
+    public void setProject(Project project) {
+        this.project = project;
+    }
 
-    public Set<UserStory> getUserStories() { return userStories; }
-    public void setUserStories(Set<UserStory> userStories) { this.userStories = userStories; }
+    public Set<Task> getTasks() {
+        return tasks;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setTasks(Set<Task> tasks) {
+        this.tasks = tasks;
+    }
+
+    public Set<UserStory> getUserStories() {
+        return userStories;
+    }
+
+    public void setUserStories(Set<UserStory> userStories) {
+        this.userStories = userStories;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

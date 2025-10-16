@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -37,8 +36,17 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
+    public enum UserRole implements GrantedAuthority {
+        ROLE_DEVELOPER, ROLE_ADMIN;
+
+        @Override
+        public String getAuthority() {
+            return name();
+        }
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private UserRole role;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -61,9 +69,11 @@ public class User implements UserDetails {
     private String telegramToken;
 
     // Constructors
-    public User() {}
+    public User() {
+    }
 
-    public User(String firstName, String lastName, String email, String phoneNumber, String password, UserRole role, Team team) {
+    public User(String firstName, String lastName, String email, String phoneNumber, String password, UserRole role,
+            Team team) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -74,51 +84,105 @@ public class User implements UserDetails {
     }
 
     // Getters and Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getFirstName() { return firstName; }
-    public void setFirstName(String firstName) { this.firstName = firstName; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getLastName() { return lastName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
+    public String getFirstName() {
+        return firstName;
+    }
 
-    public String getName() { return firstName + " " + lastName; }
-    public String getID() { return id; }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getLastName() {
+        return lastName;
+    }
 
-    public String getPhoneNumber() { return phoneNumber; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public String getName() {
+        return firstName + " " + lastName;
+    }
 
-    public UserRole getRole() { return role; }
-    public void setRole(UserRole role) { this.role = role; }
+    public String getID() {
+        return id;
+    }
 
-    public Team getTeam() { return team; }
-    public void setTeam(Team team) { this.team = team; }
+    public String getEmail() {
+        return email;
+    }
 
-    public Set<Task> getTasks() { return tasks; }
-    public void setTasks(Set<Task> tasks) { this.tasks = tasks; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
 
-    public String getTelegramToken() { return telegramToken; }
-    public void setTelegramToken(String telegramToken) { this.telegramToken = telegramToken; }
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
-    // UserDetails methods
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
+
+    public Set<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(Set<Task> tasks) {
+        this.tasks = tasks;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public String getTelegramToken() {
+        return telegramToken;
+    }
+
+    public void setTelegramToken(String telegramToken) {
+        this.telegramToken = telegramToken;
+    }
+
     @Override
-    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (role != null) {
-            return Collections.singletonList(
-                    new SimpleGrantedAuthority("ROLE_" + role.getRole()));
-        }
-        return Collections.emptyList();
+        return Collections.singleton(role);
     }
 
     @Override
@@ -129,19 +193,27 @@ public class User implements UserDetails {
 
     @Override
     @JsonIgnore
-    public boolean isAccountNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
     @JsonIgnore
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
     @JsonIgnore
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
     @Override
     @JsonIgnore
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return true;
+    }
 
     @Override
     public String toString() {

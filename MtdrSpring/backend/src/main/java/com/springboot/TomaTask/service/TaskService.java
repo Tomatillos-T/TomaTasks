@@ -20,9 +20,6 @@ import org.springframework.stereotype.Service;
 import com.springboot.TomaTask.dto.PaginationRequestDTO;
 import com.springboot.TomaTask.dto.SortingDTO;
 import com.springboot.TomaTask.dto.ColumnFilterDTO;
-import com.springboot.TomaTask.dto.TaskDTO;
-import com.springboot.TomaTask.mapper.TaskMapper;
-import java.util.stream.Collectors;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -34,31 +31,30 @@ import java.util.List;
 public class TaskService {
     private final TaskRepository taskRepository;
     private final UserStoryRepository userStoryRepository;
+    private final UserRepository userRepository;
     private final SprintRepository sprintRepository;
-    private final TaskMapper taskMapper;
 
     public TaskService(TaskRepository taskRepository,
             UserStoryRepository userStoryRepository,
             SprintRepository sprintRepository,
-            TaskMapper taskMapper) {
+            UserRepository userRepository) {
         this.taskRepository = taskRepository;
         this.userStoryRepository = userStoryRepository;
+        this.userRepository = userRepository;
         this.sprintRepository = sprintRepository;
-        this.taskMapper = taskMapper;
     }
-
 
     public List<TaskDTO> getAllTasks() {
         return TaskMapper.toDTOList(taskRepository.findAll());
     }
 
-    public Page<Task> searchTasks(PaginationRequestDTO request) {
+    public Page<TaskDTO> searchTasks(PaginationRequestDTO request) {
         Specification<Task> spec = buildSpecification(request);
         Pageable pageable = PageRequest.of(
                 request.getPage(),
                 request.getPageSize(),
                 getSort(request.getSorting()));
-        return taskRepository.findAll(spec, pageable);
+        return taskRepository.findAll(spec, pageable).map(TaskMapper::toDTO);
     }
 
     // Build Specification dynamically
@@ -126,7 +122,7 @@ public class TaskService {
 
     public List<Task> findByUserStoryId(String userStoryId) {
         return taskRepository.findByUserStoryId(userStoryId);
-    private final UserRepository userRepository;
+    }
 
     public TaskDTO getTaskById(String id) {
         Task task = taskRepository.findById(id)
@@ -140,7 +136,8 @@ public class TaskService {
         // Set UserStory
         if (taskDTO.getUserStoryId() != null) {
             UserStory userStory = userStoryRepository.findById(taskDTO.getUserStoryId())
-                    .orElseThrow(() -> new RuntimeException("UserStory not found with ID: " + taskDTO.getUserStoryId()));
+                    .orElseThrow(
+                            () -> new RuntimeException("UserStory not found with ID: " + taskDTO.getUserStoryId()));
             task.setUserStory(userStory);
         }
 
@@ -177,7 +174,8 @@ public class TaskService {
         // Update UserStory
         if (taskDTO.getUserStoryId() != null) {
             UserStory userStory = userStoryRepository.findById(taskDTO.getUserStoryId())
-                    .orElseThrow(() -> new RuntimeException("UserStory not found with ID: " + taskDTO.getUserStoryId()));
+                    .orElseThrow(
+                            () -> new RuntimeException("UserStory not found with ID: " + taskDTO.getUserStoryId()));
             task.setUserStory(userStory);
         }
 
