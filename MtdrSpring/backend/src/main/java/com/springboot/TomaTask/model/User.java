@@ -2,7 +2,6 @@ package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,8 +18,7 @@ import java.util.Set;
 @Table(name = "user_table")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, unique = true)
     private String id;
 
@@ -118,14 +116,16 @@ public class User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role != null) {
             return Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + role.getRole())
-            );
+                    new SimpleGrantedAuthority("ROLE_" + role.getRole()));
         }
         return Collections.emptyList();
     }
 
     @Override
-    public String getUsername() { return email; }
+    @JsonIgnore
+    public String getUsername() {
+        return email;
+    }
 
     @Override
     @JsonIgnore

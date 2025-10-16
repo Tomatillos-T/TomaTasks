@@ -11,8 +11,7 @@ import java.util.Set;
 @Table(name = "user_role")
 public class UserRole {
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, unique = true)
     private String id;
 
@@ -32,7 +31,6 @@ public class UserRole {
 
     // Getters and Setters
     public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }

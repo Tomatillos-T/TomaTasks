@@ -14,8 +14,7 @@ import java.util.Set;
 @Table(name = "userstory")
 public class UserStory {
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, unique = true)
     private String id;
 
@@ -64,20 +63,22 @@ public class UserStory {
 
     // Getters and Setters
     public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+  
+    public String getName() {
+        return name;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public Integer getWeight() { return weight; }
-    public void setWeight(Integer weight) { this.weight = weight; }
+    public Integer getWeight() {
+        return weight;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-
+    public void setWeight(Integer weight) {
+        this.weight = weight;
+    }
     public Sprint getSprint() { return sprint; }
     public void setSprint(Sprint sprint) { this.sprint = sprint; }
 
@@ -87,9 +88,24 @@ public class UserStory {
     public Set<AcceptanceCriteria> getAcceptanceCriteria() { return acceptanceCriteria; }
     public void setAcceptanceCriteria(Set<AcceptanceCriteria> acceptanceCriteria) { this.acceptanceCriteria = acceptanceCriteria; }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getDescription() {
+        return description;
+    }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

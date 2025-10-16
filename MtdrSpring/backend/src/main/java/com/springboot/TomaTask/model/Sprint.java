@@ -2,7 +2,6 @@ package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -15,8 +14,7 @@ import java.util.Set;
 @Table(name = "sprint")
 public class Sprint {
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, unique = true)
     private String id;
 
@@ -65,34 +63,57 @@ public class Sprint {
         this.project = project;
     }
 
-    public Sprint(String description, String status, LocalDate startDate, LocalDate endDate,
-                  LocalDate deliveryDate, Project project) {
+    public Sprint(String description, String status, LocalDate startDate, LocalDate endDate, Project project) {
         this.description = description;
         this.status = status;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.deliveryDate = deliveryDate;
         this.project = project;
     }
 
-    // Getters and Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getDescription() {
+        return description;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+    public String getStatus() {
+        return status;
+    }
 
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public LocalDate getDeliveryDate() { return deliveryDate; }
-    public void setDeliveryDate(LocalDate deliveryDate) { this.deliveryDate = deliveryDate; }
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public LocalDate getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(LocalDate deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
 
     public Project getProject() { return project; }
     public void setProject(Project project) { this.project = project; }

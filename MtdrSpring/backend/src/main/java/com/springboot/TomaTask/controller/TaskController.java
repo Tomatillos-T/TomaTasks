@@ -1,7 +1,11 @@
 package com.springboot.TomaTask.controller;
 
+import com.springboot.TomaTask.dto.PaginationRequestDTO;
 import com.springboot.TomaTask.dto.TaskDTO;
 import com.springboot.TomaTask.service.TaskService;
+import com.springboot.TomaTask.mapper.TaskMapper;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,14 +16,22 @@ import java.util.List;
 @RequestMapping("/api/tasks")
 public class TaskController {
     private final TaskService taskService;
+    private final TaskMapper taskMapper;
 
-    public TaskController(TaskService taskService) {
+    public TaskController(TaskService taskService, TaskMapper taskMapper) {
         this.taskService = taskService;
+        this.taskMapper = taskMapper;
     }
 
     @GetMapping
     public ResponseEntity<List<TaskDTO>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
+    }
+
+    // Obtener todas las tareas paginadas como DTOs
+    @PostMapping("/search")
+    public Page<TaskDTO> searchTasks(@RequestBody PaginationRequestDTO request) {
+        return taskService.searchTasks(request).map(taskMapper::toDTO);
     }
 
     @GetMapping("/{id}")

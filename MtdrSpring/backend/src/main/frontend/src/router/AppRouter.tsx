@@ -4,7 +4,7 @@ import Home from "../pages/Home";
 import Dashboard from "../pages/Dashboard";
 import Layout from "../components/Layout";
 import TomaTaskMockup from "../pages/TomaTaskMockUp";
-import Tareas from "../pages/Tareas";
+import Tareas from "../pages/task/Tareas";
 import Kanban from "../pages/Kanban";
 import Equipos from "../pages/Equipos";
 import Proyectos from "../pages/Proyectos";

@@ -11,8 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "acceptance_criteria")
 public class AcceptanceCriteria {
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, unique = true)
     private String id;
 
