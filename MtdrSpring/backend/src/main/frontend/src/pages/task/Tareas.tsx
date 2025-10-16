@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import Input from "../../components/Input";
-import Button from "../../components//Button";
-import Alert from "../../components//Alert";
-import Modal from "../../components//Modal";
-import Textarea from "../../components//TextArea";
+import Button from "../../components/Button";
+import Alert from "../../components/Alert";
+import Modal from "../../components/Modal";
+import Textarea from "../../components/TextArea";
 import { HttpClient } from "../../services/httpClient";
 import type { HttpError } from "../../services/httpClient";
 import { Check } from "lucide-react";
