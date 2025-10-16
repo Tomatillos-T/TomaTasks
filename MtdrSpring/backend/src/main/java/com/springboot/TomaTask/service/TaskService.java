@@ -86,7 +86,7 @@ public class TaskService {
                         cb.like(cb.lower(userStoryJoin.get("name")), "%" + keyword + "%"),
                         cb.like(cb.lower(userStoryJoin.get("description")), "%" + keyword + "%"),
                         cb.like(cb.lower(userJoin.get("email")), "%" + keyword + "%"),
-                        cb.like(cb.lower(cb.concat(userJoin.get("firstName"), userJoin.get("lastName"))),
+                        cb.like(cb.lower(cb.concat(cb.concat(userJoin.get("firstName"), " "), userJoin.get("lastName"))),
                                 "%" + keyword + "%"),
                         cb.like(cb.lower(sprintJoin.get("description")), "%" + keyword + "%"));
             });
