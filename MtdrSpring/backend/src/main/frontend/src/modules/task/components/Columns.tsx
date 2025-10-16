@@ -15,7 +15,7 @@ export const columns: ColumnDef<Task>[] = [
     header: "Estimación (hrs)",
   },
   {
-    accessorKey: "asignee",
+    accessorKey: "assignee",
     header: "Asignado a",
   },
   {
