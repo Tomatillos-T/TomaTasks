@@ -21,7 +21,7 @@ export default async function getTasksAdapter({
           Authorization: `Bearer ${localStorage.getItem("jwtToken") || ""}`,
         },
         body: JSON.stringify({
-          page,
+          page: page - 1,
           pageSize,
           search,
           filters,
