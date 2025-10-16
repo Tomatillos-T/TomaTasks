@@ -123,6 +123,12 @@ public class User implements UserDetails {
 
     @Override
     @JsonIgnore
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() { return true; }
 
     @Override
