@@ -8,7 +8,7 @@ export default interface Task {
   status: TaskStatus;
   userStory: string;
   sprint: string;
-  asignee: string;
+  assignee: string;
   startDate: Date;
   endDate: Date;
   deliveryDate: Date;
