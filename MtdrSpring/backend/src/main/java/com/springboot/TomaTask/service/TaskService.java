@@ -27,13 +27,9 @@ import jakarta.persistence.criteria.Join;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 public class TaskService {
-
-    private static final Logger logger = LoggerFactory.getLogger(TaskService.class);
 
     private final TaskRepository taskRepository;
     private final UserStoryRepository userStoryRepository;
@@ -86,7 +82,8 @@ public class TaskService {
                         cb.like(cb.lower(userStoryJoin.get("name")), "%" + keyword + "%"),
                         cb.like(cb.lower(userStoryJoin.get("description")), "%" + keyword + "%"),
                         cb.like(cb.lower(userJoin.get("email")), "%" + keyword + "%"),
-                        cb.like(cb.lower(cb.concat(cb.concat(userJoin.get("firstName"), " "), userJoin.get("lastName"))),
+                        cb.like(cb
+                                .lower(cb.concat(cb.concat(userJoin.get("firstName"), " "), userJoin.get("lastName"))),
                                 "%" + keyword + "%"),
                         cb.like(cb.lower(sprintJoin.get("description")), "%" + keyword + "%"));
             });
@@ -97,13 +94,11 @@ public class TaskService {
             for (ColumnFilterDTO filter : request.getFilters()) {
                 spec = spec.and((root, query, cb) -> {
                     String[] value = filter.getId().split("\\.");
-                    logger.info("Filter ID parts: " + value[0] + ", " + (value.length > 1 ? value[1] : "N/A"));
                     switch (value[0]) {
                         case "userStory":
                             Join<Task, UserStory> userStoryJoin = root.join("userStory", JoinType.LEFT);
                             return cb.equal(userStoryJoin.get(value[1]), filter.getValue());
                         case "sprint":
-                            logger.info("Applying filter on sprint with value: " + filter.getValue() + " " + value[1]);
                             Join<Task, Sprint> sprintJoin = root.join("sprint", JoinType.LEFT);
                             return cb.equal(sprintJoin.get(value[1]), filter.getValue());
                         case "user":
