@@ -186,7 +186,7 @@ public class BotActions {
                 requestText.lastIndexOf(BotLabels.DASH.getLabel()));
         try {
             TaskDTO taskDto = taskService.getTaskById(undo);
-            taskDto.setStatus(Status.DONE);
+            taskDto.setStatus(Status.IN_PROGRESS);
             taskService.updateTask(undo, taskDto);
             BotHelper.sendMessageToTelegram(chatId, BotMessages.ITEM_UNDONE.getMessage(), telegramClient);
         } catch (Exception e) {
