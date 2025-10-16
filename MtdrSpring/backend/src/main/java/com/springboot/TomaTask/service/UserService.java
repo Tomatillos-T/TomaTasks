@@ -22,8 +22,9 @@ public class UserService {
     private UserRepository userRepository;
 
     public List<UserDTO> findAll() {
-        return UserMapper.toDTOSet(userRepository.findAll().stream().collect(java.util.stream.Collectors.toSet()))
-                .stream().collect(java.util.stream.Collectors.toList());
+        return userRepository.findAll().stream()
+                .map(UserMapper::toDTO)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     public ResponseEntity<UserDTO> getUserById(String id) {
