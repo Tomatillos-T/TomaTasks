@@ -16,11 +16,9 @@ import java.util.List;
 @RequestMapping("/api/tasks")
 public class TaskController {
     private final TaskService taskService;
-    private final TaskMapper taskMapper;
 
-    public TaskController(TaskService taskService, TaskMapper taskMapper) {
+    public TaskController(TaskService taskService) {
         this.taskService = taskService;
-        this.taskMapper = taskMapper;
     }
 
     @GetMapping
@@ -30,8 +28,9 @@ public class TaskController {
 
     // Obtener todas las tareas paginadas como DTOs
     @PostMapping("/search")
-    public Page<TaskDTO> searchTasks(@RequestBody PaginationRequestDTO request) {
-        return taskService.searchTasks(request).map(taskMapper::toDTO);
+    public ResponseEntity<Page<TaskDTO>> searchTasks(@RequestBody PaginationRequestDTO request) {
+        Page<TaskDTO> dtoPage = taskService.searchTasks(request);
+        return ResponseEntity.ok(dtoPage);
     }
 
     @GetMapping("/{id}")

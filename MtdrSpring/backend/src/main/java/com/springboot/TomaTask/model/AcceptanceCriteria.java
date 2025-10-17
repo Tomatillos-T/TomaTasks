@@ -2,7 +2,6 @@ package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -34,7 +33,8 @@ public class AcceptanceCriteria {
     private LocalDateTime updatedAt;
 
     // Constructors
-    public AcceptanceCriteria() {}
+    public AcceptanceCriteria() {
+    }
 
     public AcceptanceCriteria(String description, String status, UserStory userStory) {
         this.description = description;
@@ -43,18 +43,43 @@ public class AcceptanceCriteria {
     }
 
     // Getters and Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public String getDescription() {
+        return description;
+    }
 
-    public UserStory getUserStory() { return userStory; }
-    public void setUserStory(UserStory userStory) { this.userStory = userStory; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public UserStory getUserStory() {
+        return userStory;
+    }
+
+    public void setUserStory(UserStory userStory) {
+        this.userStory = userStory;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

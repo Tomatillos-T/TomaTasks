@@ -67,21 +67,13 @@ public class SprintMapper {
             return null;
         }
 
-        Sprint sprint = new Sprint();
+        Sprint sprint = new Sprint(dto.getId());
         sprint.setDescription(dto.getDescription());
         sprint.setStatus(dto.getStatus());
         sprint.setStartDate(dto.getStartDate());
         sprint.setEndDate(dto.getEndDate());
         sprint.setDeliveryDate(dto.getDeliveryDate());
 
-        return sprint;
-    }
-
-    public static Sprint toEntityWithId(SprintDTO dto) {
-        Sprint sprint = toEntity(dto);
-        if (dto != null && dto.getId() != null) {
-            sprint.setId(dto.getId());
-        }
         return sprint;
     }
 

@@ -55,20 +55,12 @@ public class UserStoryMapper {
             return null;
         }
 
-        UserStory userStory = new UserStory();
+        UserStory userStory = new UserStory(dto.getId());
         userStory.setName(dto.getName());
         userStory.setWeight(dto.getWeight());
         userStory.setDescription(dto.getDescription());
         userStory.setStatus(dto.getStatus());
 
-        return userStory;
-    }
-
-    public static UserStory toEntityWithId(UserStoryDTO dto) {
-        UserStory userStory = toEntity(dto);
-        if (dto != null && dto.getId() != null) {
-            userStory.setId(dto.getId());
-        }
         return userStory;
     }
 

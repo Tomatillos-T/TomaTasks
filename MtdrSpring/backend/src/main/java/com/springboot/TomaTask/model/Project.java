@@ -2,7 +2,6 @@ package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -54,7 +53,12 @@ public class Project {
     private LocalDateTime updatedAt;
 
     // Constructors
-    public Project() {}
+    public Project() {
+    }
+
+    public Project(String id) {
+        this.id = id;
+    }
 
     public Project(String name, String status, LocalDate startDate) {
         this.name = name;
@@ -63,12 +67,14 @@ public class Project {
     }
 
     // Missing team
-    public Project(String name, String description, String status, LocalDate startDate, LocalDate endDate) {
+    public Project(String name, String description, String status, LocalDate startDate, LocalDate endDate,
+            LocalDate deliveryDate) {
         this.name = name;
         this.description = description;
         this.status = status;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.deliveryDate = deliveryDate;
     }
 
     // Getters y Setters
@@ -124,12 +130,27 @@ public class Project {
         this.endDate = endDate;
     }
 
-    public Team getTeam() { return team; }
-    public void setTeam(Team team) { this.team = team; }
+    public Team getTeam() {
+        return team;
+    }
 
-    public Set<Sprint> getSprints() { return sprints; }
-    public void setSprints(Set<Sprint> sprints) { this.sprints = sprints; }
+    public void setTeam(Team team) {
+        this.team = team;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public Set<Sprint> getSprints() {
+        return sprints;
+    }
+
+    public void setSprints(Set<Sprint> sprints) {
+        this.sprints = sprints;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

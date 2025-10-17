@@ -57,19 +57,11 @@ public class TeamMapper {
             return null;
         }
 
-        Team team = new Team();
+        Team team = new Team(dto.getId());
         team.setName(dto.getName());
         team.setDescription(dto.getDescription());
         team.setStatus(dto.getStatus());
 
-        return team;
-    }
-
-    public static Team toEntityWithId(TeamDTO dto) {
-        Team team = toEntity(dto);
-        if (dto != null && dto.getId() != null) {
-            team.setId(dto.getId());
-        }
         return team;
     }
 

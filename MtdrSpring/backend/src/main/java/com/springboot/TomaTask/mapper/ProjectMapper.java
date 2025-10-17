@@ -59,7 +59,7 @@ public class ProjectMapper {
             return null;
         }
 
-        Project project = new Project();
+        Project project = new Project(dto.getId());
         project.setName(dto.getName());
         project.setDescription(dto.getDescription());
         project.setStatus(dto.getStatus());
@@ -67,14 +67,6 @@ public class ProjectMapper {
         project.setDeliveryDate(dto.getDeliveryDate());
         project.setEndDate(dto.getEndDate());
 
-        return project;
-    }
-
-    public static Project toEntityWithId(ProjectDTO dto) {
-        Project project = toEntity(dto);
-        if (dto != null && dto.getId() != null) {
-            project.setId(dto.getId());
-        }
         return project;
     }
 

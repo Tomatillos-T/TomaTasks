@@ -26,10 +26,11 @@ public class TaskDTO {
     private LocalDateTime updatedAt;
 
     // Constructors
-    public TaskDTO() {}
+    public TaskDTO() {
+    }
 
     public TaskDTO(String id, String name, String description, Integer timeEstimate, Status status,
-                   LocalDate startDate, LocalDate endDate, LocalDate deliveryDate) {
+            LocalDate startDate, LocalDate endDate, LocalDate deliveryDate) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -41,9 +42,13 @@ public class TaskDTO {
     }
 
     // Getters and Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -76,17 +81,38 @@ public class TaskDTO {
     public void setStatus(Status status) {
         this.status = status;
     }
-    public String getUserStoryId() { return userStoryId; }
-    public void setUserStoryId(String userStoryId) { this.userStoryId = userStoryId; }
 
-    public String getSprintId() { return sprintId; }
-    public void setSprintId(String sprintId) { this.sprintId = sprintId; }
+    public String getUserStoryId() {
+        return userStoryId;
+    }
 
-    public String getAssigneeId() { return assigneeId; }
-    public void setAssigneeId(String assigneeId) { this.assigneeId = assigneeId; }
+    public void setUserStoryId(String userStoryId) {
+        this.userStoryId = userStoryId;
+    }
 
-    public UserDTO getAssignee() { return assignee; }
-    public void setAssignee(UserDTO assignee) { this.assignee = assignee; }
+    public String getSprintId() {
+        return sprintId;
+    }
+
+    public void setSprintId(String sprintId) {
+        this.sprintId = sprintId;
+    }
+
+    public String getAssigneeId() {
+        return assigneeId;
+    }
+
+    public void setAssigneeId(String assigneeId) {
+        this.assigneeId = assigneeId;
+    }
+
+    public UserDTO getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(UserDTO assignee) {
+        this.assignee = assignee;
+    }
 
     public LocalDate getStartDate() {
         return startDate;
@@ -113,11 +139,11 @@ public class TaskDTO {
     }
 
     public UserDTO getUser() {
-        return user;
+        return assignee;
     }
 
     public void setUser(UserDTO user) {
-        this.user = user;
+        this.assignee = user;
     }
 
     public SprintDTO getSprint() {
@@ -127,13 +153,28 @@ public class TaskDTO {
     public void setSprint(SprintDTO sprint) {
         this.sprint = sprint;
     }
-    
-    public UserStoryDTO getUserStory() { return userStory; }
-    public void setUserStory(UserStoryDTO userStory) { this.userStory = userStory; }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public UserStoryDTO getUserStory() {
+        return userStory;
+    }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setUserStory(UserStoryDTO userStory) {
+        this.userStory = userStory;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
