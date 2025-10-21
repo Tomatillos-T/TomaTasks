@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useRef, forwardRef } from "react";
-import geminiService from "../services/geminiService";
+import { HttpClient } from "../services/httpClient";
 
 interface ChatBubbleProps {
   role: "user" | "assistant";
   content: string;
   isLoading?: boolean;
+}
+
+interface Commit {
+  hash: string;
+  message: string;
+  author: string;
+  timestamp: number;
 }
 
 function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
@@ -65,7 +72,7 @@ function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
 
 interface Message {
   role: "user" | "assistant";
-  content: { text: string }[];
+  content: string;
 }
 
 interface ChatMessagesProps {
@@ -80,7 +87,7 @@ function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
         <ChatBubble
           key={index}
           role={message.role}
-          content={message.content.map((block) => block.text).join("\n")}
+          content={message.content}
         />
       ))}
       {isLoading && <ChatBubble role="assistant" content="" isLoading={true} />}
@@ -88,7 +95,6 @@ function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   );
 }
 
-// ChatInput.jsx (dentro de Chatbot.jsx)
 interface ChatInputProps {
   onSendMessage: (input: string) => void;
   disabled?: boolean;
@@ -121,7 +127,7 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
                    dark:bg-gray-700 dark:border-gray-600 dark:text-white 
                    text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           placeholder={
-            disabled ? "Enviando mensaje..." : "Escribe un mensaje..."
+            disabled ? "Enviando mensaje..." : "Pregunta sobre el repositorio..."
           }
         />
         <button
@@ -139,22 +145,14 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
 function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGeminiAvailable, setIsGeminiAvailable] = useState(false);
+  const [commits, setCommits] = useState<Commit[]>([]);
+  const [selectedCommits, setSelectedCommits] = useState<string[]>([]);
+  const [repoStatus, setRepoStatus] = useState<string>("Not synced");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputFieldRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    // Verificar si Gemini está disponible
-    setIsGeminiAvailable(geminiService.isAvailable());
-
-    if (!geminiService.isAvailable()) {
-      if (typeof geminiService.getModelInfo === "function") {
-        console.log("Gemini Service Info:", geminiService.getModelInfo());
-      } else {
-        console.log("Gemini Service Info: not available");
-      }
-    }
-
+    loadCommits();
     inputFieldRef.current?.focus();
   }, []);
 
@@ -164,55 +162,54 @@ function Chatbot() {
     }, 100);
   };
 
-  const handleSendMessage = async (input: string) => {
-    if (!isGeminiAvailable) {
-      alert("Gemini no está configurado correctamente. Verifica tu API key.");
-      return;
+  const loadCommits = async () => {
+    try {
+      const data = await HttpClient.get<Commit[]>("/api/rag/commits?limit=20", { auth: true });
+      setCommits(data);
+    } catch (error) {
+      console.error("Error loading commits:", error);
     }
+  };
 
-    const newMessage: Message = {
-      role: "user",
-      content: [{ text: input }],
-    };
+  const syncRepo = async () => {
+    try {
+      setRepoStatus("Syncing...");
+      await HttpClient.post("/api/rag/sync", {}, { auth: true });
+      setRepoStatus("Synced ✓");
+      loadCommits();
+    } catch (error) {
+      console.error("Error syncing repo:", error);
+      setRepoStatus("Sync failed");
+    }
+  };
 
-    // Agregar mensaje del usuario
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  const handleSendMessage = async (input: string) => {
+    const newMessage: Message = { role: "user", content: input };
+    setMessages((prev) => [...prev, newMessage]);
     setIsLoading(true);
     scrollToBottom();
 
     try {
-      // Enviar mensaje a Gemini
-      const response = await geminiService.sendMessage(
-        input,
-        messages
-          .filter((m) => m.role === "user")
-          .map((m) => m.content.map((block) => block.text).join("\n"))
+      const response = await HttpClient.post<{ answer: string }>(
+        "/api/rag/query",
+        { question: input, commitIds: selectedCommits },
+        { auth: true }
       );
 
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: [{ text: response }],
-      };
-
-      // Agregar respuesta del asistente
-      setMessages((prevMessages) => [...prevMessages, assistantMessage]);
-    } catch (error) {
-      console.error("Error sending message:", error);
-
-      const errorMessage: Message = {
-        role: "assistant",
-        content: [
-          {
-            text:
-              "Error: " +
-              (error && typeof error === "object" && "message" in error
-                ? (error as { message?: string }).message
-                : String(error)),
-          },
-        ],
-      };
-
-      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: response.answer },
+      ]);
+    } catch (error: any) {
+      console.error("❌ Backend 500 error:", error);
+      const message =
+        error?.response?.data?.error ||
+        error?.message ||
+        "There was an error processing your question.";
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Error: " + message },
+      ]);
     } finally {
       setIsLoading(false);
       scrollToBottom();
@@ -222,65 +219,102 @@ function Chatbot() {
 
   const newChat = () => {
     setMessages([]);
+    setSelectedCommits([]);
     inputFieldRef.current?.focus();
   };
 
+  const toggleCommit = (hash: string) => {
+    setSelectedCommits((prev) =>
+      prev.includes(hash) ? prev.filter((h) => h !== hash) : [...prev, hash]
+    );
+  };
+
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden">
-      {/* Header del chat */}
-      <div className="flex flex-wrap items-center justify-between p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800">
-        <div className="flex flex-wrap items-center gap-3">
-          <h3 className="font-semibold text-gray-900 dark:text-white">
-            Chatbot con Gemini
-          </h3>
-          {isGeminiAvailable && (
-            <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-              ✓ Conectado
-            </span>
-          )}
-          {!isGeminiAvailable && (
-            <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
-              ✗ Sin conexión
-            </span>
-          )}
+    <div className="flex h-full bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden">
+      {/* Sidebar */}
+      <div className="w-64 border-r dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto p-4">
+        <div className="mb-4">
+          <h3 className="font-semibold text-sm mb-2">Repository Status</h3>
+          <button
+            onClick={syncRepo}
+            className="w-full px-3 py-2 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Sync Repository
+          </button>
+          <p className="text-xs text-gray-500 mt-1">{repoStatus}</p>
         </div>
-        <button
-          onClick={newChat}
-          className="mt-2 sm:mt-0 px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          Nuevo Chat
-        </button>
+
+        <div>
+          <h3 className="font-semibold text-sm mb-2">Select Commits</h3>
+          <div className="space-y-2">
+            {commits.map((commit) => (
+              <div key={commit.hash} className="text-xs">
+                <label className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded">
+                  <input
+                    type="checkbox"
+                    checked={selectedCommits.includes(commit.hash)}
+                    onChange={() => toggleCommit(commit.hash)}
+                    className="mt-0.5"
+                  />
+                  <div className="flex-1">
+                    <div className="font-mono text-xs text-blue-600 dark:text-blue-400">
+                      {commit.hash.substring(0, 7)}
+                    </div>
+                    <div className="text-gray-700 dark:text-gray-300">
+                      {commit.message.split("\n")[0].substring(0, 50)}
+                    </div>
+                    <div className="text-gray-500 text-xs">
+                      {commit.author}
+                    </div>
+                  </div>
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Área de mensajes */}
-      <div className="flex-1 overflow-y-auto p-2 sm:p-4">
-        {messages.length === 0 && (
-          <div className="text-center text-gray-500 dark:text-gray-400 mt-4 sm:mt-8 px-4">
-            <p className="mb-2 text-sm sm:text-base">
-              👋 ¡Hola! Soy un chatbot potenciado por Gemini
-            </p>
-            <p className="text-xs sm:text-sm">
-              Escribe un mensaje para comenzar la conversación
+      {/* Chat Area */}
+      <div className="flex-1 flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800">
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-white">
+              Repository Assistant
+            </h3>
+            <p className="text-xs text-gray-500">
+              Ask questions about commits and code changes
             </p>
           </div>
-        )}
-        <ChatMessages messages={messages} isLoading={isLoading} />
-        <div ref={messagesEndRef} />
-      </div>
+          <button
+            onClick={newChat}
+            className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          >
+            New Chat
+          </button>
+        </div>
 
-      {/* Input de mensaje */}
-      <div className="p-2 sm:p-4 border-t dark:border-gray-700 bg-white dark:bg-gray-800">
-        {!isGeminiAvailable && (
-          <div className="mb-2 sm:mb-3 p-2 bg-yellow-100 border border-yellow-300 rounded-lg text-yellow-800 text-xs sm:text-sm">
-            ⚠️ Configura tu API key de Gemini en las variables de entorno
-            (VITE_APP_GEMINI_API_KEY)
-          </div>
-        )}
-        <ChatInput
-          onSendMessage={handleSendMessage}
-          ref={inputFieldRef}
-          disabled={isLoading || !isGeminiAvailable}
-        />
+        <div className="flex-1 overflow-y-auto p-2 sm:p-4">
+          {messages.length === 0 && (
+            <div className="text-center text-gray-500 dark:text-gray-400 mt-4 sm:mt-8 px-4">
+              <p className="mb-2 text-sm sm:text-base">
+                👨‍💻 Repository Analysis Assistant
+              </p>
+              <p className="text-xs sm:text-sm">
+                Select commits from the sidebar and ask questions about changes
+              </p>
+            </div>
+          )}
+          <ChatMessages messages={messages} isLoading={isLoading} />
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div className="p-2 sm:p-4 border-t dark:border-gray-700 bg-white dark:bg-gray-800">
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            ref={inputFieldRef}
+            disabled={isLoading}
+          />
+        </div>
       </div>
     </div>
   );
