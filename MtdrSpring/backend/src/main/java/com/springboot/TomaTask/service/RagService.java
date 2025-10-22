@@ -24,29 +24,38 @@ public class RagService {
 
     public String queryRepository(String question, List<String> commitIds) throws Exception {
         StringBuilder context = new StringBuilder();
-        
-        // Get recent commits as context
-        List<RepositoryService.CommitInfo> commits = repoService.getRecentCommits(10);
-        context.append("Recent commits:\n");
-        for (RepositoryService.CommitInfo commit : commits) {
-            context.append(String.format("- [%s] %s by %s\n", 
-                commit.hash.substring(0, 7), commit.message, commit.author));
+    
+        // Fetch commits (limit 10) to provide general context
+        List<RepositoryService.CommitInfo> recentCommits = repoService.getRecentCommits(10);
+        context.append("Recent commits overview:\n");
+        for (RepositoryService.CommitInfo commit : recentCommits) {
+            context.append(String.format("- [%s] %s by %s (%d)\n",
+                    commit.hash.substring(0, 7), commit.message, commit.author, commit.timestamp));
         }
-        
-        // Add specific commit diffs if requested
+    
+        // If specific commits were selected by the user
         if (commitIds != null && !commitIds.isEmpty()) {
+            context.append("\nSelected commit details:\n");
             for (String commitId : commitIds) {
-                String diff = repoService.getCommitDiff(commitId);
-                context.append("\nDiff for commit ").append(commitId).append(":\n");
-                context.append(diff);
+                try {
+                    String diff = repoService.getCommitDiff(commitId);
+                    context.append("\n--- Commit ").append(commitId).append(" ---\n");
+                    context.append(diff.isBlank() ? "(No changes detected)\n" : diff);
+                } catch (Exception e) {
+                    // Gracefully fallback if diff can't be generated
+                    context.append(String.format("\n--- Commit %s ---\n(Diff unavailable locally: %s)\n",
+                            commitId, e.getMessage()));
+                }
             }
         }
-
+    
+        // Send the clean context to Gemini
         return callGemini(context.toString(), question);
     }
+    
 
     private String callGemini(String context, String question) {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" + apiKey;
         
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("contents", List.of(

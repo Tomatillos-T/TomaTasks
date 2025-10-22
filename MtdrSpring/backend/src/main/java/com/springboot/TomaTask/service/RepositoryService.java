@@ -4,9 +4,11 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -62,29 +64,42 @@ public class RepositoryService {
         return commits;
     }
 
-    public String getCommitDiff(String commitId) throws IOException, GitAPIException {
+    public String getCommitDiff(String commitId) throws IOException {
+        if (git == null) {
+            throw new IllegalStateException("Local repository not initialized. Please run /api/rag/sync first.");
+        }
+
         Repository repo = git.getRepository();
-        RevCommit commit = git.getRepository().parseCommit(repo.resolve(commitId));
-        RevCommit parent = commit.getParent(0);
-        
-        try (ObjectReader reader = repo.newObjectReader();
-             ByteArrayOutputStream out = new ByteArrayOutputStream();
-             DiffFormatter formatter = new DiffFormatter(out)) {
-            
-            CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
-            oldTreeIter.reset(reader, parent.getTree());
-            
-            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-            newTreeIter.reset(reader, commit.getTree());
-            
-            formatter.setRepository(repo);
-            List<DiffEntry> diffs = formatter.scan(oldTreeIter, newTreeIter);
-            
-            for (DiffEntry diff : diffs) {
-                formatter.format(diff);
+        ObjectId commitObject = repo.resolve(commitId);
+        if (commitObject == null) {
+            throw new IllegalArgumentException("Commit not found locally: " + commitId);
+        }
+
+        try (RevWalk revWalk = new RevWalk(repo)) {
+            RevCommit commit = revWalk.parseCommit(commitObject);
+            RevCommit parent = commit.getParentCount() > 0 ? revWalk.parseCommit(commit.getParent(0)) : null;
+
+            try (ObjectReader reader = repo.newObjectReader();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                DiffFormatter formatter = new DiffFormatter(out)) {
+
+                CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
+                if (parent != null) {
+                    oldTreeIter.reset(reader, parent.getTree());
+                }
+
+                CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+                newTreeIter.reset(reader, commit.getTree());
+
+                formatter.setRepository(repo);
+                List<DiffEntry> diffs = formatter.scan(oldTreeIter, newTreeIter);
+                for (DiffEntry diff : diffs) {
+                    formatter.format(diff);
+                }
+
+                String diffText = out.toString().trim();
+                return diffText.isEmpty() ? "(No changes detected)" : diffText;
             }
-            
-            return out.toString();
         }
     }
 
