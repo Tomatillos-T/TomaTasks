@@ -19,39 +19,38 @@ interface Commit {
 function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
   return (
     <div
-      className={`${
-        role === "user" ? "col-start-1 col-end-9" : "col-start-5 col-end-13"
-      } p-2 rounded-lg`}
+      className={`flex ${
+        role === "user" ? "justify-start" : "justify-end"
+      } w-full`}
     >
       <div
-        className={`flex ${
+        className={`flex items-start gap-3 max-w-[90%] sm:max-w-[88%] lg:max-w-[85%] ${
           role === "user" ? "flex-row" : "flex-row-reverse"
-        } items-start gap-3`}
+        }`}
       >
+        {/* Avatar */}
         <div
           className={`flex items-center justify-center rounded-full flex-shrink-0
-                        h-8 w-8 sm:h-10 sm:w-10 ${
-                          role === "user"
-                            ? "bg-primary-main text-primary-contrast"
-                            : "bg-secondary-main text-secondary-contrast"
-                        }`}
+                      h-8 w-8 sm:h-10 sm:w-10 ${
+                        role === "user"
+                          ? "bg-primary-main text-primary-contrast"
+                          : "bg-secondary-main text-secondary-contrast"
+                      }`}
         >
           <span className="text-sm sm:text-base font-semibold">
             {role === "user" ? "U" : "A"}
           </span>
         </div>
+
+        {/* Message Bubble */}
         <div
-          className={`relative ${
-            role === "user" ? "mr-auto" : "ml-auto"
-          } 
-                        p-3 sm:p-4 lg:p-5 rounded-2xl shadow-sm
-                        max-w-[95%] sm:max-w-[85%] lg:max-w-[75%]
-                        text-sm sm:text-base
-                        ${
-                          role === "user"
-                            ? "bg-background-paper text-text-primary border border-background-contrast"
-                            : "bg-primary-main text-primary-contrast"
-                        }`}
+          className={`relative p-3 sm:p-4 rounded-2xl shadow-sm
+                      text-sm sm:text-base break-words
+                      ${
+                        role === "user"
+                          ? "bg-background-paper text-text-primary border border-background-contrast"
+                          : "bg-primary-main text-primary-contrast"
+                      }`}
         >
           {isLoading ? (
             <div className="flex items-center gap-1.5">
@@ -67,53 +66,7 @@ function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
             </div>
           ) : role === "assistant" ? (
             <div className="prose prose-sm sm:prose-base prose-invert max-w-none">
-              <ReactMarkdown
-                components={{
-                  p: ({ node, ...props }) => (
-                    <p className="mb-2 last:mb-0" {...props} />
-                  ),
-                  code: ({ node, className, children, ...props }) => {
-                    const isInline = !className;
-                    return isInline ? (
-                      <code
-                        className="bg-black/20 px-1.5 py-0.5 rounded text-xs sm:text-sm font-mono"
-                        {...props}
-                      >
-                        {children}
-                      </code>
-                    ) : (
-                      <code
-                        className="block bg-black/20 p-2 sm:p-3 rounded-lg text-xs sm:text-sm font-mono overflow-x-auto"
-                        {...props}
-                      >
-                        {children}
-                      </code>
-                    );
-                  },
-                  ul: ({ node, ...props }) => (
-                    <ul className="list-disc pl-4 sm:pl-5 space-y-1" {...props} />
-                  ),
-                  ol: ({ node, ...props }) => (
-                    <ol className="list-decimal pl-4 sm:pl-5 space-y-1" {...props} />
-                  ),
-                  li: ({ node, ...props }) => <li className="mb-1" {...props} />,
-                  strong: ({ node, ...props }) => (
-                    <strong className="font-semibold" {...props} />
-                  ),
-                  em: ({ node, ...props }) => <em className="italic" {...props} />,
-                  h1: ({ node, ...props }) => (
-                    <h1 className="text-lg sm:text-xl font-bold mb-2" {...props} />
-                  ),
-                  h2: ({ node, ...props }) => (
-                    <h2 className="text-base sm:text-lg font-bold mb-2" {...props} />
-                  ),
-                  h3: ({ node, ...props }) => (
-                    <h3 className="text-sm sm:text-base font-bold mb-1" {...props} />
-                  ),
-                }}
-              >
-                {content}
-              </ReactMarkdown>
+              <ReactMarkdown>{content}</ReactMarkdown>
             </div>
           ) : (
             <span className="whitespace-pre-wrap">{content}</span>
@@ -136,9 +89,13 @@ interface ChatMessagesProps {
 
 function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   return (
-    <div className="grid grid-cols-12 gap-y-3 px-2 sm:px-4">
+    <div className="flex flex-col gap-3 px-2 sm:px-4 w-full">
       {messages.map((message, index) => (
-        <ChatBubble key={index} role={message.role} content={message.content} />
+        <ChatBubble
+          key={index}
+          role={message.role}
+          content={message.content}
+        />
       ))}
       {isLoading && <ChatBubble role="assistant" content="" isLoading={true} />}
     </div>
