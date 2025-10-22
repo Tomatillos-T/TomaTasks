@@ -1,7 +1,7 @@
 interface TableHeadProps {
   children: React.ReactNode;
   className?: string;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLTableCellElement>) => void;
 }
 
 export const TableHead: React.FC<TableHeadProps> = ({
