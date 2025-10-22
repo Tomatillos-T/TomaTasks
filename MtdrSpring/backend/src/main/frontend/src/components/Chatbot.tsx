@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, forwardRef } from "react";
 import { HttpClient } from "../services/httpClient";
 import { Check } from "lucide-react";
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from "react-markdown";
 
 interface ChatBubbleProps {
   role: "user" | "assistant";
@@ -31,8 +31,8 @@ function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
         <div
           className={`flex items-center justify-center rounded-full flex-shrink-0
                         h-8 w-8 sm:h-10 sm:w-10 ${
-                          role === "user" 
-                            ? "bg-primary-main text-primary-contrast" 
+                          role === "user"
+                            ? "bg-primary-main text-primary-contrast"
                             : "bg-secondary-main text-secondary-contrast"
                         }`}
         >
@@ -44,8 +44,8 @@ function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
           className={`relative ${
             role === "user" ? "mr-auto" : "ml-auto"
           } 
-                        p-3 sm:p-4 rounded-2xl shadow-sm
-                        max-w-[85%] sm:max-w-[80%] 
+                        p-3 sm:p-4 lg:p-5 rounded-2xl shadow-sm
+                        max-w-[95%] sm:max-w-[85%] lg:max-w-[75%]
                         text-sm sm:text-base
                         ${
                           role === "user"
@@ -69,23 +69,47 @@ function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
             <div className="prose prose-sm sm:prose-base prose-invert max-w-none">
               <ReactMarkdown
                 components={{
-                  p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
-                  code: ({node, className, children, ...props}) => {
+                  p: ({ node, ...props }) => (
+                    <p className="mb-2 last:mb-0" {...props} />
+                  ),
+                  code: ({ node, className, children, ...props }) => {
                     const isInline = !className;
                     return isInline ? (
-                      <code className="bg-black/20 px-1.5 py-0.5 rounded text-xs sm:text-sm font-mono" {...props}>{children}</code>
+                      <code
+                        className="bg-black/20 px-1.5 py-0.5 rounded text-xs sm:text-sm font-mono"
+                        {...props}
+                      >
+                        {children}
+                      </code>
                     ) : (
-                      <code className="block bg-black/20 p-2 sm:p-3 rounded-lg text-xs sm:text-sm font-mono overflow-x-auto" {...props}>{children}</code>
+                      <code
+                        className="block bg-black/20 p-2 sm:p-3 rounded-lg text-xs sm:text-sm font-mono overflow-x-auto"
+                        {...props}
+                      >
+                        {children}
+                      </code>
                     );
                   },
-                  ul: ({node, ...props}) => <ul className="list-disc pl-4 sm:pl-5 space-y-1" {...props} />,
-                  ol: ({node, ...props}) => <ol className="list-decimal pl-4 sm:pl-5 space-y-1" {...props} />,
-                  li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                  strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
-                  em: ({node, ...props}) => <em className="italic" {...props} />,
-                  h1: ({node, ...props}) => <h1 className="text-lg sm:text-xl font-bold mb-2" {...props} />,
-                  h2: ({node, ...props}) => <h2 className="text-base sm:text-lg font-bold mb-2" {...props} />,
-                  h3: ({node, ...props}) => <h3 className="text-sm sm:text-base font-bold mb-1" {...props} />,
+                  ul: ({ node, ...props }) => (
+                    <ul className="list-disc pl-4 sm:pl-5 space-y-1" {...props} />
+                  ),
+                  ol: ({ node, ...props }) => (
+                    <ol className="list-decimal pl-4 sm:pl-5 space-y-1" {...props} />
+                  ),
+                  li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                  strong: ({ node, ...props }) => (
+                    <strong className="font-semibold" {...props} />
+                  ),
+                  em: ({ node, ...props }) => <em className="italic" {...props} />,
+                  h1: ({ node, ...props }) => (
+                    <h1 className="text-lg sm:text-xl font-bold mb-2" {...props} />
+                  ),
+                  h2: ({ node, ...props }) => (
+                    <h2 className="text-base sm:text-lg font-bold mb-2" {...props} />
+                  ),
+                  h3: ({ node, ...props }) => (
+                    <h3 className="text-sm sm:text-base font-bold mb-1" {...props} />
+                  ),
                 }}
               >
                 {content}
@@ -114,11 +138,7 @@ function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   return (
     <div className="grid grid-cols-12 gap-y-3 px-2 sm:px-4">
       {messages.map((message, index) => (
-        <ChatBubble
-          key={index}
-          role={message.role}
-          content={message.content}
-        />
+        <ChatBubble key={index} role={message.role} content={message.content} />
       ))}
       {isLoading && <ChatBubble role="assistant" content="" isLoading={true} />}
     </div>
@@ -145,7 +165,7 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
     };
 
     return (
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <input
           ref={ref}
           type="text"
@@ -153,24 +173,24 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           disabled={disabled}
-          className="flex-grow px-3 sm:px-4 py-2.5 sm:py-3 border border-background-contrast rounded-xl 
+          className="flex-grow min-w-[200px] px-3 sm:px-4 py-2.5 sm:py-3 border border-background-contrast rounded-xl 
                    focus:outline-none focus:ring-2 focus:ring-primary-main
                    bg-background-paper text-text-primary placeholder:text-text-secondary
                    text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed
                    transition-all"
           placeholder={
-            disabled ? "Enviando mensaje..." : "Pregunta sobre el repositorio..."
+            disabled ? "Sending message..." : "Ask about the repository..."
           }
         />
         <button
           onClick={handleSendMessage}
           disabled={disabled || input.trim() === ""}
-          className="px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-main text-primary-contrast rounded-xl 
+          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-main text-primary-contrast rounded-xl 
                    hover:bg-primary-dark text-sm sm:text-base font-medium whitespace-nowrap 
                    transition-colors disabled:opacity-50 disabled:cursor-not-allowed
                    shadow-sm hover:shadow-md"
         >
-          {disabled ? "..." : "Enviar"}
+          {disabled ? "..." : "Send"}
         </button>
       </div>
     );
@@ -199,7 +219,9 @@ function Chatbot() {
 
   const loadCommits = async () => {
     try {
-      const data = await HttpClient.get<Commit[]>("/api/rag/commits?limit=20", { auth: true });
+      const data = await HttpClient.get<Commit[]>("/api/rag/commits?limit=20", {
+        auth: true,
+      });
       setCommits(data);
     } catch (error) {
       console.error("Error loading commits:", error);
@@ -270,7 +292,9 @@ function Chatbot() {
       <div className="lg:w-80 border-b lg:border-b-0 lg:border-r border-background-contrast 
                     bg-background-paper overflow-y-auto p-4 sm:p-6 max-h-64 lg:max-h-full">
         <div className="mb-6">
-          <h3 className="font-semibold text-base sm:text-lg mb-3 text-text-primary">Repository Status</h3>
+          <h3 className="font-semibold text-base sm:text-lg mb-3 text-text-primary">
+            Repository Status
+          </h3>
           <button
             onClick={syncRepo}
             className="w-full px-4 py-2.5 text-sm bg-primary-main text-primary-contrast rounded-lg 
@@ -278,7 +302,9 @@ function Chatbot() {
           >
             Sync Repository
           </button>
-          <p className="text-xs sm:text-sm text-text-secondary mt-2">{repoStatus}</p>
+          <p className="text-xs sm:text-sm text-text-secondary mt-2">
+            {repoStatus}
+          </p>
         </div>
 
         <div>
