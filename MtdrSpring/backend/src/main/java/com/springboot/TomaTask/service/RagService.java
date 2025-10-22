@@ -56,25 +56,35 @@ public class RagService {
 
     private String callGemini(String context, String question) {
         String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" + apiKey;
-        
+
+        // 🧩 SYSTEM PROMPT: focus only on repository context
+        // It's like this instead of a single long string because we use Java 11, if we upgrade to 17+ we can use text blocks
+        String systemPrompt =
+            "You are a repository analysis assistant.\n" +
+            "Your job is to answer questions ONLY about the given repository context, commits, and code changes.\n" +
+            "If the user's question is unrelated to the repository, such as general knowledge or personal questions,\n" +
+            "respond politely with: \"I specialize in repository-related questions. Could you rephrase your question to reference code, commits, or repository details?\"\n" +
+            "Be concise and accurate based on the provided context.";
+
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("contents", List.of(
-            Map.of("parts", List.of(
-                Map.of("text", "Repository context:\n" + context + "\n\nQuestion: " + question)
-            ))
+            Map.of("role", "user",
+                "parts", List.of(
+                    Map.of("text", systemPrompt + "\n\nRepository context:\n" + context + "\n\nQuestion: " + question)
+                ))
         ));
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        
+
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
-        
+
         Map<String, Object> body = response.getBody();
         List<Map<String, Object>> candidates = (List<Map<String, Object>>) body.get("candidates");
         Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
         List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
-        
+
         return (String) parts.get(0).get("text");
     }
 }
