@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, forwardRef } from "react";
 import { HttpClient } from "../services/httpClient";
+import { Check } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
 
 interface ChatBubbleProps {
   role: "user" | "assistant";
@@ -18,48 +20,76 @@ function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
   return (
     <div
       className={`${
-        role === "user" ? "col-start-1 col-end-8" : "col-start-6 col-end-13"
-      } p-1 sm:p-2 rounded-lg`}
+        role === "user" ? "col-start-1 col-end-9" : "col-start-5 col-end-13"
+      } p-2 rounded-lg`}
     >
       <div
         className={`flex ${
           role === "user" ? "flex-row" : "flex-row-reverse"
-        } items-center`}
+        } items-start gap-3`}
       >
         <div
           className={`flex items-center justify-center rounded-full flex-shrink-0
-                        h-6 w-6 sm:h-8 sm:w-8 ${
-                          role === "user" ? "bg-indigo-300" : "bg-indigo-500"
+                        h-8 w-8 sm:h-10 sm:w-10 ${
+                          role === "user" 
+                            ? "bg-primary-main text-primary-contrast" 
+                            : "bg-secondary-main text-secondary-contrast"
                         }`}
         >
-          <span className="text-xs sm:text-sm font-semibold">
-            {role[0].toUpperCase()}
+          <span className="text-sm sm:text-base font-semibold">
+            {role === "user" ? "U" : "A"}
           </span>
         </div>
         <div
           className={`relative ${
-            role === "user" ? "ml-2 sm:ml-3" : "mr-2 sm:mr-3"
+            role === "user" ? "mr-auto" : "ml-auto"
           } 
-                        p-2 sm:p-3 shadow rounded-xl 
-                        max-w-[70%] sm:max-w-[70%] 
-                        text-xs sm:text-sm 
+                        p-3 sm:p-4 rounded-2xl shadow-sm
+                        max-w-[85%] sm:max-w-[80%] 
+                        text-sm sm:text-base
                         ${
                           role === "user"
-                            ? "bg-white dark:bg-cyan-900 text-black dark:text-white"
-                            : "bg-blue-500 dark:bg-sky-900 text-white"
+                            ? "bg-background-paper text-text-primary border border-background-contrast"
+                            : "bg-primary-main text-primary-contrast"
                         }`}
         >
           {isLoading ? (
-            <div className="flex items-center gap-1">
-              <div className="animate-bounce w-2 h-2 bg-white rounded-full"></div>
+            <div className="flex items-center gap-1.5">
+              <div className="animate-bounce w-2 h-2 bg-current rounded-full"></div>
               <div
-                className="animate-bounce w-2 h-2 bg-white rounded-full"
-                style={{ animationDelay: "0.1s" }}
+                className="animate-bounce w-2 h-2 bg-current rounded-full"
+                style={{ animationDelay: "0.15s" }}
               ></div>
               <div
-                className="animate-bounce w-2 h-2 bg-white rounded-full"
-                style={{ animationDelay: "0.2s" }}
+                className="animate-bounce w-2 h-2 bg-current rounded-full"
+                style={{ animationDelay: "0.3s" }}
               ></div>
+            </div>
+          ) : role === "assistant" ? (
+            <div className="prose prose-sm sm:prose-base prose-invert max-w-none">
+              <ReactMarkdown
+                components={{
+                  p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                  code: ({node, className, children, ...props}) => {
+                    const isInline = !className;
+                    return isInline ? (
+                      <code className="bg-black/20 px-1.5 py-0.5 rounded text-xs sm:text-sm font-mono" {...props}>{children}</code>
+                    ) : (
+                      <code className="block bg-black/20 p-2 sm:p-3 rounded-lg text-xs sm:text-sm font-mono overflow-x-auto" {...props}>{children}</code>
+                    );
+                  },
+                  ul: ({node, ...props}) => <ul className="list-disc pl-4 sm:pl-5 space-y-1" {...props} />,
+                  ol: ({node, ...props}) => <ol className="list-decimal pl-4 sm:pl-5 space-y-1" {...props} />,
+                  li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                  strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
+                  em: ({node, ...props}) => <em className="italic" {...props} />,
+                  h1: ({node, ...props}) => <h1 className="text-lg sm:text-xl font-bold mb-2" {...props} />,
+                  h2: ({node, ...props}) => <h2 className="text-base sm:text-lg font-bold mb-2" {...props} />,
+                  h3: ({node, ...props}) => <h3 className="text-sm sm:text-base font-bold mb-1" {...props} />,
+                }}
+              >
+                {content}
+              </ReactMarkdown>
             </div>
           ) : (
             <span className="whitespace-pre-wrap">{content}</span>
@@ -82,7 +112,7 @@ interface ChatMessagesProps {
 
 function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   return (
-    <div className="grid grid-cols-12 gap-y-2 px-2">
+    <div className="grid grid-cols-12 gap-y-3 px-2 sm:px-4">
       {messages.map((message, index) => (
         <ChatBubble
           key={index}
@@ -115,7 +145,7 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
     };
 
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 sm:gap-3">
         <input
           ref={ref}
           type="text"
@@ -123,9 +153,11 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           disabled={disabled}
-          className="flex-grow px-2 sm:px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 
-                   dark:bg-gray-700 dark:border-gray-600 dark:text-white 
-                   text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-grow px-3 sm:px-4 py-2.5 sm:py-3 border border-background-contrast rounded-xl 
+                   focus:outline-none focus:ring-2 focus:ring-primary-main
+                   bg-background-paper text-text-primary placeholder:text-text-secondary
+                   text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed
+                   transition-all"
           placeholder={
             disabled ? "Enviando mensaje..." : "Pregunta sobre el repositorio..."
           }
@@ -133,7 +165,10 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
         <button
           onClick={handleSendMessage}
           disabled={disabled || input.trim() === ""}
-          className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-main text-primary-contrast rounded-xl 
+                   hover:bg-primary-dark text-sm sm:text-base font-medium whitespace-nowrap 
+                   transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+                   shadow-sm hover:shadow-md"
         >
           {disabled ? "..." : "Enviar"}
         </button>
@@ -201,7 +236,7 @@ function Chatbot() {
         { role: "assistant", content: response.answer },
       ]);
     } catch (error: any) {
-      console.error("❌ Backend 500 error:", error);
+      console.error("❌ Backend error:", error);
       const message =
         error?.response?.data?.error ||
         error?.message ||
@@ -230,40 +265,54 @@ function Chatbot() {
   };
 
   return (
-    <div className="flex h-full bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-full bg-background-main rounded-xl overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 border-r dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto p-4">
-        <div className="mb-4">
-          <h3 className="font-semibold text-sm mb-2">Repository Status</h3>
+      <div className="lg:w-80 border-b lg:border-b-0 lg:border-r border-background-contrast 
+                    bg-background-paper overflow-y-auto p-4 sm:p-6 max-h-64 lg:max-h-full">
+        <div className="mb-6">
+          <h3 className="font-semibold text-base sm:text-lg mb-3 text-text-primary">Repository Status</h3>
           <button
             onClick={syncRepo}
-            className="w-full px-3 py-2 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="w-full px-4 py-2.5 text-sm bg-primary-main text-primary-contrast rounded-lg 
+                     hover:bg-primary-dark transition-colors shadow-sm"
           >
             Sync Repository
           </button>
-          <p className="text-xs text-gray-500 mt-1">{repoStatus}</p>
+          <p className="text-xs sm:text-sm text-text-secondary mt-2">{repoStatus}</p>
         </div>
 
         <div>
-          <h3 className="font-semibold text-sm mb-2">Select Commits</h3>
+          <h3 className="font-semibold text-base sm:text-lg mb-3 text-text-primary">
+            Select Commits ({selectedCommits.length})
+          </h3>
           <div className="space-y-2">
             {commits.map((commit) => (
-              <div key={commit.hash} className="text-xs">
-                <label className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded">
-                  <input
-                    type="checkbox"
-                    checked={selectedCommits.includes(commit.hash)}
-                    onChange={() => toggleCommit(commit.hash)}
-                    className="mt-0.5"
-                  />
-                  <div className="flex-1">
-                    <div className="font-mono text-xs text-blue-600 dark:text-blue-400">
+              <div key={commit.hash} className="text-xs sm:text-sm">
+                <label className="flex items-start gap-3 cursor-pointer hover:bg-background-subtle 
+                               p-3 rounded-lg transition-colors group">
+                  <div className="relative flex items-center justify-center mt-0.5">
+                    <input
+                      type="checkbox"
+                      checked={selectedCommits.includes(commit.hash)}
+                      onChange={() => toggleCommit(commit.hash)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-5 h-5 border-2 border-background-contrast rounded 
+                                  peer-checked:bg-primary-main peer-checked:border-primary-main
+                                  transition-all flex items-center justify-center">
+                      {selectedCommits.includes(commit.hash) && (
+                        <Check className="w-3.5 h-3.5 text-primary-contrast" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-mono text-xs sm:text-sm text-primary-main font-medium mb-1">
                       {commit.hash.substring(0, 7)}
                     </div>
-                    <div className="text-gray-700 dark:text-gray-300">
-                      {commit.message.split("\n")[0].substring(0, 50)}
+                    <div className="text-text-primary font-medium mb-1 line-clamp-2">
+                      {commit.message.split("\n")[0]}
                     </div>
-                    <div className="text-gray-500 text-xs">
+                    <div className="text-text-secondary text-xs">
                       {commit.author}
                     </div>
                   </div>
@@ -275,31 +324,33 @@ function Chatbot() {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800">
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-background-contrast 
+                      bg-background-paper flex-shrink-0">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">
+            <h3 className="font-semibold text-lg sm:text-xl text-text-primary">
               Repository Assistant
             </h3>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs sm:text-sm text-text-secondary mt-1">
               Ask questions about commits and code changes
             </p>
           </div>
           <button
             onClick={newChat}
-            className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            className="px-3 sm:px-4 py-2 text-sm bg-secondary-main text-secondary-contrast 
+                     rounded-lg hover:bg-secondary-dark transition-colors shadow-sm"
           >
             New Chat
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2 sm:p-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 min-h-0">
           {messages.length === 0 && (
-            <div className="text-center text-gray-500 dark:text-gray-400 mt-4 sm:mt-8 px-4">
-              <p className="mb-2 text-sm sm:text-base">
+            <div className="text-center text-text-secondary mt-8 sm:mt-16 px-4">
+              <p className="mb-3 text-base sm:text-lg font-medium">
                 👨‍💻 Repository Analysis Assistant
               </p>
-              <p className="text-xs sm:text-sm">
+              <p className="text-sm sm:text-base">
                 Select commits from the sidebar and ask questions about changes
               </p>
             </div>
@@ -308,7 +359,7 @@ function Chatbot() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-2 sm:p-4 border-t dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="p-4 sm:p-6 border-t border-background-contrast bg-background-paper flex-shrink-0">
           <ChatInput
             onSendMessage={handleSendMessage}
             ref={inputFieldRef}
