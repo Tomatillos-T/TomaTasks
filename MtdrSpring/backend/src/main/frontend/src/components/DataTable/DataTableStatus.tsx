@@ -13,7 +13,7 @@ export default function DataTableStatus({ status, span }: DataTableStatusProps) 
       case ResponseStatus.PENDING:
         return "Loading...";
       case ResponseStatus.ERROR:
-        return "Algo salio mal, intente de nuevo";
+        return "Algo salió mal, intente de nuevo";
       case ResponseStatus.EMPTY:
         return "No hay datos";
       case ResponseStatus.SUCCESS:
