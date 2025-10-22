@@ -81,10 +81,38 @@ public class RagService {
         ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
         Map<String, Object> body = response.getBody();
-        List<Map<String, Object>> candidates = (List<Map<String, Object>>) body.get("candidates");
-        Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
-        List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
-
-        return (String) parts.get(0).get("text");
+        if (body == null) {
+            throw new RuntimeException("Gemini API response body is null.");
+        }
+        Object candidatesObj = body.get("candidates");
+        if (!(candidatesObj instanceof List) || ((List<?>) candidatesObj).isEmpty()) {
+            throw new RuntimeException("Gemini API response missing or empty 'candidates' field: " + body);
+        }
+        List<?> candidates = (List<?>) candidatesObj;
+        Object firstCandidateObj = candidates.get(0);
+        if (!(firstCandidateObj instanceof Map)) {
+            throw new RuntimeException("First candidate in Gemini API response is not a Map: " + firstCandidateObj);
+        }
+        Map<?, ?> firstCandidate = (Map<?, ?>) firstCandidateObj;
+        Object contentObj = firstCandidate.get("content");
+        if (!(contentObj instanceof Map)) {
+            throw new RuntimeException("Candidate 'content' field is missing or not a Map: " + contentObj);
+        }
+        Map<?, ?> content = (Map<?, ?>) contentObj;
+        Object partsObj = content.get("parts");
+        if (!(partsObj instanceof List) || ((List<?>) partsObj).isEmpty()) {
+            throw new RuntimeException("Content 'parts' field is missing or empty: " + content);
+        }
+        List<?> parts = (List<?>) partsObj;
+        Object firstPartObj = parts.get(0);
+        if (!(firstPartObj instanceof Map)) {
+            throw new RuntimeException("First part in 'parts' is not a Map: " + firstPartObj);
+        }
+        Map<?, ?> firstPart = (Map<?, ?>) firstPartObj;
+        Object textObj = firstPart.get("text");
+        if (!(textObj instanceof String)) {
+            throw new RuntimeException("Part 'text' field is missing or not a String: " + firstPart);
+        }
+        return (String) textObj;
     }
 }
