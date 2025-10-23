@@ -35,14 +35,17 @@ public class TaskMapper {
         // Set IDs for relationships
         if (task.getUserStory() != null) {
             dto.setUserStoryId(task.getUserStory().getId());
+            dto.setUserStoryName(task.getUserStory().getName());
         }
 
         if (task.getSprint() != null) {
             dto.setSprintId(task.getSprint().getId());
+            dto.setSprintName(task.getSprint().getDescription());
         }
 
         if (task.getUser() != null) {
             dto.setAssigneeId(task.getUser().getId());
+            dto.setAssigneeName(task.getUser().getName());
         }
 
         // Include nested objects if requested

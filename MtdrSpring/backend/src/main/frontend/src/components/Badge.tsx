@@ -13,7 +13,7 @@ export const Badge: React.FC<BadgeProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
+    "inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 max-w-full";
 
   const variantStyles = {
     default: "bg-primary-main text-primary-contrast border-transparent",
@@ -24,12 +24,16 @@ export const Badge: React.FC<BadgeProps> = ({
     warning: "bg-warning-bg text-warning-contrast border-transparent",
   };
 
+  // Extract text content for title attribute
+  const textContent = typeof children === 'string' ? children : '';
+
   return (
     <div
       className={clsx(baseStyles, variantStyles[variant], className)}
+      title={textContent}
       {...props}
     >
-      {children}
+      <span className="truncate">{children}</span>
     </div>
   );
 };

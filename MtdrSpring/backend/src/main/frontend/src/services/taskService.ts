@@ -1,6 +1,6 @@
 // services/taskService.ts
 import { HttpClient } from "../services/httpClient";
-import type { Task } from "../pages/task/Tareas";
+import type Task from "../modules/task/models/task";
 
 export const getTasks = async (): Promise<Task[]> => {
   return HttpClient.get<Task[]>("/api/tasks", { auth: true });
