@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type {
   ColumnDef,
@@ -10,11 +10,11 @@ import type {
 } from "@tanstack/react-table";
 
 import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
-import { columns } from "../components/Columns";
-import type Task from "../models/task";
-import { ResponseStatus } from "../../../models/responseStatus";
-import getTasksAdapter from "../adapters/getTasksAdapter";
-import deleteTaskAdapter from "../adapters/deleteTaskAdapter";
+import { columns } from "@/modules/task/components/Columns";
+import type Task from "@/modules/task/models/task";
+import { ResponseStatus } from "@/models/responseStatus";
+import getTasksAdapter from "@/modules/task/adapters/getTasksAdapter";
+import deleteTaskAdapter from "@/modules/task/adapters/deleteTaskAdapter";
 
 interface useTasksResult {
   status: ResponseStatus;
@@ -24,9 +24,12 @@ interface useTasksResult {
   searchInput: string;
   setSearchInput: (value: string) => void;
   error: Error | null;
+  isFetching: boolean;
+  isRefetching: boolean;
 }
 
 export default function useTasks(): useTasksResult {
+  const queryClient = useQueryClient();
   const [status, setStatus] = useState<ResponseStatus>(ResponseStatus.PENDING);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [searchInput, setSearchInput] = useState("");
@@ -54,17 +57,30 @@ export default function useTasks(): useTasksResult {
     isPending,
     isError,
     error,
+    isFetching,
+    isRefetching,
   } = useQuery({
     queryKey: ["tasks", queryVariables],
     queryFn: async () => {
       const response = await getTasksAdapter(queryVariables);
       return response;
     },
-    placeholderData: keepPreviousData,
+    // Mantener datos previos durante transiciones para UX suave
+    placeholderData: (previousData) => previousData,
+    // Cache: datos frescos por 30 segundos
+    staleTime: 30000,
+    // Mantener datos en cache por 5 minutos
+    gcTime: 5 * 60 * 1000,
+    // No refetch automático al volver a la ventana
+    refetchOnWindowFocus: false,
+    // Solo refetch al montar si los datos están obsoletos
+    refetchOnMount: 'stale',
   });
 
   useEffect(() => {
     if (isPending) {
+      setStatus(ResponseStatus.PENDING);
+    } else if (isFetching && !tasks) {
       setStatus(ResponseStatus.PENDING);
     } else if (isError) {
       setStatus(ResponseStatus.ERROR);
@@ -73,7 +89,7 @@ export default function useTasks(): useTasksResult {
     } else {
       setStatus(ResponseStatus.SUCCESS);
     }
-  }, [isPending, isError, tasks]);
+  }, [isPending, isFetching, isError, tasks]);
 
   const pageCount = useMemo(() => {
     return tasks
@@ -85,7 +101,7 @@ export default function useTasks(): useTasksResult {
     const delayDebounceFn = setTimeout(() => {
       setSearch(searchInput);
       setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-    }, 1000);
+    }, 300);
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchInput]);
@@ -94,14 +110,40 @@ export default function useTasks(): useTasksResult {
     mutationFn: async (id: string) => {
       return await deleteTaskAdapter({ id });
     },
-    onSuccess: (data, id) => {
-      console.log("Task deleted successfully:", data);
-      if (tasks && tasks.data) {
-        tasks.data.items = tasks.data.items.filter((task) => task.id !== id);
+    // Optimistic update: actualizar cache inmediatamente
+    onMutate: async (deletedId: string) => {
+      // Cancelar refetches en curso para evitar sobrescribir nuestro update optimista
+      await queryClient.cancelQueries({ queryKey: ["tasks", queryVariables] });
+
+      // Snapshot del valor previo para rollback
+      const previousTasks = queryClient.getQueryData(["tasks", queryVariables]);
+
+      // Actualizar cache optimistamente
+      queryClient.setQueryData(["tasks", queryVariables], (old: any) => {
+        if (!old?.data?.items) return old;
+
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            items: old.data.items.filter((task: Task) => task.id !== deletedId),
+            total: old.data.total - 1,
+          },
+        };
+      });
+
+      // Retornar contexto con snapshot para rollback si falla
+      return { previousTasks };
+    },
+    // Si falla, revertir cambios optimistas
+    onError: (error, deletedId, context: any) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(["tasks", queryVariables], context.previousTasks);
       }
     },
-    onError: (error) => {
-      console.error("Error deleting task:", error);
+    // Siempre sincronizar con el servidor después de completar
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });
 
@@ -109,7 +151,9 @@ export default function useTasks(): useTasksResult {
     try {
       await deleteService.mutateAsync(serviceId);
     } catch (error) {
-      console.error("Error deleting task:", error);
+      // El error ya se maneja en onError de la mutation
+      // Solo propagamos para que el componente pueda manejarlo si es necesario
+      throw error;
     }
   };
 
@@ -162,5 +206,7 @@ export default function useTasks(): useTasksResult {
     table,
     searchInput,
     setSearchInput,
+    isFetching,
+    isRefetching,
   };
 }

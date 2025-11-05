@@ -1,6 +1,6 @@
-import type GeneralResponse from "../../../models/generalResponse";
-import type { TaskDTO } from "../models/taskDTO";
-import { mapTaskDTOToTask } from "../utils/taskMapper";
+import type GeneralResponse from "@/models/generalResponse";
+import type { TaskDTO } from "@/modules/task/models/taskDTO";
+import { mapTaskDTOToTask } from "@/modules/task/utils/taskMapper";
 
 export interface CreateTaskParams {
   name: string;

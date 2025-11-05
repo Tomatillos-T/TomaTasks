@@ -1,30 +1,19 @@
-import { useState, useEffect } from "react";
-import Modal from "../../../components/Modal";
-import Input from "../../../components/Input";
-import Textarea from "../../../components/TextArea";
-import Button from "../../../components/Button";
-import Alert from "../../../components/Alert";
-import createTaskAdapter from "../adapters/createTaskAdapter";
+import { useState } from "react";
+import Modal from "@/components/Modal";
+import Input from "@/components/Input";
+import Textarea from "@/components/TextArea";
+import Button from "@/components/Button";
+import Alert from "@/components/Alert";
+import InfiniteSelect from "@/components/InfiniteSelect";
+import createTaskAdapter from "@/modules/task/adapters/createTaskAdapter";
 import { useQueryClient } from "@tanstack/react-query";
+import useInfiniteUsers from "@/modules/users/hooks/useInfiniteUsers";
+import useInfiniteSprints from "@/modules/sprint/hooks/useInfiniteSprints";
+import useInfiniteUserStories from "@/modules/userStory/hooks/useInfiniteUserStories";
 
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-}
-
-interface User {
-  id: string;
-  name: string;
-}
-
-interface Sprint {
-  id: string;
-  description: string;
-}
-
-interface UserStory {
-  id: string;
-  name: string;
 }
 
 export default function CreateTaskModal({
@@ -44,58 +33,30 @@ export default function CreateTaskModal({
   const [sprintId, setSprintId] = useState("");
   const [userStoryId, setUserStoryId] = useState("");
 
-  // Data for dropdowns
-  const [users, setUsers] = useState<User[]>([]);
-  const [sprints, setSprints] = useState<Sprint[]>([]);
-  const [userStories, setUserStories] = useState<UserStory[]>([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
+  // Infinite query hooks
+  const {
+    users,
+    isLoading: isLoadingUsers,
+    isFetchingNextPage: isFetchingNextPageUsers,
+    hasNextPage: hasNextPageUsers,
+    fetchNextPage: fetchNextPageUsers,
+  } = useInfiniteUsers();
 
-  // Fetch users, sprints, and user stories on mount
-  useEffect(() => {
-    if (isOpen) {
-      fetchFormData();
-    }
-  }, [isOpen]);
+  const {
+    sprints,
+    isLoading: isLoadingSprints,
+    isFetchingNextPage: isFetchingNextPageSprints,
+    hasNextPage: hasNextPageSprints,
+    fetchNextPage: fetchNextPageSprints,
+  } = useInfiniteSprints();
 
-  const fetchFormData = async () => {
-    setIsLoadingData(true);
-    try {
-      const [usersRes, sprintsRes, userStoriesRes] = await Promise.all([
-        fetch("/api/user", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("jwtToken") || ""}`,
-          },
-        }),
-        fetch("/api/sprints", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("jwtToken") || ""}`,
-          },
-        }),
-        fetch("/api/user-stories", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("jwtToken") || ""}`,
-          },
-        }),
-      ]);
-
-      if (usersRes.ok) {
-        const usersData = await usersRes.json();
-        setUsers(usersData);
-      }
-      if (sprintsRes.ok) {
-        const sprintsData = await sprintsRes.json();
-        setSprints(sprintsData);
-      }
-      if (userStoriesRes.ok) {
-        const userStoriesData = await userStoriesRes.json();
-        setUserStories(userStoriesData);
-      }
-    } catch (err) {
-      console.error("Error loading form data:", err);
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
+  const {
+    userStories,
+    isLoading: isLoadingUserStories,
+    isFetchingNextPage: isFetchingNextPageUserStories,
+    hasNextPage: hasNextPageUserStories,
+    fetchNextPage: fetchNextPageUserStories,
+  } = useInfiniteUserStories();
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -178,95 +139,75 @@ export default function CreateTaskModal({
         {error && <Alert type="error" message={error} />}
         {success && <Alert type="success" message={success} />}
 
-        {isLoadingData ? (
-          <div className="text-center py-4 text-text-secondary">
-            Cargando datos del formulario...
-          </div>
-        ) : (
-          <>
-            <Input
-              label="Nombre de la tarea"
-              name="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              placeholder="Ej: Implementar autenticación"
-            />
+        <Input
+          label="Nombre de la tarea"
+          name="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          placeholder="Ej: Implementar autenticación"
+        />
 
-            <Textarea
-              label="Descripción"
-              name="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              placeholder="Describe la tarea..."
-            />
+        <Textarea
+          label="Descripción"
+          name="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          placeholder="Describe la tarea..."
+        />
 
-            <Input
-              label="Estimación de tiempo (horas)"
-              type="number"
-              name="timeEstimate"
-              value={timeEstimate}
-              onChange={(e) => setTimeEstimate(Number(e.target.value))}
-              min={0}
-              placeholder="0"
-            />
+        <Input
+          label="Estimación de tiempo (horas)"
+          type="number"
+          name="timeEstimate"
+          value={timeEstimate}
+          onChange={(e) => setTimeEstimate(Number(e.target.value))}
+          min={0}
+          placeholder="0"
+        />
 
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-text-primary mb-1">
-                Asignar a usuario
-              </label>
-              <select
-                className="px-3 py-2 rounded-lg border border-background-contrast bg-background-paper text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-main"
-                value={assigneeId}
-                onChange={(e) => setAssigneeId(e.target.value)}
-              >
-                <option value="">Seleccione un usuario</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <InfiniteSelect
+          label="Asignar a usuario"
+          value={assigneeId}
+          onChange={setAssigneeId}
+          items={users}
+          getItemId={(user) => user.id}
+          getItemLabel={(user) => `${user.firstName} ${user.lastName}`}
+          isLoading={isLoadingUsers}
+          hasNextPage={hasNextPageUsers}
+          fetchNextPage={fetchNextPageUsers}
+          isFetchingNextPage={isFetchingNextPageUsers}
+          placeholder="Seleccione un usuario"
+        />
 
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-text-primary mb-1">
-                Sprint
-              </label>
-              <select
-                className="px-3 py-2 rounded-lg border border-background-contrast bg-background-paper text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-main"
-                value={sprintId}
-                onChange={(e) => setSprintId(e.target.value)}
-              >
-                <option value="">Seleccione un sprint</option>
-                {sprints.map((sprint) => (
-                  <option key={sprint.id} value={sprint.id}>
-                    {sprint.description}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <InfiniteSelect
+          label="Sprint"
+          value={sprintId}
+          onChange={setSprintId}
+          items={sprints}
+          getItemId={(sprint) => sprint.id}
+          getItemLabel={(sprint) => sprint.description}
+          isLoading={isLoadingSprints}
+          hasNextPage={hasNextPageSprints}
+          fetchNextPage={fetchNextPageSprints}
+          isFetchingNextPage={isFetchingNextPageSprints}
+          placeholder="Seleccione un sprint"
+        />
 
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-text-primary mb-1">
-                Historia de Usuario
-              </label>
-              <select
-                className="px-3 py-2 rounded-lg border border-background-contrast bg-background-paper text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-main"
-                value={userStoryId}
-                onChange={(e) => setUserStoryId(e.target.value)}
-              >
-                <option value="">Seleccione una historia de usuario</option>
-                {userStories.map((story) => (
-                  <option key={story.id} value={story.id}>
-                    {story.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </>
-        )}
+        <InfiniteSelect
+          label="Historia de Usuario"
+          value={userStoryId}
+          onChange={setUserStoryId}
+          items={userStories}
+          getItemId={(story) => story.id}
+          getItemLabel={(story) => story.name}
+          isLoading={isLoadingUserStories}
+          hasNextPage={hasNextPageUserStories}
+          fetchNextPage={fetchNextPageUserStories}
+          isFetchingNextPage={isFetchingNextPageUserStories}
+          placeholder="Seleccione una historia de usuario"
+        />
       </div>
     </Modal>
   );

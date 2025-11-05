@@ -1,6 +1,6 @@
-import type { TaskDTO } from "../models/taskDTO";
-import type Task from "../models/task";
-import { TaskStatus } from "../models/taskStatus";
+import type { TaskDTO } from "@/modules/task/models/taskDTO";
+import type Task from "@/modules/task/models/task";
+import { TaskStatus } from "@/modules/task/models/taskStatus";
 
 /**
  * Maps backend TaskDTO to frontend Task model

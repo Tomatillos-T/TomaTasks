@@ -1,7 +1,7 @@
 import React from "react";
 import { Bell, ChevronDown, Moon, Search, Sun } from "lucide-react";
-import { useTheme } from "../hooks/useTheme";
-import { useUserContext } from "../contexts/UserContext";
+import { useTheme } from "@/hooks/useTheme";
+import { useUserContext } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
 const Navbar: React.FC = () => {

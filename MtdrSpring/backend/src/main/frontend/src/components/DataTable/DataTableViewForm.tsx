@@ -5,9 +5,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../Dialog";
-import Input from "../Input";
-import Button from "../Button";
+} from "@/components/Dialog";
+import Input from "@/components/Input";
+import Button from "@/components/Button";
 import type { Table, ColumnFilter } from "@tanstack/react-table";
 
 interface DataTableViewFormProps<TData = unknown> {

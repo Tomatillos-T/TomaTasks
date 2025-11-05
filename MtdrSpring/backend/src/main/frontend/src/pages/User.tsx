@@ -1,12 +1,12 @@
 // User.tsx
 import { useState, useEffect } from "react";
-import { useUserContext } from "../contexts/UserContext";
-import Input from "../components/Input";
-import Button from "../components/Button";
-import Alert from "../components/Alert";
-import Modal from "../components/Modal";
-import { HttpClient } from "../services/httpClient";
-import type { User as UserType } from "../services/authService";
+import { useUserContext } from "@/contexts/UserContext";
+import Input from "@/components/Input";
+import Button from "@/components/Button";
+import Alert from "@/components/Alert";
+import Modal from "@/components/Modal";
+import { HttpClient } from "@/services/httpClient";
+import type { User as UserType } from "@/services/authService";
 
 interface SubmitStatus {
   type: "success" | "error" | null;

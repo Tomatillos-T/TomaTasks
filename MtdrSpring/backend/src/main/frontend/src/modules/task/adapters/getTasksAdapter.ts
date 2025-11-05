@@ -1,14 +1,14 @@
-import type Task from "../models/task";
-import type { TaskDTO } from "../models/taskDTO";
-import type PaginationParams from "../../../models/paginatedParams";
-import type PaginationResponse from "../../../models/paginationResponse";
-import type GeneralResponse from "../../../models/generalResponse";
-import type JPAPaginatedResponse from "../../../models/JPAPaginatedResponse";
-import { mapTaskDTOsToTasks } from "../utils/taskMapper";
+import type Task from "@/modules/task/models/task";
+import type { TaskDTO } from "@/modules/task/models/taskDTO";
+import type PaginationParams from "@/models/paginatedParams";
+import type PaginationResponse from "@/models/paginationResponse";
+import type GeneralResponse from "@/models/generalResponse";
+import type JPAPaginatedResponse from "@/models/JPAPaginatedResponse";
+import { mapTaskDTOsToTasks } from "@/modules/task/utils/taskMapper";
 import {
   mapFiltersToBackend,
   mapSortingToBackend,
-} from "../utils/columnMapper";
+} from "@/modules/task/utils/columnMapper";
 
 export default async function getTasksAdapter({
   page,
@@ -22,6 +22,14 @@ export default async function getTasksAdapter({
     const mappedFilters = mapFiltersToBackend(filters);
     const mappedSorting = mapSortingToBackend(sorting);
 
+    const requestBody = {
+      page: page - 1,
+      pageSize,
+      search,
+      filters: mappedFilters,
+      sorting: mappedSorting,
+    };
+
     const response: JPAPaginatedResponse<TaskDTO[]> = await fetch(
       "/api/tasks/search",
       {
@@ -30,13 +38,7 @@ export default async function getTasksAdapter({
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("jwtToken") || ""}`,
         },
-        body: JSON.stringify({
-          page: page - 1,
-          pageSize,
-          search,
-          filters: mappedFilters,
-          sorting: mappedSorting,
-        }),
+        body: JSON.stringify(requestBody),
       }
     ).then((res) => {
       if (!res.ok) {
