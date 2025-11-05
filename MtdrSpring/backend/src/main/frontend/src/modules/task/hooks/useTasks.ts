@@ -144,7 +144,6 @@ export default function useTasks(): useTasksResult {
     manualPagination: true,
     manualFiltering: true,
     manualSorting: true,
-    enableSortingRemoval: false,
     pageCount,
     onColumnFiltersChange: handleFilterChange,
     onSortingChange: handleSortChange,

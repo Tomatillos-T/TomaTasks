@@ -18,6 +18,11 @@ public class TaskDTO {
     private String sprintId;
     private String assigneeId;
 
+    // Denormalized fields for easy access
+    private String assigneeName;
+    private String sprintName;
+    private String userStoryName;
+
     private UserDTO assignee;
     private SprintDTO sprint;
     private UserStoryDTO userStory;
@@ -176,5 +181,29 @@ public class TaskDTO {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getAssigneeName() {
+        return assigneeName;
+    }
+
+    public void setAssigneeName(String assigneeName) {
+        this.assigneeName = assigneeName;
+    }
+
+    public String getSprintName() {
+        return sprintName;
+    }
+
+    public void setSprintName(String sprintName) {
+        this.sprintName = sprintName;
+    }
+
+    public String getUserStoryName() {
+        return userStoryName;
+    }
+
+    public void setUserStoryName(String userStoryName) {
+        this.userStoryName = userStoryName;
     }
 }

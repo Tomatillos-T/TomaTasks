@@ -5,6 +5,7 @@ import React, {
   useRef,
   useEffect,
 } from "react";
+import { createPortal } from "react-dom";
 import type { HTMLAttributes, ReactNode } from "react";
 import clsx from "clsx";
 
@@ -95,6 +96,66 @@ export const PopoverContent: React.FC<PopoverContentProps> = ({
 }) => {
   const { open, setOpen, triggerRef } = usePopoverContext();
   const contentRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (!open || !triggerRef.current) return;
+
+    const updatePosition = () => {
+      if (!triggerRef.current) return;
+
+      const triggerRect = triggerRef.current.getBoundingClientRect();
+      let top = 0;
+      let left = 0;
+
+      // Calculate vertical position
+      if (side === "bottom") {
+        top = triggerRect.bottom + 8;
+      } else if (side === "top") {
+        top = triggerRect.top - 8;
+        if (contentRef.current) {
+          top -= contentRef.current.offsetHeight;
+        }
+      } else if (side === "left") {
+        top = triggerRect.top;
+        left = triggerRect.left - 8;
+        if (contentRef.current) {
+          left -= contentRef.current.offsetWidth;
+        }
+      } else if (side === "right") {
+        top = triggerRect.top;
+        left = triggerRect.right + 8;
+      }
+
+      // Calculate horizontal position for top/bottom sides
+      if (side === "top" || side === "bottom") {
+        if (align === "start") {
+          left = triggerRect.left;
+        } else if (align === "end") {
+          left = triggerRect.right;
+          if (contentRef.current) {
+            left -= contentRef.current.offsetWidth;
+          }
+        } else {
+          left = triggerRect.left + triggerRect.width / 2;
+          if (contentRef.current) {
+            left -= contentRef.current.offsetWidth / 2;
+          }
+        }
+      }
+
+      setPosition({ top, left });
+    };
+
+    updatePosition();
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [open, side, align, triggerRef]);
 
   useEffect(() => {
     if (!open) return;
@@ -127,28 +188,17 @@ export const PopoverContent: React.FC<PopoverContentProps> = ({
 
   if (!open) return null;
 
-  const alignmentStyles = {
-    start: "left-0",
-    center: "left-1/2 -translate-x-1/2",
-    end: "right-0",
-  };
-
-  const sideStyles = {
-    top: "bottom-full mb-2",
-    bottom: "top-full mt-2",
-    left: "right-full mr-2",
-    right: "left-full ml-2",
-  };
-
-  return (
+  const content = (
     <div
       ref={contentRef}
       className={clsx(
-        "absolute z-50 rounded-md border border-background-contrast bg-background-paper text-text-primary shadow-md outline-none animate-in fade-in-0 zoom-in-95",
-        sideStyles[side],
-        alignmentStyles[align],
+        "fixed z-50 rounded-md border border-background-contrast bg-background-paper text-text-primary shadow-md outline-none animate-in fade-in-0 zoom-in-95",
         className
       )}
+      style={{
+        top: `${position.top}px`,
+        left: `${position.left}px`,
+      }}
       role="dialog"
       aria-modal="true"
       {...props}
@@ -156,4 +206,6 @@ export const PopoverContent: React.FC<PopoverContentProps> = ({
       {children}
     </div>
   );
+
+  return createPortal(content, document.body);
 };

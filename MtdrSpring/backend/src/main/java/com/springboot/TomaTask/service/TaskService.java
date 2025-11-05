@@ -86,20 +86,27 @@ public class TaskService {
         // Dynamic filters
         if (request.getFilters() != null) {
             for (ColumnFilterDTO filter : request.getFilters()) {
+                // Skip empty filters
+                if (filter.getValue() == null || filter.getValue().isEmpty()) {
+                    continue;
+                }
+
                 spec = spec.and((root, query, cb) -> {
                     String[] value = filter.getId().split("\\.");
+                    List<String> filterValues = filter.getValue();
+
                     switch (value[0]) {
                         case "userStory":
                             Join<Task, UserStory> userStoryJoin = root.join("userStory", JoinType.LEFT);
-                            return cb.equal(userStoryJoin.get(value[1]), filter.getValue());
+                            return userStoryJoin.get(value[1]).in(filterValues);
                         case "sprint":
                             Join<Task, Sprint> sprintJoin = root.join("sprint", JoinType.LEFT);
-                            return cb.equal(sprintJoin.get(value[1]), filter.getValue());
+                            return sprintJoin.get(value[1]).in(filterValues);
                         case "user":
                             Join<Task, User> userJoin = root.join("user", JoinType.LEFT);
-                            return cb.equal(userJoin.get(value[1]), filter.getValue());
+                            return userJoin.get(value[1]).in(filterValues);
                         default:
-                            return cb.equal(root.get(value[0]), filter.getValue());
+                            return root.get(value[0]).in(filterValues);
                     }
                 });
             }

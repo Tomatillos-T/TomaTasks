@@ -1,9 +1,10 @@
 package com.springboot.TomaTask.dto;
 
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class ColumnFilterDTO {
     private String id;
-    private String value;
+    private List<String> value;
 }
