@@ -24,9 +24,9 @@ export function mapTaskDTOToTask(dto: TaskDTO): Task {
       id: dto.assigneeId || "",
       name: dto.assigneeName || "",
     },
-    startDate: dto.startDate ? new Date(dto.startDate) : new Date(),
-    endDate: dto.endDate ? new Date(dto.endDate) : new Date(),
-    deliveryDate: dto.deliveryDate ? new Date(dto.deliveryDate) : new Date(),
+    startDate: dto.startDate ? new Date(dto.startDate) : null,
+    endDate: dto.endDate ? new Date(dto.endDate) : null,
+    deliveryDate: dto.deliveryDate ? new Date(dto.deliveryDate) : null,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   };
