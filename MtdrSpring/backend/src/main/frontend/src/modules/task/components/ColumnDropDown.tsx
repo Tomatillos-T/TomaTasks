@@ -1,7 +1,7 @@
 import React from "react";
-import type Task from "../models/task";
-import type { TaskTableMeta } from "../models/taskTableMeta";
-import Button from "../../../components/Button";
+import type Task from "@/modules/task/models/task";
+import type { TaskTableMeta } from "@/modules/task/models/taskTableMeta";
+import Button from "@/components/Button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from "../../../components/DropdownMenu";
+} from "@/components/DropdownMenu";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -19,7 +19,7 @@ import {
   AlertDialogFooter,
   AlertDialogAction,
   AlertDialogCancel,
-} from "../../../components/AlertDialog";
+} from "@/components/AlertDialog";
 import { Ellipsis } from "lucide-react";
 
 export const ColumnDropDownMenu: React.FC<{
@@ -28,15 +28,25 @@ export const ColumnDropDownMenu: React.FC<{
 }> = ({ task, meta }) => {
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   const handleDelete = () => {
     setOpen(false);
     setDialogOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     setDialogOpen(false);
-    meta.removeRow(task.id);
+    setIsDeleting(true);
+
+    try {
+      await meta.removeRow(task.id);
+    } catch (error) {
+      setErrorDialogOpen(true);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const cancelDelete = () => {
@@ -90,12 +100,30 @@ export const ColumnDropDownMenu: React.FC<{
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={confirmDelete}>
-              Eliminar
+            <AlertDialogAction onClick={confirmDelete} disabled={isDeleting}>
+              {isDeleting ? "Eliminando..." : "Eliminar"}
             </AlertDialogAction>
-            <AlertDialogCancel onClick={cancelDelete}>
+            <AlertDialogCancel onClick={cancelDelete} disabled={isDeleting}>
               Cancelar
             </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-error-main">
+              Error al eliminar
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              No se pudo eliminar la tarea. Por favor, intenta de nuevo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setErrorDialogOpen(false)}>
+              Cerrar
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

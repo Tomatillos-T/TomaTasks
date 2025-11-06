@@ -1,8 +1,8 @@
 // hooks/useAuth.ts
 import { useState } from "react";
-import authService from "../services/authService";
-import type { LoginCredentials, RegisterData } from "../services/authService";
-import { useUserContext } from "../contexts/UserContext";
+import authService from "@/services/authService";
+import type { LoginCredentials, RegisterData } from "@/services/authService";
+import { useUserContext } from "@/contexts/UserContext";
 
 export const useAuth = () => {
   const [loading, setLoading] = useState(false);

@@ -9,8 +9,8 @@
  */
 
 import type { ColumnFilter, SortingState } from "@tanstack/react-table";
-import { COLUMN_MAPPING } from "./columnMappingConfig";
-import { getValueMapper } from "./filterValueMappers";
+import { COLUMN_MAPPING } from "@/modules/task/utils/columnMappingConfig";
+import { getValueMapper } from "@/modules/task/utils/filterValueMappers";
 
 /**
  * Maps a single frontend column name to backend property name

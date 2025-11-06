@@ -1,15 +1,15 @@
 import { useMemo, useState } from "react";
-import useTasks from "../../modules/task/hooks/useTasks";
-import { columns } from "../../modules/task/components/Columns";
-import { DataTableAdvanced } from "../../components/DataTable/DataTableAdvanced";
-import type { FilterData } from "../../components/DataTable/types";
-import { TaskStatus } from "../../modules/task/models/taskStatus";
-import Button from "../../components/Button";
+import useTasks from "@/modules/task/hooks/useTasks";
+import { columns } from "@/modules/task/components/Columns";
+import { DataTableAdvanced } from "@/components/DataTable/DataTableAdvanced";
+import type { FilterData } from "@/components/DataTable/types";
+import { TaskStatus } from "@/modules/task/models/taskStatus";
+import Button from "@/components/Button";
 import { Plus } from "lucide-react";
-import CreateTaskModal from "../../modules/task/components/CreateTaskModal";
+import CreateTaskModal from "@/modules/task/components/CreateTaskModal";
 
 export default function Tasks() {
-  const { status, table, searchInput, setSearchInput } = useTasks();
+  const { status, table, searchInput, setSearchInput, isRefetching } = useTasks();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const filters: FilterData[] = useMemo(
@@ -27,8 +27,8 @@ export default function Tasks() {
   );
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-4">
+    <div className="h-full flex flex-col p-6 min-h-0">
+      <div className="flex justify-between items-center mb-4 flex-shrink-0">
         <h1 className="text-2xl font-bold text-text-primary">Tareas</h1>
         <Button
           variant="primary"
@@ -38,14 +38,17 @@ export default function Tasks() {
           Crear Tarea
         </Button>
       </div>
-      <DataTableAdvanced
-        columns={columns}
-        table={table}
-        status={status}
-        searchInput={searchInput}
-        setSearchInput={setSearchInput}
-        filters={filters}
-      />
+      <div className="flex-1 min-h-0 relative">
+        <DataTableAdvanced
+          columns={columns}
+          table={table}
+          status={status}
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+          filters={filters}
+          isRefetching={isRefetching}
+        />
+      </div>
       <CreateTaskModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

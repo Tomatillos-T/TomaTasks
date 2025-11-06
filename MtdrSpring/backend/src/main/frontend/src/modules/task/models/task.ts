@@ -1,4 +1,4 @@
-import { TaskStatus } from "./taskStatus";
+import { TaskStatus } from "@/modules/task/models/taskStatus";
 
 export default interface Task {
   id: string;

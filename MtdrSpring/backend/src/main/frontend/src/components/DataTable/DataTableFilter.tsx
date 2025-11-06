@@ -1,6 +1,6 @@
 import React from "react";
-import { Badge } from "../Badge";
-import Button from "../Button";
+import { Badge } from "@/components/Badge";
+import Button from "@/components/Button";
 import {
   Command,
   CommandEmpty,
@@ -9,11 +9,11 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "../Command";
-import { Popover, PopoverContent, PopoverTrigger } from "../Popover";
-import { Separator } from "../Separator";
+} from "@/components/Command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/Popover";
+import { Separator } from "@/components/Separator";
 import clsx from "clsx";
-import type { FilterValue } from "./types";
+import type { FilterValue } from "@/components/DataTable/types";
 
 interface FilterOption {
   label: string;
@@ -29,10 +29,6 @@ interface DataTableFacetedFilterProps {
   setFilterValue: (value: FilterValue) => void;
   search?: string;
   setSearch?: (search: string) => void;
-  isLoading?: boolean;
-  isFetching?: boolean;
-  fetchNextPage?: () => void;
-  hasNextPage?: boolean;
 }
 
 export function DataTableFacetedFilter({
@@ -43,7 +39,6 @@ export function DataTableFacetedFilter({
   setFilterValue,
   search,
   setSearch,
-  isLoading,
 }: DataTableFacetedFilterProps) {
   const backendFiltered = search !== undefined && setSearch !== undefined;
 
@@ -119,7 +114,7 @@ export function DataTableFacetedFilter({
           />
           <CommandList>
             <CommandEmpty>
-              {isLoading ? "...Cargando" : "No hay opciones disponibles"}
+              No hay opciones disponibles
             </CommandEmpty>
             <CommandGroup>
               {options.map((option) => {

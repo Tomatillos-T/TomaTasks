@@ -1,4 +1,4 @@
-import type GeneralResponse from "../../../models/generalResponse";
+import type GeneralResponse from "@/models/generalResponse";
 
 interface DeleteTaskParams {
   id: string;

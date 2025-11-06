@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, forwardRef } from "react";
-import { HttpClient } from "../services/httpClient";
+import { HttpClient } from "@/services/httpClient";
 import { Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 

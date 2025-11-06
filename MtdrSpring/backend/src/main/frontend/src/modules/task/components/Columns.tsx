@@ -1,9 +1,9 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type Task from "../models/task";
-import { TaskStatus } from "../models/taskStatus";
-import Badge, { type BadgeProps } from "../../../components/Badge";
-import type { TaskTableMeta } from "../models/taskTableMeta";
-import { ColumnDropDownMenu } from "./ColumnDropDown";
+import type Task from "@/modules/task/models/task";
+import { TaskStatus } from "@/modules/task/models/taskStatus";
+import Badge, { type BadgeProps } from "@/components/Badge";
+import type { TaskTableMeta } from "@/modules/task/models/taskTableMeta";
+import { ColumnDropDownMenu } from "@/modules/task/components/ColumnDropDown";
 
 export const columns: ColumnDef<Task>[] = [
   {
@@ -25,11 +25,11 @@ export const columns: ColumnDef<Task>[] = [
       const status = row.original.status;
 
       const variantMap: Record<TaskStatus, BadgeProps["variant"]> = {
-        [TaskStatus.DONE]: "success",
-        [TaskStatus.INPROGRESS]: "warning",
-        [TaskStatus.PENDING]: "error",
-        [TaskStatus.TODO]: "secondary",
-        [TaskStatus.TESTING]: "default",
+        [TaskStatus.DONE]: "done",
+        [TaskStatus.INPROGRESS]: "inprogress",
+        [TaskStatus.PENDING]: "pending",
+        [TaskStatus.TODO]: "todo",
+        [TaskStatus.TESTING]: "testing",
       };
 
       return <Badge variant={variantMap[status] || "default"}>{status}</Badge>;

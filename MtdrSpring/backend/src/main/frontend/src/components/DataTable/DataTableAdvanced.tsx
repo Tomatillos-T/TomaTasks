@@ -8,17 +8,17 @@ import type {
   Cell,
 } from "@tanstack/react-table";
 import { flexRender } from "@tanstack/react-table";
-import { Table } from "../Table/Table";
-import { TableBody } from "../Table/TableBody";
-import { TableCell } from "../Table/TableCell";
-import { TableHead } from "../Table/TableHead";
-import { TableHeader } from "../Table/TableHeader";
-import { TableRow } from "../Table/TableRow";
-import DataTableStatus from "./DataTableStatus";
-import { DataTableToolbar } from "./DataTableToolbar";
-import { DataTablePagination } from "./DataTablePagination";
-import type { FilterData } from "./types";
-import { ResponseStatus } from "../../models/responseStatus";
+import { Table } from "@/components/Table/Table";
+import { TableBody } from "@/components/Table/TableBody";
+import { TableCell } from "@/components/Table/TableCell";
+import { TableHead } from "@/components/Table/TableHead";
+import { TableHeader } from "@/components/Table/TableHeader";
+import { TableRow } from "@/components/Table/TableRow";
+import DataTableStatus from "@/components/DataTable/DataTableStatus";
+import { DataTableToolbar } from "@/components/DataTable/DataTableToolbar";
+import { DataTablePagination } from "@/components/DataTable/DataTablePagination";
+import type { FilterData } from "@/components/DataTable/types";
+import { ResponseStatus } from "@/models/responseStatus";
 
 interface DataTableAdvancedProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -29,6 +29,7 @@ interface DataTableAdvancedProps<TData, TValue> {
   setSearchInput: (value: string) => void;
   filters: FilterData[];
   onRowClick?: (row: Row<TData>) => void;
+  isRefetching?: boolean;
 }
 
 export function DataTableAdvanced<TData, TValue>({
@@ -40,6 +41,7 @@ export function DataTableAdvanced<TData, TValue>({
   setSearchInput,
   filters,
   onRowClick,
+  isRefetching = false,
 }: DataTableAdvancedProps<TData, TValue>) {
   const handleRowClick = (row: Row<TData>, e: React.MouseEvent) => {
     // Check if click is on an interactive element
@@ -71,15 +73,17 @@ export function DataTableAdvanced<TData, TValue>({
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-col border border-background-contrast rounded-md p-2 gap-2">
-        <DataTableToolbar
-          table={table}
-          searchInput={searchInput}
-          setSearchInput={setSearchInput}
-          filters={filters}
-        />
-        <div className="rounded-md border border-background-contrast">
+    <div className="h-full flex flex-col gap-2 min-h-0">
+      <div className="h-full flex flex-col border border-background-contrast rounded-md p-2 gap-2 min-h-0">
+        <div className="flex-shrink-0">
+          <DataTableToolbar
+            table={table}
+            searchInput={searchInput}
+            setSearchInput={setSearchInput}
+            filters={filters}
+          />
+        </div>
+        <div className="flex-1 min-h-0 overflow-auto rounded-md border border-background-contrast scrollbar-thin">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>) => (
@@ -161,7 +165,9 @@ export function DataTableAdvanced<TData, TValue>({
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length ? (
+              {isRefetching ? (
+                <DataTableStatus status={ResponseStatus.PENDING} span={columns.length} />
+              ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row: Row<TData>) => (
                   <TableRow
                     data-state={row.getIsSelected() ? "selected" : undefined}
@@ -187,7 +193,9 @@ export function DataTableAdvanced<TData, TValue>({
             </TableBody>
           </Table>
         </div>
-        <DataTablePagination table={table} />
+        <div className="flex-shrink-0">
+          <DataTablePagination table={table} />
+        </div>
       </div>
     </div>
   );

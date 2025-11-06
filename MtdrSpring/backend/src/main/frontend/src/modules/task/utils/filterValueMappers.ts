@@ -6,8 +6,8 @@
  * Dependency Inversion: Main code depends on the ValueMapper type, not concrete implementations
  */
 
-import { TaskStatus } from "../models/taskStatus";
-import { mapStatusToBackend } from "./taskMapper";
+import { TaskStatus } from "@/modules/task/models/taskStatus";
+import { mapStatusToBackend } from "@/modules/task/utils/taskMapper";
 
 /**
  * Interface for value mapper strategies

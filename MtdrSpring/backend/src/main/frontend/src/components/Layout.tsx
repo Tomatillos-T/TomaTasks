@@ -1,24 +1,24 @@
 import { Outlet } from "react-router-dom";
 import { useState } from "react";
-import Navbar from "./Navbar";
-import Sidebar from "./Sidebar";
-import Chatbot from "./Chatbot";
+import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
+import Chatbot from "@/components/Chatbot";
 
 export default function Layout() {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
 
   return (
-    <div className="min-h-screen flex flex-col bg-background-main">
+    <div className="h-screen flex flex-col bg-background-main overflow-hidden">
       {/* Fixed Navbar */}
       <Navbar />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 min-h-0">
         {/* Sidebar */}
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/* Main Content */}
-        <div className="flex-1 relative p-6 bg-background-subtle overflow-y-auto">
+        <div className="flex-1 relative bg-background-subtle overflow-hidden min-h-0">
           <Outlet />
         </div>
       </div>
