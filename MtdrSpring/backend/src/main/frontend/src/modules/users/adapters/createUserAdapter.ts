@@ -8,7 +8,7 @@ export interface CreateUserParams {
 
 export default async function createUserAdapter(
   params: CreateUserParams
-): Promise<GeneralResponse<User>> {
+): Promise<GeneralResponse<User | null>> {
   try {
     const response = await fetch("/api/user", {
       method: "POST",
@@ -32,7 +32,7 @@ export default async function createUserAdapter(
     };
   } catch (error) {
     return {
-      data: null as any,
+      data: null,
       message: (error as Error).message || "Error al crear usuario",
       status: 500,
     };
