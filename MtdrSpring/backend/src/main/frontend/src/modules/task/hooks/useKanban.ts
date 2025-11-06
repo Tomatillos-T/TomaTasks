@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type Task from "@/modules/task/models/task";
 import { TaskStatus } from "@/modules/task/models/taskStatus";
 import getTasksAdapter from "@/modules/task/adapters/getTasksAdapter";
@@ -206,7 +206,7 @@ export default function useKanban(): UseKanbanResult {
   };
 
   // Build columns with their data
-  const columns: KanbanColumn[] = [
+  const columns: KanbanColumn[] = useMemo(() => [
     {
       id: TaskStatus.TODO,
       title: "TODO",
@@ -243,7 +243,7 @@ export default function useKanban(): UseKanbanResult {
       fetchNextPage: doneQuery.fetchNextPage,
       isLoading: doneQuery.isLoading,
     },
-  ];
+  ], [todoQuery, inProgressQuery, testingQuery, doneQuery, getTasksFromQuery]);
 
   // Drag & drop state
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
