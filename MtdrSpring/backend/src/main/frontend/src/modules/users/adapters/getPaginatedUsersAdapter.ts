@@ -40,8 +40,8 @@ export default async function getPaginatedUsersAdapter(
     // Simulate pagination by slicing the cached data
     const startIndex = page * PAGE_SIZE;
     const endIndex = startIndex + PAGE_SIZE;
-    const paginatedData = cachedUsers.slice(startIndex, endIndex);
-    const hasMore = endIndex < cachedUsers.length;
+    const paginatedData = (cachedUsers || []).slice(startIndex, endIndex);
+    const hasMore = endIndex < (cachedUsers || []).length;
 
     return {
       data: paginatedData,

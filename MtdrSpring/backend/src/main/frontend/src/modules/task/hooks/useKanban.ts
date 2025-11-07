@@ -1,10 +1,22 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type Task from "@/modules/task/models/task";
 import { TaskStatus } from "@/modules/task/models/taskStatus";
 import getTasksAdapter from "@/modules/task/adapters/getTasksAdapter";
 import updateTaskAdapter from "@/modules/task/adapters/updateTaskAdapter";
 import { mapStatusToBackend } from "@/modules/task/utils/taskMapper";
+
+interface TaskPage {
+  data: {
+    items: Task[];
+    total: number;
+  };
+}
+
+interface InfiniteTaskData {
+  pages: TaskPage[];
+  pageParams: unknown[];
+}
 
 export interface KanbanColumn {
   id: TaskStatus;
@@ -33,7 +45,7 @@ export default function useKanban(): UseKanbanResult {
   const queryClient = useQueryClient();
 
   // Create infinite query for each status
-  const createColumnQuery = (status: TaskStatus) => {
+  const useColumnQuery = (status: TaskStatus) => {
     return useInfiniteQuery({
       queryKey: ["kanban-tasks", status],
       queryFn: async ({ pageParam = 1 }) => {
@@ -61,10 +73,10 @@ export default function useKanban(): UseKanbanResult {
   };
 
   // Create queries for all statuses
-  const todoQuery = createColumnQuery(TaskStatus.TODO);
-  const inProgressQuery = createColumnQuery(TaskStatus.INPROGRESS);
-  const testingQuery = createColumnQuery(TaskStatus.TESTING);
-  const doneQuery = createColumnQuery(TaskStatus.DONE);
+  const todoQuery = useColumnQuery(TaskStatus.TODO);
+  const inProgressQuery = useColumnQuery(TaskStatus.INPROGRESS);
+  const testingQuery = useColumnQuery(TaskStatus.TESTING);
+  const doneQuery = useColumnQuery(TaskStatus.DONE);
 
   // Mutation to update task status with optimistic updates
   const updateTaskMutation = useMutation({
@@ -107,7 +119,7 @@ export default function useKanban(): UseKanbanResult {
 
       const statuses = [TaskStatus.TODO, TaskStatus.INPROGRESS, TaskStatus.TESTING, TaskStatus.DONE];
       for (const status of statuses) {
-        const data = queryClient.getQueryData<any>(["kanban-tasks", status]);
+        const data = queryClient.getQueryData<InfiniteTaskData>(["kanban-tasks", status]);
         if (data?.pages) {
           for (const page of data.pages) {
             const foundTask = page.data.items.find((t: Task) => t.id === taskId);
@@ -129,11 +141,11 @@ export default function useKanban(): UseKanbanResult {
 
       // Optimistically update: remove from old column
       if (oldStatus !== task.status) {
-        queryClient.setQueryData(["kanban-tasks", oldStatus], (old: any) => {
+        queryClient.setQueryData(["kanban-tasks", oldStatus], (old: InfiniteTaskData | undefined) => {
           if (!old) return old;
           return {
             ...old,
-            pages: old.pages.map((page: any) => ({
+            pages: old.pages.map((page: TaskPage) => ({
               ...page,
               data: {
                 ...page.data,
@@ -145,12 +157,12 @@ export default function useKanban(): UseKanbanResult {
         });
 
         // Optimistically update: add to new column (prepend to first page)
-        queryClient.setQueryData(["kanban-tasks", task.status], (old: any) => {
+        queryClient.setQueryData(["kanban-tasks", task.status], (old: InfiniteTaskData | undefined) => {
           if (!old) return old;
           const updatedTask = { ...oldTask, status: task.status };
           return {
             ...old,
-            pages: old.pages.map((page: any, index: number) => {
+            pages: old.pages.map((page: TaskPage, index: number) => {
               if (index === 0) {
                 // Add to first page
                 return {
@@ -176,7 +188,7 @@ export default function useKanban(): UseKanbanResult {
         newStatus: task.status,
       };
     },
-    onError: (error, variables, context) => {
+    onError: (error, _variables, context) => {
       console.error("Error updating task:", error);
 
       // Rollback optimistic update on error
@@ -187,7 +199,7 @@ export default function useKanban(): UseKanbanResult {
         queryClient.setQueryData(["kanban-tasks", context.newStatus], context.previousNewStatusData);
       }
     },
-    onSettled: (data, error, variables, context) => {
+    onSettled: (_data, _error, _variables, context) => {
       // After mutation (success or error), refetch affected columns only
       // This ensures data consistency with the server
       if (context?.oldStatus) {
@@ -200,13 +212,13 @@ export default function useKanban(): UseKanbanResult {
   });
 
   // Helper function to get all tasks from infinite query pages
-  const getTasksFromQuery = (query: typeof todoQuery): Task[] => {
+  const getTasksFromQuery = useCallback((query: typeof todoQuery): Task[] => {
     if (!query.data) return [];
     return query.data.pages.flatMap((page) => page.data.items);
-  };
+  }, []);
 
   // Build columns with their data
-  const columns: KanbanColumn[] = [
+  const columns: KanbanColumn[] = useMemo(() => [
     {
       id: TaskStatus.TODO,
       title: "TODO",
@@ -243,7 +255,7 @@ export default function useKanban(): UseKanbanResult {
       fetchNextPage: doneQuery.fetchNextPage,
       isLoading: doneQuery.isLoading,
     },
-  ];
+  ], [todoQuery, inProgressQuery, testingQuery, doneQuery, getTasksFromQuery]);
 
   // Drag & drop state
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);

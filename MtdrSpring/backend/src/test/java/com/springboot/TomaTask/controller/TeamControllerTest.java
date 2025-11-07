@@ -1,8 +1,6 @@
-/*package com.springboot.TomaTask.controller;
+package com.springboot.TomaTask.controller;
 
-import com.springboot.TomaTask.model.Project;
-import com.springboot.TomaTask.model.Team;
-import com.springboot.TomaTask.service.ProjectService;
+import com.springboot.TomaTask.dto.TeamDTO;
 import com.springboot.TomaTask.service.TeamService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
@@ -27,98 +25,82 @@ public class TeamControllerTest {
     @Mock
     private TeamService teamService;
 
-    @Mock
-    private ProjectService projectService;
-
     @InjectMocks
     private TeamController teamController;
 
-    private Project project1;
-    private Team team1;
+    private TeamDTO teamDTO1;
+    private TeamDTO teamDTO2;
 
     @BeforeEach
     void setUp() {
-        project1 = new Project("Project A", "active", null);
-        team1 = new Team("Team 1", "Backend team", "active", project1);
+        teamDTO1 = new TeamDTO();
+        teamDTO1.setName("Team 1");
+        teamDTO1.setDescription("Backend team");
+        teamDTO1.setStatus("active");
+        teamDTO1.setProjectId("project-1");
+
+        teamDTO2 = new TeamDTO();
+        teamDTO2.setName("Team 2");
+        teamDTO2.setDescription("Frontend team");
+        teamDTO2.setStatus("planning");
+        teamDTO2.setProjectId("project-2");
     }
 
     @Test
     void testGetAllTeams() {
-        when(teamService.getAllTeams()).thenReturn(Arrays.asList(team1));
+        when(teamService.getAllTeams()).thenReturn(Arrays.asList(teamDTO1, teamDTO2));
 
-        List<Team> result = teamController.getAllTeams();
+        ResponseEntity<List<TeamDTO>> response = teamController.getAllTeams();
 
-        assertEquals(1, result.size());
-        verify(teamService).getAllTeams();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
+        verify(teamService, times(1)).getAllTeams();
     }
 
     @Test
     void testGetTeamById() {
-        when(teamService.getTeamById("id1")).thenReturn(team1);
+        when(teamService.getTeamById("1")).thenReturn(teamDTO1);
 
-        ResponseEntity<Team> response = teamController.getTeamById("id1");
+        ResponseEntity<TeamDTO> response = teamController.getTeamById("1");
 
-        assertEquals(team1, response.getBody());
-        verify(teamService).getTeamById("id1");
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Team 1", response.getBody().getName());
+        verify(teamService, times(1)).getTeamById("1");
     }
 
     @Test
     void testCreateTeam() {
-        // Mock project lookup
-        when(projectService.getProjectById("project-1")).thenReturn(project1);
-        when(teamService.createTeam(any(Team.class))).thenReturn(team1);
+        when(teamService.createTeam(any(TeamDTO.class))).thenReturn(teamDTO1);
 
-        TeamController.TeamRequest request = new TeamController.TeamRequest();
-        request.setName("Team 1");
-        request.setDescription("Backend team");
-        request.setStatus("active");
-        request.setProjectId("project-1");
+        ResponseEntity<TeamDTO> response = teamController.createTeam(teamDTO1);
 
-        ResponseEntity<Team> response = teamController.createTeam(request);
-
-        assertEquals(team1, response.getBody());
-        verify(projectService).getProjectById("project-1");
-        verify(teamService).createTeam(any(Team.class));
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Team 1", response.getBody().getName());
+        verify(teamService, times(1)).createTeam(teamDTO1);
     }
 
     @Test
     void testUpdateTeam() {
-        when(teamService.getTeamById("id1")).thenReturn(team1);
-        when(projectService.getProjectById("project-1")).thenReturn(project1);
-        when(teamService.updateTeam(eq("id1"), any(Team.class))).thenReturn(team1);
+        when(teamService.updateTeam(eq("1"), any(TeamDTO.class))).thenReturn(teamDTO2);
 
-        TeamController.TeamRequest request = new TeamController.TeamRequest();
-        request.setName("Team 1 Updated");
-        request.setDescription("Backend updated");
-        request.setStatus("active");
-        request.setProjectId("project-1");
+        ResponseEntity<TeamDTO> response = teamController.updateTeam("1", teamDTO2);
 
-        ResponseEntity<Team> response = teamController.updateTeam("id1", request);
-
-        assertEquals(team1, response.getBody());
-        verify(teamService).updateTeam(eq("id1"), any(Team.class));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Team 2", response.getBody().getName());
+        verify(teamService, times(1)).updateTeam(eq("1"), eq(teamDTO2));
     }
 
     @Test
     void testDeleteTeam() {
-        doNothing().when(teamService).deleteTeam("id1");
+        doNothing().when(teamService).deleteTeam("1");
 
-        ResponseEntity<Void> response = teamController.deleteTeam("id1");
+        ResponseEntity<Void> response = teamController.deleteTeam("1");
 
-        assertEquals(204, response.getStatusCode().value());
-        verify(teamService).deleteTeam("id1");
-    }
-
-    @Test
-    void testGetTeamByProject() {
-        when(projectService.getProjectById("project-1")).thenReturn(project1);
-        when(teamService.getTeamByProject(project1)).thenReturn(team1);
-
-        ResponseEntity<Team> response = teamController.getTeamByProject("project-1");
-
-        assertEquals(team1, response.getBody());
-        verify(projectService).getProjectById("project-1");
-        verify(teamService).getTeamByProject(project1);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(teamService, times(1)).deleteTeam("1");
     }
 }
-*/

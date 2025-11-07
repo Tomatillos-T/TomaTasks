@@ -38,8 +38,8 @@ export default async function getPaginatedSprintsAdapter(
     // Simulate pagination by slicing the cached data
     const startIndex = page * PAGE_SIZE;
     const endIndex = startIndex + PAGE_SIZE;
-    const paginatedData = cachedSprints.slice(startIndex, endIndex);
-    const hasMore = endIndex < cachedSprints.length;
+    const paginatedData = (cachedSprints || []).slice(startIndex, endIndex);
+    const hasMore = endIndex < (cachedSprints || []).length;
 
     return {
       data: paginatedData,

@@ -1,3 +1,4 @@
+import React from "react";
 import { TableRow } from "@/components/Table/TableRow";
 import { TableCell } from "@/components/Table/TableCell";
 import { ResponseStatus } from "@/models/responseStatus";
@@ -8,7 +9,7 @@ interface DataTableStatusProps {
 }
 
 export default function DataTableStatus({ status, span }: DataTableStatusProps) {
-  const getMessage = (): JSX.Element | string => {
+  const getMessage = (): React.JSX.Element | string => {
     switch (status) {
       case ResponseStatus.PENDING:
         return (

@@ -37,12 +37,13 @@ export const ColumnDropDownMenu: React.FC<{
   };
 
   const confirmDelete = async () => {
+    if (isDeleting) return;
     setDialogOpen(false);
     setIsDeleting(true);
 
     try {
       await meta.removeRow(task.id);
-    } catch (error) {
+    } catch {
       setErrorDialogOpen(true);
     } finally {
       setIsDeleting(false);
@@ -61,7 +62,10 @@ export const ColumnDropDownMenu: React.FC<{
             variant="ghost"
             className="h-8 w-8 p-0 border border-primary-foreground cursor-pointer"
           >
-            <Ellipsis size={16} style={{ width: '16px', height: '16px', minWidth: '16px' }} />
+            <Ellipsis
+              size={16}
+              style={{ width: "16px", height: "16px", minWidth: "16px" }}
+            />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -100,10 +104,10 @@ export const ColumnDropDownMenu: React.FC<{
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={confirmDelete} disabled={isDeleting}>
+            <AlertDialogAction onClick={confirmDelete}>
               {isDeleting ? "Eliminando..." : "Eliminar"}
             </AlertDialogAction>
-            <AlertDialogCancel onClick={cancelDelete} disabled={isDeleting}>
+            <AlertDialogCancel onClick={cancelDelete}>
               Cancelar
             </AlertDialogCancel>
           </AlertDialogFooter>

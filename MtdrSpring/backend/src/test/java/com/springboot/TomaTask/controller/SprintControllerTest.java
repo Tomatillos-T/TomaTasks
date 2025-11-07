@@ -1,6 +1,6 @@
-/*package com.springboot.TomaTask.controller;
+package com.springboot.TomaTask.controller;
 
-import com.springboot.TomaTask.model.Sprint;
+import com.springboot.TomaTask.dto.SprintDTO;
 import com.springboot.TomaTask.service.SprintService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -27,62 +29,79 @@ public class SprintControllerTest {
     @InjectMocks
     private SprintController sprintController;
 
-    private Sprint sprint1;
-    private Sprint sprint2;
+    private SprintDTO sprintDTO1;
+    private SprintDTO sprintDTO2;
 
     @BeforeEach
     void setUp() {
-        sprint1 = new Sprint("Sprint 1 desc", "active", LocalDate.of(2025, 10, 1), "project-1");
-        sprint2 = new Sprint("Sprint 2 desc", "planning", LocalDate.of(2025, 9, 20), "project-2");
+        sprintDTO1 = new SprintDTO();
+        sprintDTO1.setDescription("Sprint 1 desc");
+        sprintDTO1.setStatus("active");
+        sprintDTO1.setStartDate(LocalDate.of(2025, 10, 1));
+        sprintDTO1.setProjectId("project-1");
+
+        sprintDTO2 = new SprintDTO();
+        sprintDTO2.setDescription("Sprint 2 desc");
+        sprintDTO2.setStatus("planning");
+        sprintDTO2.setStartDate(LocalDate.of(2025, 9, 20));
+        sprintDTO2.setProjectId("project-2");
     }
 
     @Test
     void testGetAllSprints() {
-        when(sprintService.getAllSprints()).thenReturn(Arrays.asList(sprint1, sprint2));
+        when(sprintService.getAllSprints()).thenReturn(Arrays.asList(sprintDTO1, sprintDTO2));
 
-        List<Sprint> result = sprintController.getAllSprints();
+        ResponseEntity<List<SprintDTO>> response = sprintController.getAllSprints();
 
-        assertEquals(2, result.size());
-        verify(sprintService).getAllSprints();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
+        verify(sprintService, times(1)).getAllSprints();
     }
 
     @Test
     void testGetSprintById() {
-        when(sprintService.getSprintById("1")).thenReturn(sprint1);
+        when(sprintService.getSprintById("1")).thenReturn(sprintDTO1);
 
-        Sprint result = sprintController.getSprintById("1");
+        ResponseEntity<SprintDTO> response = sprintController.getSprintById("1");
 
-        assertEquals("Sprint 1 desc", result.getDescription());
-        verify(sprintService).getSprintById("1");
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Sprint 1 desc", response.getBody().getDescription());
+        verify(sprintService, times(1)).getSprintById("1");
     }
 
     @Test
     void testCreateSprint() {
-        when(sprintService.createSprint(sprint1)).thenReturn(sprint1);
+        when(sprintService.createSprint(any(SprintDTO.class))).thenReturn(sprintDTO1);
 
-        Sprint result = sprintController.createSprint(sprint1);
+        ResponseEntity<SprintDTO> response = sprintController.createSprint(sprintDTO1);
 
-        assertEquals("Sprint 1 desc", result.getDescription());
-        verify(sprintService).createSprint(sprint1);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Sprint 1 desc", response.getBody().getDescription());
+        verify(sprintService, times(1)).createSprint(sprintDTO1);
     }
 
     @Test
     void testUpdateSprint() {
-        when(sprintService.updateSprint(eq("1"), any(Sprint.class))).thenReturn(sprint2);
+        when(sprintService.updateSprint(eq("1"), any(SprintDTO.class))).thenReturn(sprintDTO2);
 
-        Sprint result = sprintController.updateSprint("1", sprint2);
+        ResponseEntity<SprintDTO> response = sprintController.updateSprint("1", sprintDTO2);
 
-        assertEquals("Sprint 2 desc", result.getDescription());
-        verify(sprintService).updateSprint(eq("1"), any(Sprint.class));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Sprint 2 desc", response.getBody().getDescription());
+        verify(sprintService, times(1)).updateSprint(eq("1"), eq(sprintDTO2));
     }
 
     @Test
     void testDeleteSprint() {
         doNothing().when(sprintService).deleteSprint("1");
 
-        sprintController.deleteSprint("1");
+        ResponseEntity<Void> response = sprintController.deleteSprint("1");
 
-        verify(sprintService).deleteSprint("1");
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(sprintService, times(1)).deleteSprint("1");
     }
 }
-*/
