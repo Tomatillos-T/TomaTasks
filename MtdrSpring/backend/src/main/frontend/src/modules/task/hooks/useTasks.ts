@@ -101,7 +101,7 @@ export default function useTasks(): useTasksResult {
     const delayDebounceFn = setTimeout(() => {
       setSearch(searchInput);
       setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-    }, 300);
+    }, 400);
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchInput]);

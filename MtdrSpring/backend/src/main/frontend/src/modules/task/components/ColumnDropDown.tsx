@@ -62,10 +62,7 @@ export const ColumnDropDownMenu: React.FC<{
             variant="ghost"
             className="h-8 w-8 p-0 border border-primary-foreground cursor-pointer"
           >
-            <Ellipsis
-              size={16}
-              style={{ width: "16px", height: "16px", minWidth: "16px" }}
-            />
+            <Ellipsis style={{ width: '16px', height: '16px', minWidth: '16px' }} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

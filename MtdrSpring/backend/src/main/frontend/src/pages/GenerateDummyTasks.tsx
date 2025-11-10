@@ -102,9 +102,6 @@ export default function GenerateDummyTasks() {
           } else {
             console.error("Error creating task:", await response.text());
           }
-
-          // Small delay to avoid overwhelming the server
-          await new Promise((resolve) => setTimeout(resolve, 50));
         }
       }
 

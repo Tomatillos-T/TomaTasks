@@ -9,7 +9,7 @@ interface UpdateTaskParams {
 export default async function updateTaskAdapter({
   id,
   taskDTO,
-}: UpdateTaskParams): Promise<GeneralResponse<TaskDTO>> {
+}: UpdateTaskParams): Promise<GeneralResponse<TaskDTO | null>> {
   try {
     const response = await fetch(`/api/tasks/${id}`, {
       method: "PUT",
@@ -33,7 +33,7 @@ export default async function updateTaskAdapter({
     };
   } catch (error) {
     return {
-      data: null as unknown as TaskDTO,
+      data: null,
       message: (error as Error).message || "Error updating task",
       status: 500,
     };
