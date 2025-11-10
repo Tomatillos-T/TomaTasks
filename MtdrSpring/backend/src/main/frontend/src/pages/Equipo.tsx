@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { Users, FolderKanban, MoreHorizontal } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import Badge from '../components/Badge';
@@ -84,7 +83,6 @@ const mockTeamData: DetailedTeam = {
 };
 
 export default function Equipo() {
-  const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState('resumen');
   const [team] = useState<DetailedTeam>(mockTeamData);
 

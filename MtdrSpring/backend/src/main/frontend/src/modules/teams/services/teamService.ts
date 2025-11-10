@@ -19,6 +19,15 @@ export interface CreateTeamPayload {
   projectId: string;
 }
 
+export async function getTeams(): Promise<Team[]> {
+  try {
+    return await HttpClient.get<Team[]>("/api/teams", { auth: true });
+  } catch (error) {
+    const err = error as HttpError;
+    throw { message: err.message, status: err.status };
+  }
+}
+
 export async function createTeam(payload: CreateTeamPayload): Promise<Team> {
   try {
     return await HttpClient.post<Team>("/api/teams", payload);
