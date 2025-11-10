@@ -66,7 +66,7 @@ export default function useTasks(): useTasksResult {
       return response;
     },
     // Mantener datos previos durante transiciones para UX suave
-    placeholderData: (previousData) => previousData,
+    placeholderData: (previousData: any) => previousData,
     // Cache: datos frescos por 30 segundos
     staleTime: 30000,
     // Mantener datos en cache por 5 minutos
@@ -74,7 +74,7 @@ export default function useTasks(): useTasksResult {
     // No refetch automático al volver a la ventana
     refetchOnWindowFocus: false,
     // Solo refetch al montar si los datos están obsoletos
-    refetchOnMount: 'stale',
+    refetchOnMount: true,
   });
 
   useEffect(() => {
@@ -136,7 +136,7 @@ export default function useTasks(): useTasksResult {
       return { previousTasks };
     },
     // Si falla, revertir cambios optimistas
-    onError: (error, deletedId, context: any) => {
+    onError: (_error, _deletedId, context: any) => {
       if (context?.previousTasks) {
         queryClient.setQueryData(["tasks", queryVariables], context.previousTasks);
       }

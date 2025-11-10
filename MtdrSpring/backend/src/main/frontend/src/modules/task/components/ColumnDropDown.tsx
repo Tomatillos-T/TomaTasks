@@ -37,12 +37,13 @@ export const ColumnDropDownMenu: React.FC<{
   };
 
   const confirmDelete = async () => {
+    if (isDeleting) return;
     setDialogOpen(false);
     setIsDeleting(true);
 
     try {
       await meta.removeRow(task.id);
-    } catch (error) {
+    } catch {
       setErrorDialogOpen(true);
     } finally {
       setIsDeleting(false);
@@ -100,10 +101,10 @@ export const ColumnDropDownMenu: React.FC<{
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={confirmDelete} disabled={isDeleting}>
+            <AlertDialogAction onClick={confirmDelete}>
               {isDeleting ? "Eliminando..." : "Eliminar"}
             </AlertDialogAction>
-            <AlertDialogCancel onClick={cancelDelete} disabled={isDeleting}>
+            <AlertDialogCancel onClick={cancelDelete}>
               Cancelar
             </AlertDialogCancel>
           </AlertDialogFooter>
