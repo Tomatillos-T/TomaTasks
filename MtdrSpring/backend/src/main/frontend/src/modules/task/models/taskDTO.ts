@@ -5,8 +5,8 @@ export interface TaskDTO {
   description: string;
   timeEstimate: number;
   status: string;
-  startDate: string;
-  endDate: string;
+  startDate: string | null;
+  endDate: string | null;
   deliveryDate: string | null;
   userStoryId: string | null;
   sprintId: string | null;

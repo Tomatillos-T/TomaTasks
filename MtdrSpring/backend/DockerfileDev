@@ -1,4 +1,4 @@
-FROM openjdk:22-slim
+FROM eclipse-temurin:22-jdk-jammy
 RUN apt-get update && apt-get install -y procps
 #COPY pom.xml /tmp/
 #COPY src /tmp/src/

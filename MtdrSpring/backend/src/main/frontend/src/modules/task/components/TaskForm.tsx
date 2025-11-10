@@ -194,6 +194,10 @@ export default function TaskForm() {
     try {
       const createdUser = await createUser(userFormData);
 
+      if (!createdUser) {
+        throw new Error("No se pudo crear el usuario.");
+      }
+
       setUserSubmitStatus({
         type: "success",
         message: `Usuario "${createdUser.name}" creado.`,

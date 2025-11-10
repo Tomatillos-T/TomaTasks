@@ -7,20 +7,20 @@ export default interface Task {
   estimation: number;
   status: TaskStatus;
   userStory: {
-    id: string;
-    name: string;
+    id: string | null;
+    name: string | null;
   };
   sprint: {
-    id: string;
-    name: string;
+    id: string | null;
+    name: string | null;
   };
   assignee: {
-    id: string;
-    name: string;
+    id: string | null;
+    name: string | null;
   };
-  startDate: Date;
-  endDate: Date;
-  deliveryDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
+  deliveryDate: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
