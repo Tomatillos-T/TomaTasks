@@ -147,8 +147,10 @@ export function useProjectForm() {
       const created = await createProject(payload)
       setSubmitStatus({ type: "success", message: `Proyecto "${created.name}" creado correctamente.` })
       setTimeout(() => resetForm(), 2000)
+      return created;
     } catch (err: any) {
       setSubmitStatus({ type: "error", message: err?.message || "No se pudo crear el proyecto." })
+      return null;
     } finally {
       setIsSubmitting(false)
     }

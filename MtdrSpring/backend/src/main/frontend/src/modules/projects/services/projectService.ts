@@ -26,5 +26,10 @@ export interface Project {
 }
 
 export async function createProject(payload: CreateProjectPayload): Promise<Project> {
-  return HttpClient.post<Project>("/api/projects", payload, { auth: true });
+  return HttpClient.post<Project>("/api/projects", payload);
 }
+
+export async function deleteProject(id: string): Promise<void> {
+  return HttpClient.delete<void>(`/api/projects/${id}`);
+}
+

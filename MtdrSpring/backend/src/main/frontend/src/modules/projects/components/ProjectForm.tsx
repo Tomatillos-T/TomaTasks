@@ -4,8 +4,14 @@ import TeamFormModal from "./TeamFormModal";
 import { useProjectForm } from "../hooks/useProjectForm";
 import { useTeamForm } from "../hooks/useTeamForm";
 import type { Team } from "../services/teamService";
+import { useCallback } from "react";
 
-export default function ProjectForm() {
+// interface avec la prop de callback
+interface ProjectFormProps {
+  onProjectCreated?: () => void;
+}
+
+export default function ProjectForm({ onProjectCreated }: ProjectFormProps) {
   const {
     formData,
     handleChange,
@@ -23,16 +29,18 @@ export default function ProjectForm() {
     setSubmitStatus,
   } = useProjectForm();
 
-  // Cuando se crea un equipo, actualizamos el teamId en formData y recargamos equipos
-  const onTeamCreated = (team: Team) => {
-    setFormData((prev) => ({ ...prev, teamId: team.id }));
-    fetchTeams();
-    // También dejamos un mensaje en el formulario principal (similar al original)
-    setSubmitStatus({
-      type: "success",
-      message: `Equipo "${team.name}" creado y asociado al proyecto.`,
-    });
-  };
+  // 🔹 Gestion création d’équipe
+  const onTeamCreated = useCallback(
+    (team: Team) => {
+      setFormData((prev) => ({ ...prev, teamId: team.id }));
+      fetchTeams();
+      setSubmitStatus({
+        type: "success",
+        message: `Equipo "${team.name}" creado y asociado al proyecto.`,
+      });
+    },
+    [fetchTeams, setFormData, setSubmitStatus]
+  );
 
   const {
     teamFormData,
@@ -46,12 +54,10 @@ export default function ProjectForm() {
     setTeamFormData,
   } = useTeamForm(onTeamCreated);
 
-  // Abrir modal para crear equipo, creando proyecto temporal si es necesario
+  // 🔹 Ouverture du modal équipe
   const handleCreateTeamClick = async () => {
-    // Si ya hay proyecto temporal, abrimos directamente el modal
     if (tempProjectId) {
       openTeamModal(tempProjectId);
-      // Prellenar projectId en el formulario de equipo
       setTeamFormData((prev) => ({ ...prev, projectId: tempProjectId }));
       return;
     }
@@ -63,10 +69,22 @@ export default function ProjectForm() {
     }
   };
 
+  // ✅ Nouvelle fonction de soumission qui appelle la callback parent
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await handleSubmit(e);
+
+    // Si la création a réussi, notifie le parent
+    if (result) {
+      onProjectCreated?.();
+      resetForm(); 
+    }
+  };
+
   return (
     <>
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleFormSubmit}
         className="max-w-3xl w-full space-y-8 p-8 bg-background-paper rounded-2xl shadow-lg"
       >
         <ProjectFormFields
@@ -85,9 +103,7 @@ export default function ProjectForm() {
 
       <TeamFormModal
         isOpen={isTeamModalOpen}
-        onClose={() => {
-          closeTeamModal();
-        }}
+        onClose={closeTeamModal}
         teamFormData={teamFormData}
         onChange={handleTeamChange}
         onSubmit={handleCreateTeam}
