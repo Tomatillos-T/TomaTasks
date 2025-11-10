@@ -16,6 +16,7 @@ import TaskForm from "@/modules/task/components/TaskForm";
 import User from "@/pages/User";
 import Tasks from "@/pages/task/Tasks";
 import GenerateDummyTasks from "@/pages/GenerateDummyTasks";
+import Equipo from "@/pages/Equipo";
 
 // Definición de las rutas de la aplicación
 
@@ -41,6 +42,8 @@ export default function AppRouter() {
         <Route path="/taskForm" element={<TaskForm />} />
         <Route path="/user" element={<User />} />
         <Route path="/generate-dummy-tasks" element={<GenerateDummyTasks />} />
+
+        <Route path="/equipos/:id" element={<Equipo />} />
       </Route>
     </Routes>
   );
