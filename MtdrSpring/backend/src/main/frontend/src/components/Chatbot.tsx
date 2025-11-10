@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, forwardRef } from "react";
 import { HttpClient } from "@/services/httpClient";
-import { Check } from "lucide-react";
+import { Check, RefreshCw, Database, AlertCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface ChatBubbleProps {
@@ -16,6 +16,12 @@ interface Commit {
   timestamp: number;
 }
 
+interface Stats {
+  totalEmbeddings: number;
+  totalCommits: number;
+  processedCommits: number;
+}
+
 function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
   return (
     <div
@@ -28,7 +34,6 @@ function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
           role === "user" ? "flex-row" : "flex-row-reverse"
         }`}
       >
-        {/* Avatar */}
         <div
           className={`flex items-center justify-center rounded-full flex-shrink-0
                       h-8 w-8 sm:h-10 sm:w-10 ${
@@ -42,7 +47,6 @@ function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
           </span>
         </div>
 
-        {/* Message Bubble */}
         <div
           className={`relative p-3 sm:p-4 rounded-2xl shadow-sm
                       text-sm sm:text-base break-words
@@ -160,11 +164,14 @@ function Chatbot() {
   const [commits, setCommits] = useState<Commit[]>([]);
   const [selectedCommits, setSelectedCommits] = useState<string[]>([]);
   const [repoStatus, setRepoStatus] = useState<string>("Not synced");
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [isIndexing, setIsIndexing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputFieldRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     loadCommits();
+    loadStats();
     inputFieldRef.current?.focus();
   }, []);
 
@@ -185,15 +192,52 @@ function Chatbot() {
     }
   };
 
+  const loadStats = async () => {
+    try {
+      const data = await HttpClient.get<Stats>("/api/rag/stats", {
+        auth: true,
+      });
+      setStats(data);
+    } catch (error) {
+      console.error("Error loading stats:", error);
+    }
+  };
+
   const syncRepo = async () => {
     try {
       setRepoStatus("Syncing...");
       await HttpClient.post("/api/rag/sync", {}, { auth: true });
       setRepoStatus("Synced ✓");
       loadCommits();
+      loadStats();
     } catch (error) {
       console.error("Error syncing repo:", error);
       setRepoStatus("Sync failed");
+    }
+  };
+
+  const indexCommits = async () => {
+    if (selectedCommits.length === 0) {
+      alert("Please select commits to index");
+      return;
+    }
+
+    try {
+      setIsIndexing(true);
+      await HttpClient.post(
+        "/api/rag/index",
+        { commitIds: selectedCommits },
+        { auth: true }
+      );
+      
+      // Poll for stats update
+      setTimeout(() => {
+        loadStats();
+        setIsIndexing(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error indexing commits:", error);
+      setIsIndexing(false);
     }
   };
 
@@ -248,6 +292,8 @@ function Chatbot() {
       {/* Sidebar */}
       <div className="lg:w-80 border-b lg:border-b-0 lg:border-r border-background-contrast 
                     bg-background-paper overflow-y-auto p-4 sm:p-6 max-h-64 lg:max-h-full">
+        
+        {/* Repository Status */}
         <div className="mb-6">
           <h3 className="font-semibold text-base sm:text-lg mb-3 text-text-primary">
             Repository Status
@@ -255,8 +301,9 @@ function Chatbot() {
           <button
             onClick={syncRepo}
             className="w-full px-4 py-2.5 text-sm bg-primary-main text-primary-contrast rounded-lg 
-                     hover:bg-primary-dark transition-colors shadow-sm"
+                     hover:bg-primary-dark transition-colors shadow-sm flex items-center justify-center gap-2"
           >
+            <RefreshCw className="w-4 h-4" />
             Sync Repository
           </button>
           <p className="text-xs sm:text-sm text-text-secondary mt-2">
@@ -264,6 +311,62 @@ function Chatbot() {
           </p>
         </div>
 
+        {/* Statistics */}
+        {stats && (
+          <div className="mb-6 p-4 bg-background-subtle rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Database className="w-4 h-4 text-primary-main" />
+              <h3 className="font-semibold text-sm text-text-primary">
+                Vector Store Stats
+              </h3>
+            </div>
+            <div className="space-y-1 text-xs text-text-secondary">
+              <div className="flex justify-between">
+                <span>Embeddings:</span>
+                <span className="font-medium">{stats.totalEmbeddings}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Commits cached:</span>
+                <span className="font-medium">{stats.totalCommits}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Indexed:</span>
+                <span className="font-medium">{stats.processedCommits}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Index Selected Commits */}
+        {selectedCommits.length > 0 && (
+          <div className="mb-6">
+            <button
+              onClick={indexCommits}
+              disabled={isIndexing}
+              className="w-full px-4 py-2.5 text-sm bg-secondary-main text-secondary-contrast rounded-lg 
+                       hover:bg-secondary-dark transition-colors shadow-sm flex items-center justify-center gap-2
+                       disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isIndexing ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Indexing...
+                </>
+              ) : (
+                <>
+                  <Database className="w-4 h-4" />
+                  Index Selected ({selectedCommits.length})
+                </>
+              )}
+            </button>
+            <p className="text-xs text-text-secondary mt-2 flex items-start gap-1">
+              <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+              Index commits to enable semantic search
+            </p>
+          </div>
+        )}
+
+        {/* Commit Selection */}
         <div>
           <h3 className="font-semibold text-base sm:text-lg mb-3 text-text-primary">
             Select Commits ({selectedCommits.length})
@@ -312,10 +415,10 @@ function Chatbot() {
                       bg-background-paper flex-shrink-0">
           <div>
             <h3 className="font-semibold text-lg sm:text-xl text-text-primary">
-              Repository Assistant
+              Repository Assistant (RAG)
             </h3>
             <p className="text-xs sm:text-sm text-text-secondary mt-1">
-              Ask questions about commits and code changes
+              Powered by semantic search & vector embeddings
             </p>
           </div>
           <button
@@ -331,11 +434,19 @@ function Chatbot() {
           {messages.length === 0 && (
             <div className="text-center text-text-secondary mt-8 sm:mt-16 px-4">
               <p className="mb-3 text-base sm:text-lg font-medium">
-                👨‍💻 Repository Analysis Assistant
+                🤖 AI-Powered Repository Analysis
               </p>
-              <p className="text-sm sm:text-base">
-                Select commits from the sidebar and ask questions about changes
+              <p className="text-sm sm:text-base mb-4">
+                Select commits and ask questions about code changes
               </p>
+              <div className="text-xs text-text-secondary max-w-md mx-auto bg-background-subtle p-4 rounded-lg">
+                <p className="font-semibold mb-2">💡 Tips:</p>
+                <ul className="text-left space-y-1">
+                  <li>• Index commits first for better semantic search</li>
+                  <li>• Ask specific questions about code changes</li>
+                  <li>• Reference file names or functions</li>
+                </ul>
+              </div>
             </div>
           )}
           <ChatMessages messages={messages} isLoading={isLoading} />
