@@ -25,6 +25,7 @@ public class DataInitializer {
       ProjectRepository projectRepository,
       SprintRepository sprintRepository,
       TaskRepository taskRepository,
+      TeamRepository teamRepository,
       PasswordEncoder passwordEncoder) {
 
     return args -> {
@@ -98,6 +99,72 @@ public class DataInitializer {
         projectRepository.save(project3);
 
         logger.info("✓ Proyectos inicializados correctamente (3 insertados)");
+
+        
+
+        // ========== TEAMS ==========
+        if (teamRepository.count() == 0) {
+
+            Team teamBackend = new Team(
+                "Equipo Backend",
+                "Responsable de servicios, API y lógica de negocio.",
+                "ACTIVO",
+                project1
+            );
+
+            Team teamFrontend = new Team(
+                "Equipo Frontend",
+                "Responsable de interfaces, UX y consumo de API.",
+                "ACTIVO",
+                project2
+            );
+
+            Team teamMobile = new Team(
+                "Equipo Mobile",
+                "Responsable del desarrollo móvil y soporte offline.",
+                "EN_PROGRESO",
+                project3
+            );
+
+            // Asignar usuarios a equipos (lado correcto de la relación)
+            adrianUser.setTeam(teamBackend);
+            kaledUser.setTeam(teamBackend);
+            cesarUser.setTeam(teamBackend);
+            teamBackend.getMembers().add(adrianUser);
+            teamBackend.getMembers().add(kaledUser);
+            teamBackend.getMembers().add(cesarUser);
+
+            isaacUser.setTeam(teamFrontend);
+            arthurUser.setTeam(teamFrontend);
+            teamFrontend.getMembers().add(isaacUser);
+            teamFrontend.getMembers().add(arthurUser);
+
+            ranferiUser.setTeam(teamMobile);
+            teamMobile.getMembers().add(ranferiUser);
+
+            // Guardar equipos
+            teamRepository.save(teamBackend);
+            teamRepository.save(teamFrontend);
+            teamRepository.save(teamMobile);
+
+            // Guardar usuarios actualizados con su team_id
+            userRepository.save(adrianUser);
+            userRepository.save(kaledUser);
+            userRepository.save(cesarUser);
+            userRepository.save(isaacUser);
+            userRepository.save(arthurUser);
+            userRepository.save(ranferiUser);
+
+            logger.info("✓ Equipos inicializados correctamente (3 insertados)");
+
+        } else {
+            logger.info("✓ Equipos ya existentes en la base de datos");
+        }
+
+
+
+
+
 
         // ========== SPRINTS ==========
         Sprint sprint1 = new Sprint(
