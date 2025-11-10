@@ -1,21 +1,20 @@
 package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Set;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "sprint")
 public class Sprint {
-
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, unique = true)
     private String id;
 
@@ -34,11 +33,17 @@ public class Sprint {
     @Column(name = "delivery_date")
     private LocalDate deliveryDate;
 
-    @Column(name = "project_id", nullable = false)
-    private String projectId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
     @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Task> tasks;
+    @JsonIgnore
+    private Set<Task> tasks = new HashSet<>();
+
+    @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<UserStory> userStories = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -48,46 +53,104 @@ public class Sprint {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Sprint() {}
+    // Constructors
+    public Sprint() {
+    }
 
-    public Sprint(String description, String status, LocalDate startDate, String projectId) {
+    public Sprint(String id) {
+        this.id = id;
+    }
+
+    public Sprint(String description, String status, LocalDate startDate, Project project) {
         this.description = description;
         this.status = status;
         this.startDate = startDate;
-        this.projectId = projectId;
+        this.project = project;
     }
 
-    public Sprint(String description, String status, LocalDate startDate, LocalDate endDate,
-                  LocalDate deliveryDate, String projectId) {
+    public Sprint(String description, String status, LocalDate startDate, LocalDate endDate, LocalDate deliveryDate,
+            Project project) {
         this.description = description;
         this.status = status;
         this.startDate = startDate;
         this.endDate = endDate;
         this.deliveryDate = deliveryDate;
-        this.projectId = projectId;
+        this.project = project;
     }
 
-    public String getId() { return id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getDescription() {
+        return description;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+    public String getStatus() {
+        return status;
+    }
 
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public LocalDate getDeliveryDate() { return deliveryDate; }
-    public void setDeliveryDate(LocalDate deliveryDate) { this.deliveryDate = deliveryDate; }
+    public LocalDate getStartDate() {
+        return startDate;
+    }
 
-    public String getProjectId() { return projectId; }
-    public void setProjectId(String projectId) { this.projectId = projectId; }
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDate getEndDate() {
+        return endDate;
+    }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public LocalDate getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(LocalDate deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public Set<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(Set<Task> tasks) {
+        this.tasks = tasks;
+    }
+
+    public Set<UserStory> getUserStories() {
+        return userStories;
+    }
+
+    public void setUserStories(Set<UserStory> userStories) {
+        this.userStories = userStories;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

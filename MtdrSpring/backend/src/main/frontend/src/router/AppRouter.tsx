@@ -1,20 +1,23 @@
 import { Routes, Route } from "react-router-dom";
-import Login from "../pages/Login";
-import Home from "../pages/Home";
-import Dashboard from "../pages/Dashboard";
-import Layout from "../components/Layout";
-import TomaTaskMockup from "../pages/TomaTaskMockUp";
-import Tareas from "../pages/Tareas";
-import Kanban from "../pages/Kanban";
-import Equipos from "../pages/Equipos";
-import Proyectos from "../pages/Proyectos";
-import Calendario from "../pages/Calendario";
-import TeamForm from "../modules/teams/components/TeamForm";
-import SprintForm from "../modules/sprint/components/SprintForm";
-import ProjectForm from "../modules/projects/components/ProjectForm";
-import UserStoryForm from "../modules/userStory/components/UserStoryForm";
-import TaskForm from "../modules/task/components/TaskForm";
-import User from "../pages/User";
+import Login from "@/pages/Login";
+import Home from "@/pages/Home";
+import Dashboard from "@/pages/Dashboard";
+import Layout from "@/components/Layout";
+import TomaTaskMockup from "@/pages/TomaTaskMockUp";
+import Kanban from "@/pages/Kanban";
+import Equipos from "@/pages/Equipos";
+import Proyectos from "@/pages/Proyectos";
+import Calendario from "@/pages/Calendario";
+import TeamForm from "@/modules/teams/components/TeamForm";
+import SprintForm from "@/modules/sprint/components/SprintForm";
+import ProjectForm from "@/modules/projects/components/ProjectForm";
+import UserStoryForm from "@/modules/userStory/components/UserStoryForm";
+import TaskForm from "@/modules/task/components/TaskForm";
+import User from "@/pages/User";
+import Tasks from "@/pages/task/Tasks";
+import GenerateDummyTasks from "@/pages/GenerateDummyTasks";
+
+// Definición de las rutas de la aplicación
 
 export default function AppRouter() {
   return (
@@ -25,7 +28,7 @@ export default function AppRouter() {
       {/* Rutas del dashboard con sidebar fijo */}
       <Route path="/" element={<Layout />}>
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/tareas" element={<Tareas />} />
+        <Route path="/tareas" element={<Tasks />} />
         <Route path="/kanban" element={<Kanban />} />
         <Route path="/equipos" element={<Equipos />} />
         <Route path="/proyectos" element={<Proyectos />} />
@@ -37,6 +40,7 @@ export default function AppRouter() {
         <Route path="/userStoryForm" element={<UserStoryForm />} />
         <Route path="/taskForm" element={<TaskForm />} />
         <Route path="/user" element={<User />} />
+        <Route path="/generate-dummy-tasks" element={<GenerateDummyTasks />} />
       </Route>
     </Routes>
   );

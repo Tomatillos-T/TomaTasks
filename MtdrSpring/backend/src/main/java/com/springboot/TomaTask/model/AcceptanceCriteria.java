@@ -1,19 +1,16 @@
 package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "acceptance_criteria")
 public class AcceptanceCriteria {
-
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, unique = true)
     private String id;
 
@@ -35,8 +32,9 @@ public class AcceptanceCriteria {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ===== Constructores =====
-    public AcceptanceCriteria() {}
+    // Constructors
+    public AcceptanceCriteria() {
+    }
 
     public AcceptanceCriteria(String description, String status, UserStory userStory) {
         this.description = description;
@@ -44,14 +42,44 @@ public class AcceptanceCriteria {
         this.userStory = userStory;
     }
 
-    // ===== Getters y Setters =====
-    public String getId() { return id; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public UserStory getUserStory() { return userStory; }
-    public void setUserStory(UserStory userStory) { this.userStory = userStory; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public UserStory getUserStory() {
+        return userStory;
+    }
+
+    public void setUserStory(UserStory userStory) {
+        this.userStory = userStory;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

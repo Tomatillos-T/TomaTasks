@@ -1,6 +1,9 @@
 # Compiled class file
 *.class
 
+# Ignore AI Agent files
+.claude/*
+
 # Log file
 *.log
 
@@ -52,4 +55,6 @@ frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 
+# Oracle Wallet files
 MtdrSpring/backend/wallet*
+MtdrSpring/backend/minikube/wallet*

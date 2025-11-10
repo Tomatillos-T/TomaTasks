@@ -1,7 +1,8 @@
 package com.springboot.TomaTask.dto;
 
-import java.time.LocalDate;
 import com.springboot.TomaTask.model.Task.Status;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class TaskDTO {
     private String id;
@@ -13,15 +14,28 @@ public class TaskDTO {
     private LocalDate endDate;
     private LocalDate deliveryDate;
 
-    private UserDTO user;
+    private String userStoryId;
+    private String sprintId;
+    private String assigneeId;
+
+    // Denormalized fields for easy access
+    private String assigneeName;
+    private String sprintName;
+    private String userStoryName;
+
+    private UserDTO assignee;
     private SprintDTO sprint;
     private UserStoryDTO userStory;
 
-    public TaskDTO() {}
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    // Constructors
+    public TaskDTO() {
+    }
 
     public TaskDTO(String id, String name, String description, Integer timeEstimate, Status status,
-                   LocalDate startDate, LocalDate endDate, LocalDate deliveryDate,
-                   UserDTO user, SprintDTO sprint, UserStoryDTO userStory) {
+            LocalDate startDate, LocalDate endDate, LocalDate deliveryDate) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -30,41 +44,166 @@ public class TaskDTO {
         this.startDate = startDate;
         this.endDate = endDate;
         this.deliveryDate = deliveryDate;
-        this.user = user;
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getTimeEstimate() {
+        return timeEstimate;
+    }
+
+    public void setTimeEstimate(Integer timeEstimate) {
+        this.timeEstimate = timeEstimate;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public String getUserStoryId() {
+        return userStoryId;
+    }
+
+    public void setUserStoryId(String userStoryId) {
+        this.userStoryId = userStoryId;
+    }
+
+    public String getSprintId() {
+        return sprintId;
+    }
+
+    public void setSprintId(String sprintId) {
+        this.sprintId = sprintId;
+    }
+
+    public String getAssigneeId() {
+        return assigneeId;
+    }
+
+    public void setAssigneeId(String assigneeId) {
+        this.assigneeId = assigneeId;
+    }
+
+    public UserDTO getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(UserDTO assignee) {
+        this.assignee = assignee;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public LocalDate getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(LocalDate deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
+    public UserDTO getUser() {
+        return assignee;
+    }
+
+    public void setUser(UserDTO user) {
+        this.assignee = user;
+    }
+
+    public SprintDTO getSprint() {
+        return sprint;
+    }
+
+    public void setSprint(SprintDTO sprint) {
         this.sprint = sprint;
+    }
+
+    public UserStoryDTO getUserStory() {
+        return userStory;
+    }
+
+    public void setUserStory(UserStoryDTO userStory) {
         this.userStory = userStory;
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 
-    public Integer getTimeEstimate() { return timeEstimate; }
-    public void setTimeEstimate(Integer timeEstimate) { this.timeEstimate = timeEstimate; }
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
-    public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
+    public String getAssigneeName() {
+        return assigneeName;
+    }
 
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+    public void setAssigneeName(String assigneeName) {
+        this.assigneeName = assigneeName;
+    }
 
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+    public String getSprintName() {
+        return sprintName;
+    }
 
-    public LocalDate getDeliveryDate() { return deliveryDate; }
-    public void setDeliveryDate(LocalDate deliveryDate) { this.deliveryDate = deliveryDate; }
+    public void setSprintName(String sprintName) {
+        this.sprintName = sprintName;
+    }
 
-    public UserDTO getUser() { return user; }
-    public void setUser(UserDTO user) { this.user = user; }
+    public String getUserStoryName() {
+        return userStoryName;
+    }
 
-    public SprintDTO getSprint() { return sprint; }
-    public void setSprint(SprintDTO sprint) { this.sprint = sprint; }
-
-    public UserStoryDTO getUserStory() { return userStory; }
-    public void setUserStory(UserStoryDTO userStory) { this.userStory = userStory; }
+    public void setUserStoryName(String userStoryName) {
+        this.userStoryName = userStoryName;
+    }
 }
