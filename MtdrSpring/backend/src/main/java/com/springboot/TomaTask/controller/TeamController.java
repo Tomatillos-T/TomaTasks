@@ -25,6 +25,11 @@ public class TeamController {
         return ResponseEntity.ok(teamService.getAllTeams());
     }
 
+    @GetMapping("/without-project")
+    public ResponseEntity<List<TeamDTO>> getTeamsWithoutProject() {
+        return ResponseEntity.ok(teamService.getTeamsWithoutProject());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TeamDTO> getTeamById(@PathVariable String id) {
         return ResponseEntity.ok(teamService.getTeamById(id));

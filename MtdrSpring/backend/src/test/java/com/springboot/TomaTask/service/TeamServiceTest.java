@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +40,7 @@ public class TeamServiceTest {
     private Team team2;
     private TeamDTO teamDTO1;
     private TeamDTO teamDTO2;
+    private TeamDTO teamDTOWithoutProject;
 
     @BeforeEach
     void setUp() {
@@ -68,14 +70,18 @@ public class TeamServiceTest {
         teamDTO2.setDescription("Frontend team");
         teamDTO2.setStatus("planning");
         teamDTO2.setProjectId("project-2");
+
+        teamDTOWithoutProject = new TeamDTO();
+        teamDTOWithoutProject.setName("Independent Team");
+        teamDTOWithoutProject.setDescription("No project assigned");
+        teamDTOWithoutProject.setStatus("active");
+        teamDTOWithoutProject.setProjectId(null);
     }
 
     @Test
     void testGetAllTeams() {
         when(teamRepository.findAll()).thenReturn(Arrays.asList(team1, team2));
-
         List<TeamDTO> result = teamService.getAllTeams();
-
         assertEquals(2, result.size());
         verify(teamRepository).findAll();
     }
@@ -83,9 +89,7 @@ public class TeamServiceTest {
     @Test
     void testGetTeamById_Found() {
         when(teamRepository.findById("id1")).thenReturn(Optional.of(team1));
-
         TeamDTO result = teamService.getTeamById("id1");
-
         assertEquals("Team 1", result.getName());
         verify(teamRepository).findById("id1");
     }
@@ -93,7 +97,6 @@ public class TeamServiceTest {
     @Test
     void testGetTeamById_NotFound() {
         when(teamRepository.findById("unknown")).thenReturn(Optional.empty());
-
         RuntimeException ex = assertThrows(RuntimeException.class, () -> teamService.getTeamById("unknown"));
         assertEquals("Team not found with ID: unknown", ex.getMessage());
     }
@@ -125,21 +128,23 @@ public class TeamServiceTest {
     }
 
     @Test
-    void testCreateTeam_WithoutProjectId() {
-        TeamDTO invalid = new TeamDTO();
-        invalid.setName("No Project");
-        invalid.setDescription("desc");
-        invalid.setStatus("active");
+    void testCreateTeam_WithoutProject_Success() {
+        when(teamRepository.save(any(Team.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> teamService.createTeam(invalid));
-        assertEquals("Project ID is required", ex.getMessage());
-        verify(teamRepository, never()).save(any());
+        TeamDTO result = assertDoesNotThrow(() -> teamService.createTeam(teamDTOWithoutProject));
+
+        assertNotNull(result);
+        assertEquals("Independent Team", result.getName());
+        assertNull(result.getProjectId());
+
+        verify(projectRepository, never()).findById(any());
+        verify(teamRepository).save(any(Team.class));
     }
 
     @Test
     void testCreateTeam_ProjectNotFound() {
         when(projectRepository.findById("invalid-project")).thenReturn(Optional.empty());
-
         teamDTO1.setProjectId("invalid-project");
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> teamService.createTeam(teamDTO1));
@@ -175,9 +180,7 @@ public class TeamServiceTest {
     void testUpdateTeam_NotFoundThrowsException() {
         when(teamRepository.findById("99")).thenReturn(Optional.empty());
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-            teamService.updateTeam("99", teamDTO2)
-        );
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> teamService.updateTeam("99", teamDTO2));
 
         assertEquals("Team not found with ID: 99", ex.getMessage());
         verify(teamRepository, never()).save(any());
@@ -186,9 +189,7 @@ public class TeamServiceTest {
     @Test
     void testDeleteTeam() {
         doNothing().when(teamRepository).deleteById("id1");
-
         teamService.deleteTeam("id1");
-
         verify(teamRepository).deleteById("id1");
     }
 
@@ -208,9 +209,8 @@ public class TeamServiceTest {
     void testGetTeamByProjectId_ProjectNotFound() {
         when(projectRepository.findById("invalid-project")).thenReturn(Optional.empty());
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-            teamService.getTeamByProjectId("invalid-project")
-        );
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> teamService.getTeamByProjectId("invalid-project"));
 
         assertEquals("Project not found with ID: invalid-project", ex.getMessage());
     }
@@ -220,9 +220,7 @@ public class TeamServiceTest {
         when(projectRepository.findById("project-1")).thenReturn(Optional.of(project1));
         when(teamRepository.findByProject(project1)).thenReturn(Optional.empty());
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-            teamService.getTeamByProjectId("project-1")
-        );
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> teamService.getTeamByProjectId("project-1"));
 
         assertEquals("No team found for this project", ex.getMessage());
     }

@@ -8,6 +8,9 @@ import com.springboot.TomaTask.model.Project;
 import com.springboot.TomaTask.model.Team;
 import com.springboot.TomaTask.repository.ProjectRepository;
 import com.springboot.TomaTask.repository.TeamRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +33,16 @@ public class TeamService {
 
     public List<TeamDTO> getAllTeams() {
         return TeamMapper.toDTOList(teamRepository.findAll());
+    }
+
+    public List<TeamDTO> getTeamsWithoutProject() {
+        List<Team> teams = teamRepository.findByProjectIsNull();
+
+        if (teams.isEmpty()) {
+            throw new EntityNotFoundException("No teams found without assigned project");
+        }
+
+        return TeamMapper.toDTOList(teams);
     }
 
     public TeamDTO getTeamById(String id) {
