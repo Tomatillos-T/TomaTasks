@@ -2,6 +2,21 @@
 import { HttpClient } from "../../../services/httpClient";
 import type { HttpError } from "../../../services/httpClient";
 
+export enum TeamStatusEnum {
+  ACTIVO = "ACTIVO",
+  INACTIVO = "INACTIVO",
+}
+
+export const TeamStatusLabel: Record<TeamStatusEnum, string> = {
+  [TeamStatusEnum.ACTIVO]: "Activo",
+  [TeamStatusEnum.INACTIVO]: "Inactivo",
+};
+
+export const TeamStatusBadge: Record<TeamStatusEnum, "success" | "error"> = {
+  [TeamStatusEnum.ACTIVO]: "success",
+  [TeamStatusEnum.INACTIVO]: "error",
+};
+
 export interface TeamMember {
   id: string;
   firstName: string;
@@ -18,7 +33,7 @@ export interface Team {
   id: string;
   name: string;
   description: string;
-  status: string;
+  status: TeamStatusEnum;
   projectId?: string;
   members?: TeamMember[];
   createdAt: string;
@@ -28,20 +43,28 @@ export interface Team {
 export interface CreateTeamPayload {
   name: string;
   description: string;
-  status: string;
+  status: TeamStatusEnum;
   projectId?: string;
 }
 
-export type TeamStatus = "active" | "inactive";
+
+export type TeamStatus = "ACTIVO" | "INACTIVO";
 
 export async function getTeams(): Promise<Team[]> {
   try {
-    return await HttpClient.get<Team[]>("/api/teams", { auth: true });
+    const response = await HttpClient.get<Team[]>("/api/teams", { auth: true });
+
+    return response.map(team => ({
+      ...team,
+      status: team.status in TeamStatusEnum ? team.status as TeamStatusEnum : TeamStatusEnum.INACTIVO,
+    }));
+
   } catch (error) {
     const err = error as HttpError;
     throw { message: err.message, status: err.status };
   }
 }
+
 
 export async function getTeamById(id: string): Promise<Team> {
   try {

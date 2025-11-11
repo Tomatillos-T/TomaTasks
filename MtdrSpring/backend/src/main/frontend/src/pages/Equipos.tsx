@@ -8,6 +8,7 @@ import TextArea from "../components/TextArea";
 import Badge from "../components/Badge";
 import { getTeams, createTeam } from "../modules/teams/services/teamService";
 import type { Team, CreateTeamPayload } from "../modules/teams/services/teamService";
+import { TeamStatusLabel, TeamStatusBadge, TeamStatusEnum } from "../modules/teams/services/teamService";
 
 export default function Equipos() {
   const navigate = useNavigate();
@@ -31,25 +32,26 @@ export default function Equipos() {
     fetchTeams();
   }, []);
 
-  const handleCreateTeam = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
 
-    const payload: CreateTeamPayload = {
-      name: formData.get("name") as string,
-      description: formData.get("description") as string,
-      status: "active",
-      projectId: "default-project"
-    };
+const handleCreateTeam = async (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
 
-    try {
-      await createTeam(payload);
-      setIsCreateModalOpen(false);
-      fetchTeams();
-    } catch (error) {
-      console.error("Error al crear el equipo:", error);
-    }
+  const payload: CreateTeamPayload = {
+    name: formData.get("name") as string,
+    description: (formData.get("description") as string) || "",
+    status: formData.get("status") as TeamStatusEnum,
   };
+
+  try {
+    await createTeam(payload);
+    setIsCreateModalOpen(false);
+    fetchTeams();
+  } catch (error) {
+    console.error("Error al crear el equipo:", error);
+  }
+};
+
 
   const handleDeleteTeam = (teamId: string) => {
     setTeams(teams.filter(team => team.id !== teamId));
@@ -66,11 +68,17 @@ export default function Equipos() {
         </Button>
       </div>
 
-      {loading && (
-        <p className="text-text-secondary">Cargando equipos...</p>
+      {!loading && teams.length === 0 && (
+        <div className="text-center py-16">
+          <p className="text-text-secondary text-lg mb-4">No hay equipos disponibles</p>
+          <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Plus className="w-4 h-4" />
+            Crear Equipo
+          </Button>
+        </div>
       )}
 
-      {!loading && (
+      {!loading && teams.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {teams.map(team => (
             <div
@@ -111,8 +119,8 @@ export default function Equipos() {
               <p className="text-text-secondary mb-4 line-clamp-2">{team.description}</p>
 
               <div className="flex justify-between items-center">
-                <Badge variant={team.status === "active" ? "success" : "error"}>
-                  {team.status === "active" ? "Activo" : "Inactivo"}
+                <Badge variant={TeamStatusBadge[team.status]}>
+                  {TeamStatusLabel[team.status]}
                 </Badge>
               </div>
             </div>
@@ -120,37 +128,56 @@ export default function Equipos() {
         </div>
       )}
 
-      <Modal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title="Crear Nuevo Equipo"
-      >
-        <form onSubmit={handleCreateTeam} className="space-y-4">
-          <Input
-            label="Nombre del Equipo"
-            name="name"
-            required
-            placeholder="Ingrese el nombre del equipo"
-          />
-          <TextArea
-            label="Descripción"
-            name="description"
-            placeholder="Describa el propósito del equipo"
-            rows={4}
-          />
+    <Modal
+      isOpen={isCreateModalOpen}
+      onClose={() => setIsCreateModalOpen(false)}
+      title="Crear Nuevo Equipo"
+    >
+      <form onSubmit={handleCreateTeam} className="space-y-4">
 
-          <div className="flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsCreateModalOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit">Crear Equipo</Button>
-          </div>
-        </form>
-      </Modal>
+        <Input
+          label="Nombre del Equipo"
+          name="name"
+          required
+          placeholder="Ingrese el nombre del equipo"
+        />
+
+        <TextArea
+          label="Descripción"
+          name="description"
+          placeholder="Describa el propósito del equipo"
+          rows={4}
+        />
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Estado</label>
+          <select
+            name="status"
+            required
+            className="w-full border rounded px-3 py-2"
+            defaultValue={TeamStatusEnum.ACTIVO}
+          >
+            {Object.values(TeamStatusEnum).map((status) => (
+              <option key={status} value={status}>
+                {TeamStatusLabel[status]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex justify-end gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsCreateModalOpen(false)}
+          >
+            Cancelar
+          </Button>
+          <Button type="submit">Crear Equipo</Button>
+        </div>
+      </form>
+    </Modal>
+
     </div>
   );
 }

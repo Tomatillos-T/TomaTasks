@@ -23,7 +23,7 @@ public class TeamService {
     private final ProjectRepository projectRepository;
 
     public TeamService(TeamRepository teamRepository,
-                      ProjectRepository projectRepository) {
+            ProjectRepository projectRepository) {
         this.teamRepository = teamRepository;
         this.projectRepository = projectRepository;
     }
@@ -41,11 +41,11 @@ public class TeamService {
     public Set<UserDTO> getTeamMembers(String teamId) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new RuntimeException("Team not found with ID: " + teamId));
-        
+
         if (team.getMembers() == null || team.getMembers().isEmpty()) {
             return new HashSet<>();
         }
-        
+
         return team.getMembers().stream()
                 .map(UserMapper::toDTO)
                 .collect(Collectors.toSet());
@@ -58,19 +58,19 @@ public class TeamService {
 
         Team team = TeamMapper.toEntity(teamDTO);
 
-        // Set Project
-        if (teamDTO.getProjectId() != null) {
+        // Set Project (opcional)
+        if (teamDTO.getProjectId() != null && !teamDTO.getProjectId().isBlank()) {
             Project project = projectRepository.findById(teamDTO.getProjectId())
                     .orElseThrow(() -> new RuntimeException("Project not found with ID: " + teamDTO.getProjectId()));
-            
-            // Check if project already has a team
+
+            // Validar que el proyecto no esté asignado a otro equipo
             if (teamRepository.findByProject(project).isPresent()) {
                 throw new RuntimeException("Project is already associated with a team");
             }
-            
+
             team.setProject(project);
         } else {
-            throw new RuntimeException("Project ID is required");
+            team.setProject(null);
         }
 
         Team savedTeam = teamRepository.save(team);
@@ -89,14 +89,14 @@ public class TeamService {
         if (teamDTO.getProjectId() != null) {
             Project project = projectRepository.findById(teamDTO.getProjectId())
                     .orElseThrow(() -> new RuntimeException("Project not found with ID: " + teamDTO.getProjectId()));
-            
+
             // Check if the new project is already assigned to another team
             teamRepository.findByProject(project).ifPresent(existingTeam -> {
                 if (!existingTeam.getId().equals(id)) {
                     throw new RuntimeException("Project is already associated with another team");
                 }
             });
-            
+
             team.setProject(project);
         }
 
