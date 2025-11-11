@@ -6,10 +6,12 @@ import com.springboot.TomaTask.model.Project;
 import com.springboot.TomaTask.model.Team;
 import com.springboot.TomaTask.repository.ProjectRepository;
 import com.springboot.TomaTask.repository.TeamRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class TeamService {
     private final TeamRepository teamRepository;
     private final ProjectRepository projectRepository;

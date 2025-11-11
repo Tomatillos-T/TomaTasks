@@ -39,11 +39,12 @@ public class DataInitializer {
         ProjectRepository projectRepository,
         SprintRepository sprintRepository,
         TaskRepository taskRepository,
+        TeamRepository teamRepository,
         PasswordEncoder passwordEncoder
     ) {
 
         return args -> {
-            logger.info("🚀 Iniciando seeding de roles, usuarios, proyectos, sprints y tareas...");
+            logger.info("🚀 Iniciando seeding de roles, usuarios, proyectos, sprints, equipos y tareas...");
 
             // ========== USERS ==========
             User adrianUser = userRepository.findByEmail("admin@tomatask.com")
@@ -114,6 +115,42 @@ public class DataInitializer {
 
                 logger.info("✓ Proyectos insertados");
 
+                // ========== TEAMS ==========
+                Team team1 = new Team(
+                    "Backend Team",
+                    "Equipo encargado del desarrollo del backend",
+                    "ACTIVO",
+                    project1
+                );
+                teamRepository.save(team1);
+
+                Team team2 = new Team(
+                    "Frontend Team",
+                    "Equipo encargado del desarrollo del frontend",
+                    "ACTIVO",
+                    project2
+                );
+                teamRepository.save(team2);
+
+                Team team3 = new Team(
+                    "Mobile Team",
+                    "Equipo encargado del desarrollo móvil",
+                    "ACTIVO",
+                    project3
+                );
+                teamRepository.save(team3);
+
+                logger.info("✓ Equipos insertados");
+
+                // Asignar usuarios a equipos
+                assignUser("kaled.enriquez@tomatask.com", team1);
+                assignUser("cesar.martinez@tomatask.com", team1);
+                assignUser("isaac.enriquez@tomatask.com", team2);
+                assignUser("arthur.vigier@tomatask.com", team2);
+                assignUser("ranferi.marquez@tomatask.com", team3);
+
+                logger.info("✓ Usuarios asignados a equipos");
+
                 // ========== SPRINTS ==========
                 Sprint sprint1 = new Sprint(
                     "Sprint 1 - Configuración inicial del backend",
@@ -151,10 +188,6 @@ public class DataInitializer {
 
                 logger.info("✓ Tareas insertadas");
             }
-
-            // Ejemplo de uso de assignUser (ya funciona porque userRepository es global):
-            // Team teamExample = new Team("Dev Team", "Equipo de desarrollo");
-            // assignUser("kaled.enriquez@tomatask.com", teamExample);
 
             logger.info("✅ Seeding finalizado.");
         };
