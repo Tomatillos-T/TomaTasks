@@ -1,17 +1,16 @@
 package com.springboot.TomaTask.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "task")
 public class Task {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, unique = true)
@@ -27,11 +26,7 @@ public class Task {
     private Integer timeEstimate;
 
     public enum Status {
-        TODO,
-        IN_PROGRESS,
-        DONE,
-        PENDING,
-        TESTING
+        TODO, IN_PROGRESS, DONE, PENDING, TESTING
     }
 
     @Enumerated(EnumType.STRING)
@@ -40,17 +35,17 @@ public class Task {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_story", nullable = true)
+    @JoinColumn(name = "user_story_id", nullable = true)
     private UserStory userStory;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sprint", nullable = true)
+    @JoinColumn(name = "sprint_id", nullable = true)
     private Sprint sprint;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "asignee", referencedColumnName = "id")
+    @JoinColumn(name = "assignee_id")
     private User user;
 
     @Column(name = "start_date")
@@ -70,6 +65,7 @@ public class Task {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Constructors
     public Task() {
     }
 
@@ -106,6 +102,7 @@ public class Task {
         this.deliveryDate = deliveryDate;
     }
 
+    // Getters and Setters
     public String getId() {
         return id;
     }

@@ -5,23 +5,40 @@ import clsx from "clsx";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: "primary" | "secondary" | "danger";
+  variant?: "primary" | "secondary" | "danger" | "outline" | "ghost";
+  size?: "sm" | "md" | "lg";
   loading?: boolean;
 }
 
-const Button: React.FC<ButtonProps> = ({ children, variant = "primary", loading = false, disabled, ...props }) => {
+const Button: React.FC<ButtonProps> = ({
+  children,
+  variant = "primary",
+  size = "md",
+  loading = false,
+  disabled,
+  className,
+  ...props
+}) => {
   const baseStyles =
-    "px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+    "rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 inline-flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variantStyles = {
     primary: "bg-primary-main text-white hover:bg-primary-dark focus:ring-primary-main",
     secondary: "bg-background-paper text-text-primary border border-background-contrast hover:bg-background-subtle focus:ring-primary-main",
     danger: "bg-red-500 text-white hover:bg-red-600 focus:ring-red-500",
+    outline: "border border-background-contrast bg-transparent hover:bg-background-subtle text-text-primary focus:ring-primary-main",
+    ghost: "hover:bg-background-subtle text-text-primary focus:ring-primary-main",
+  };
+
+  const sizeStyles = {
+    sm: "px-3 py-1.5 text-sm",
+    md: "px-4 py-2 text-base",
+    lg: "px-6 py-3 text-lg",
   };
 
   return (
     <button
-      className={clsx(baseStyles, variantStyles[variant])}
+      className={clsx(baseStyles, variantStyles[variant], sizeStyles[size], className)}
       disabled={disabled || loading}
       {...props}
     >

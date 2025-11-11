@@ -1,5 +1,5 @@
 // services/authService.ts
-import { HttpClient } from "../services/httpClient";
+import { HttpClient } from "@/services/httpClient";
 
 export interface LoginCredentials {
   email: string;

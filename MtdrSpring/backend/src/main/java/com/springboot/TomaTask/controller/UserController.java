@@ -1,8 +1,8 @@
 package com.springboot.TomaTask.controller;
 
+import com.springboot.TomaTask.dto.UserDTO;
 import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.service.UserService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,61 +15,51 @@ import java.util.List;
 @RequestMapping("/api/user")
 public class UserController {
     @Autowired
-    private UserService UserService;
-    //@CrossOrigin
+    private UserService userService;
+
     @GetMapping
-    public List<User> getAllUsers(){
-        return UserService.findAll();
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.findAll());
     }
-    //@CrossOrigin
+
     @GetMapping(value = "/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable String id){
-        try{
-            ResponseEntity<User> responseEntity = UserService.getUserById(id);
-            return new ResponseEntity<User>(responseEntity.getBody(), HttpStatus.OK);
-        }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<UserDTO> getUserById(@PathVariable String id) {
+        return userService.getUserById(id);
+    }
+
+    @PostMapping
+    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO userDTO) {
+        try {
+            UserDTO savedUser = userService.addUserDTO(userDTO);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set("location", savedUser.getId());
+            responseHeaders.set("Access-Control-Expose-Headers", "location");
+            return ResponseEntity.ok().headers(responseHeaders).body(savedUser);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-    //@CrossOrigin
-    @PostMapping
-    public ResponseEntity addUser(@RequestBody User User) throws Exception{
-        User td = UserService.addUser(User);
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("location",""+td.getID());
-        responseHeaders.set("Access-Control-Expose-Headers","location");
-        //URI location = URI.create(""+td.getID())
 
-        return ResponseEntity.ok()
-                .headers(responseHeaders).build();
-    }
-    //@CrossOrigin
     @PutMapping(value = "/{id}")
-    public ResponseEntity updateUser(@RequestBody User User, @PathVariable String id){
-        try{
-            User User1 = UserService.updateUser(id, User);
-            System.out.println(User1.toString());
-            return new ResponseEntity<>(User1,HttpStatus.OK);
-        }catch (Exception e){
+    public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDTO, @PathVariable String id) {
+        try {
+            UserDTO updatedUser = userService.updateUserDTO(id, userDTO);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
-    //@CrossOrigin
+
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Boolean> deleteUser(@PathVariable("id") String id){
-        Boolean flag = false;
-        try{
-            flag = UserService.deleteUser(id);
-            return new ResponseEntity<>(flag, HttpStatus.OK);
-        }catch (Exception e){
-            return new ResponseEntity<>(flag,HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Boolean> deleteUser(@PathVariable String id) {
+        Boolean flag = userService.deleteUser(id);
+        return new ResponseEntity<>(flag, flag ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
     @PostMapping("/{id}/telegram-token")
     public ResponseEntity<User> generateTelegramToken(@PathVariable String id) {
         try {
-            User user = UserService.generateTelegramToken(id);
+            User user = userService.generateTelegramToken(id);
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -81,12 +71,10 @@ public class UserController {
             @RequestParam String token,
             @RequestParam String chatId) {
         try {
-            User user = UserService.validateTelegramToken(token, chatId);
+            User user = userService.validateTelegramToken(token, chatId);
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-
-
 }

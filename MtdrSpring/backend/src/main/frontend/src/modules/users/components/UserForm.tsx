@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import type React from "react";
-import Input from "../../../components/Input";
-import Textarea from "../../../components/TextArea";
-import Select from "../../../components/Select";
-import Button from "../../../components/Button";
-import Alert from "../../../components/Alert";
-import Modal from "../../../components/Modal";
+import Input from "@/components/Input";
+import Textarea from "@/components/TextArea";
+import Select from "@/components/Select";
+import Button from "@/components/Button";
+import Alert from "@/components/Alert";
+import Modal from "@/components/Modal";
 
 type ProjectStatus =
   | "planning"
