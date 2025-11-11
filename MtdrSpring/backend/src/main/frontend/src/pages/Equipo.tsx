@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Users, FolderKanban, MoreHorizontal } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { Users, FolderKanban, MoreHorizontal, Loader2 } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 import { ResponseStatus } from "@/models/responseStatus";
 import { DataTableAdvanced } from '@/components/DataTable/DataTableAdvanced';
 import type { FilterData } from '@/components/DataTable/types';
+import useTeam from '@/modules/team/hooks/useTeam';
+import type { TeamMember } from '@/modules/teams/services/teamService';
 import {
   useReactTable,
   getCoreRowModel,
@@ -21,73 +24,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/DropdownMenu';
 
-interface TeamMember {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: 'ROLE_DEVELOPER' | 'ROLE_ADMIN';
-}
-
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  status: string;
-  startDate: string;
-  endDate: string;
-}
-
-interface DetailedTeam {
-  id: string;
-  name: string;
-  description: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  members: TeamMember[];
-  project?: Project;
-}
-
-const mockTeamData: DetailedTeam = {
-  id: '1',
-  name: 'Equipo Frontend',
-  description: 'Equipo dedicado al desarrollo de interfaces de usuario',
-  status: 'active',
-  createdAt: '2025-11-01T10:00:00',
-  updatedAt: '2025-11-10T15:30:00',
-  members: [
-    {
-      id: '1',
-      firstName: 'Juan',
-      lastName: 'Pérez',
-      email: 'juan@example.com',
-      role: 'ROLE_DEVELOPER',
-    },
-    {
-      id: '2',
-      firstName: 'María',
-      lastName: 'García',
-      email: 'maria@example.com',
-      role: 'ROLE_ADMIN',
-    },
-  ],
-  project: {
-    id: '1',
-    name: 'Rediseño Dashboard',
-    description: 'Actualización completa del dashboard principal',
-    status: 'in-progress',
-    startDate: '2025-10-01',
-    endDate: '2025-12-31',
-  },
-};
-
 export default function Equipo() {
+  const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState('resumen');
-  const [team] = useState<DetailedTeam>(mockTeamData);
-
-  // Búsqueda para la tabla de miembros
   const [memberSearchInput, setMemberSearchInput] = useState('');
+
+  const { team, members, project, isLoading, isError } = useTeam(id || '');
 
   const memberColumns: ColumnDef<TeamMember>[] = [
     {
@@ -95,7 +37,7 @@ export default function Equipo() {
       header: 'Nombre',
       cell: ({ row }) => {
         const firstName = row.getValue('firstName') as string;
-        const lastName = row.getValue('lastName') as string;
+        const lastName = row.original.lastName;
         return (
           <div>
             <div className="font-medium">{`${firstName} ${lastName}`}</div>
@@ -158,7 +100,7 @@ export default function Equipo() {
   ];
 
   const memberTable = useReactTable({
-    data: team.members,
+    data: members,
     columns: memberColumns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -187,6 +129,25 @@ export default function Equipo() {
     { id: 'proyecto', label: 'Proyecto' },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (isError || !team) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-text-primary mb-2">Error</h2>
+          <p className="text-text-secondary">No se pudo cargar el equipo</p>
+        </div>
+      </div>
+    );
+  }
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'resumen':
@@ -209,8 +170,8 @@ export default function Equipo() {
                 </div>
                 <div>
                   <p className="text-sm text-text-secondary mb-1">Estado</p>
-                  <Badge variant={team.status === 'active' ? 'success' : 'error'}>
-                    {team.status === 'active' ? 'Activo' : 'Inactivo'}
+                  <Badge variant={team.status === 'ACTIVO' ? 'success' : 'error'}>
+                    {team.status}
                   </Badge>
                 </div>
               </div>
@@ -222,7 +183,7 @@ export default function Equipo() {
                 <div>
                   <p className="text-sm text-text-secondary mb-1">Miembros</p>
                   <p className="font-medium text-text-primary">
-                    {team.members.length} miembros
+                    {members.length} miembros
                   </p>
                 </div>
                 <div>
@@ -269,18 +230,18 @@ export default function Equipo() {
       case 'proyecto':
         return (
           <div className="space-y-6">
-            {team.project ? (
+            {project ? (
               <div className="bg-background-paper p-6 rounded-lg border border-background-contrast">
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     <h3 className="text-2xl font-bold text-text-primary mb-2">
-                      {team.project.name}
+                      {project.name}
                     </h3>
                     <p className="text-text-secondary mt-1">
-                      {team.project.description}
+                      {project.description}
                     </p>
                   </div>
-                  <Badge variant="inprogress">En Progreso</Badge>
+                  <Badge variant="inprogress">{project.status}</Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
@@ -288,7 +249,7 @@ export default function Equipo() {
                       Fecha de inicio
                     </p>
                     <p className="font-medium text-text-primary">
-                      {new Date(team.project.startDate).toLocaleDateString()}
+                      {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -296,7 +257,7 @@ export default function Equipo() {
                       Fecha de finalización
                     </p>
                     <p className="font-medium text-text-primary">
-                      {new Date(team.project.endDate).toLocaleDateString()}
+                      {project.deliveryDate ? new Date(project.deliveryDate).toLocaleDateString() : 'N/A'}
                     </p>
                   </div>
                 </div>
