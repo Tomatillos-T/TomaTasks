@@ -1,5 +1,6 @@
 package com.springboot.TomaTask.service;
 
+import com.springboot.TomaTask.dto.CreateUserRequest;
 import com.springboot.TomaTask.dto.UserDTO;
 import com.springboot.TomaTask.mapper.UserMapper;
 import com.springboot.TomaTask.model.User;
@@ -44,8 +45,10 @@ public class UserService {
         return userRepository.findByEmail(email).isPresent();
     }
 
-    public User addUser(User user) {
-        return userRepository.save(user);
+    public UserDTO addUser(CreateUserRequest request) {
+        User user = UserMapper.toEntityFromCreateRequest(request);
+        User savedUser = userRepository.save(user);
+        return UserMapper.toDTO(savedUser);
     }
 
     public UserDTO addUserDTO(UserDTO userDTO) {

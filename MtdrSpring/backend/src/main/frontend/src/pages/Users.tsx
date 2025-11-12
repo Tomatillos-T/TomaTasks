@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useReactTable, getCoreRowModel, getPaginationRowModel, type ColumnDef } from "@tanstack/react-table";
 import { DataTableAdvanced } from "@/components/DataTable/DataTableAdvanced";
@@ -16,11 +16,15 @@ export default function Users() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [searchInput, setSearchInput] = useState("");
 
-  const filteredUsers = users.filter((u) =>
-    `${u.firstName} ${u.lastName}`.toLowerCase().includes(searchInput.toLowerCase())
-  );
+  // Memoizar los usuarios filtrados
+  const filteredUsers = useMemo(() => {
+    return users.filter((u) =>
+      `${u.firstName} ${u.lastName}`.toLowerCase().includes(searchInput.toLowerCase())
+    );
+  }, [users, searchInput]);
 
-  const columns: ColumnDef<User>[] = [
+  // Memoizar las columnas
+  const columns = useMemo<ColumnDef<User>[]>(() => [
     {
       accessorKey: "firstName",
       header: "Nombre",
@@ -63,7 +67,7 @@ export default function Users() {
         </div>
       ),
     },
-  ];
+  ], [deleteUser]); // deleteUser como dependencia
 
   const table = useReactTable({
     data: filteredUsers,

@@ -1,5 +1,6 @@
 package com.springboot.TomaTask.controller;
 
+import com.springboot.TomaTask.dto.CreateUserRequest;
 import com.springboot.TomaTask.dto.UserDTO;
 import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.service.UserService;
@@ -28,14 +29,15 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserDTO> addUser(@RequestBody CreateUserRequest request) {
         try {
-            UserDTO savedUser = userService.addUserDTO(userDTO);
+            UserDTO savedUser = userService.addUser(request);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("location", savedUser.getId());
             responseHeaders.set("Access-Control-Expose-Headers", "location");
             return ResponseEntity.ok().headers(responseHeaders).body(savedUser);
         } catch (Exception e) {
+            e.printStackTrace(); // Para ver el error
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
