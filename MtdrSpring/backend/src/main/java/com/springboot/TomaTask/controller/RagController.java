@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@RestController
-@RequestMapping("/api/rag")
+// @RestController
+// @RequestMapping("/api/rag")
 public class RagController {
 
     private final RagService ragService;

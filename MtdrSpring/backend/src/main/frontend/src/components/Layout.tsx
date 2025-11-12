@@ -18,7 +18,7 @@ export default function Layout() {
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/* Main Content */}
-        <div className="flex-1 relative bg-background-subtle overflow-hidden min-h-0">
+        <div className="flex-1 relative bg-background-subtle overflow-y-auto min-h-0">
           <Outlet />
         </div>
       </div>

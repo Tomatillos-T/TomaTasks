@@ -1,13 +1,14 @@
 // teams/hooks/useTeamForm.ts
 import { useState } from "react"
 import { createTeam } from "../services/teamService"
-import type { TeamStatus, CreateTeamPayload } from "../services/teamService"
+import type { CreateTeamPayload } from "../services/teamService"
+import { TeamStatusEnum } from "../services/teamService"
 import type { Team } from "../services/teamService"
 
 export interface TeamFormData {
   name: string
   description: string
-  status: TeamStatus
+  status: TeamStatusEnum
   projectId: string
 }
 
@@ -17,7 +18,7 @@ export function useTeamForm(onTeamCreated?: (team: Team) => void) {
   const [teamFormData, setTeamFormData] = useState<TeamFormData>({
     name: "",
     description: "",
-    status: "active",
+    status: TeamStatusEnum.ACTIVO,
     projectId: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -29,7 +30,7 @@ export function useTeamForm(onTeamCreated?: (team: Team) => void) {
   }
 
   const resetForm = () => {
-    setTeamFormData({ name: "", description: "", status: "active", projectId: "" })
+    setTeamFormData({ name: "", description: "", status: TeamStatusEnum.ACTIVO, projectId: "" })
     setSubmitStatus({ type: null, message: "" })
   }
 

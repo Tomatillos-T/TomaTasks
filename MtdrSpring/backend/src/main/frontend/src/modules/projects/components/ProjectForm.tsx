@@ -1,17 +1,20 @@
 // projects/components/ProjectForm.tsx
+import { useEffect, useCallback } from "react";
 import ProjectFormFields from "./ProjectFormFields";
 import TeamFormModal from "./TeamFormModal";
 import { useProjectForm } from "../hooks/useProjectForm";
 import { useTeamForm } from "../hooks/useTeamForm";
 import type { Team } from "../services/teamService";
-import { useCallback } from "react";
+import type { Project } from "../services/projectService";
 
-// interface avec la prop de callback
 interface ProjectFormProps {
   onProjectCreated?: () => void;
+  initialData?: Project;
+  isEditing?: boolean;
+  onSubmit?: (data: Project) => void;
 }
 
-export default function ProjectForm({ onProjectCreated }: ProjectFormProps) {
+export default function ProjectForm({ onProjectCreated, initialData, isEditing, onSubmit }: ProjectFormProps) {
   const {
     formData,
     handleChange,
@@ -27,12 +30,27 @@ export default function ProjectForm({ onProjectCreated }: ProjectFormProps) {
     fetchTeams,
     setFormData,
     setSubmitStatus,
-  } = useProjectForm();
+  } = useProjectForm({ initialData });
 
-  // 🔹 Gestion création d’équipe
+  
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name,
+        description: initialData.description || "",
+        status: initialData.status || "planning",
+        startDate: initialData.startDate || "",
+        deliveryDate: initialData.deliveryDate || "",
+        endDate: initialData.endDate || "",
+        teamId: initialData.team?.id || "",
+      });
+    }
+  }, [initialData, setFormData]);
+
+  
   const onTeamCreated = useCallback(
     (team: Team) => {
-      setFormData((prev) => ({ ...prev, teamId: team.id }));
+      setFormData(prev => ({ ...prev, teamId: team.id }));
       fetchTeams();
       setSubmitStatus({
         type: "success",
@@ -54,30 +72,30 @@ export default function ProjectForm({ onProjectCreated }: ProjectFormProps) {
     setTeamFormData,
   } = useTeamForm(onTeamCreated);
 
-  // 🔹 Ouverture du modal équipe
+  
   const handleCreateTeamClick = async () => {
-    if (tempProjectId) {
-      openTeamModal(tempProjectId);
-      setTeamFormData((prev) => ({ ...prev, projectId: tempProjectId }));
-      return;
+    let projectId = tempProjectId;
+    if (!projectId) {
+      projectId = await createTemporaryProjectIfNeeded();
     }
-
-    const createdId = await createTemporaryProjectIfNeeded();
-    if (createdId) {
-      openTeamModal(createdId);
-      setTeamFormData((prev) => ({ ...prev, projectId: createdId }));
+    if (projectId) {
+      openTeamModal(projectId);
+      setTeamFormData(prev => ({ ...prev, projectId }));
     }
   };
 
-  // ✅ Nouvelle fonction de soumission qui appelle la callback parent
+  
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await handleSubmit(e);
+    const result = await handleSubmit(); 
 
-    // Si la création a réussi, notifie le parent
     if (result) {
-      onProjectCreated?.();
-      resetForm(); 
+      if (isEditing && onSubmit) {
+        await onSubmit(result);
+      } else {
+        onProjectCreated?.();
+      }
+      resetForm();
     }
   };
 

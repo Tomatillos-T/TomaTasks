@@ -1,46 +1,79 @@
 import { useState, useEffect } from "react";
-import { Plus, Calendar, DollarSign, Clock, Search, Filter, MoreVertical, CheckCircle, AlertCircle, Circle, Trash2 } from "lucide-react";
+import {
+  Plus, Calendar, DollarSign, Clock, Filter, MoreVertical,
+  CheckCircle, AlertCircle, Circle, Trash2, Edit
+} from "lucide-react";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
 import Alert from "../components/Alert";
 import StatCard from "../components/StatCard";
 import ProjectForm from "../modules/projects/components/ProjectForm";
-import type { Project } from "../modules/teams/services/projectService";
-import { getProjects } from "../modules/teams/services/projectService";
-import { deleteProject } from "../modules/projects/services/projectService";
+import type { Project } from "../modules/projects/services/projectService";
+import { getProjects, deleteProject } from "../modules/projects/services/projectService";
 
 export default function Proyectos() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // 🔹 Estados principales
   const [projects, setProjects] = useState<Project[]>([]);
-  const [searchTerm] = useState("");
-  const [filterStatus] = useState<"all" | string>("all");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
 
-  
+  // 🔹 Estados para eliminar
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
 
-  // 🔹 Charger projets
+  // 🔹 Estados para menús y confirmaciones
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [confirmEditModalOpen, setConfirmEditModalOpen] = useState(false);
+
+  // 🔹 Filtros y búsqueda
+  const [searchTerm] = useState("");
+  const [filterStatus] = useState<"all" | string>("all");
+
+  // 🔹 Cargar proyectos desde el backend
   const fetchProjects = async () => {
-    try {
-      const data = await getProjects();
-      setProjects(data);
-    } catch (error) {
-      console.error("Error al cargar proyectos:", error);
+  try {
+    const data = await getProjects();
+    if (!Array.isArray(data)) {
+      console.warn("getProjects returned non-array:", data);
+      setProjects([]); // fallback
+      return;
+    }
+    setProjects(data);
+  } catch (error) {
+    console.error("Error al cargar proyectos:", error);
+    setProjects([]); // éviter état undefined
     }
   };
 
-  // 🔹 Cargar proyectos desde el backend
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  // 🔹 Cerrar el menú si se hace clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest("[data-project-menu]")) setMenuOpenId(null);
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  // 🔹 Manejar creación o edición completada
   const handleProjectCreated = async () => {
-    setIsModalOpen(false); // fermer le modal
-    await fetchProjects(); // recharger la liste
+    setIsModalOpen(false);
+    await fetchProjects();
+    if (isEditing) setConfirmEditModalOpen(true); // abrir confirmación después de editar
+    setIsEditing(false);
+    setProjectToEdit(null);
   };
 
-  // 🔹 Manejar eliminación de proyectos (confirmado desde modal)
+  // 🔹 Manejar eliminación
   const handleDelete = async () => {
     if (!projectToDelete) return;
-
     setIsDeleting(true);
     try {
       await deleteProject(projectToDelete.id);
@@ -55,29 +88,18 @@ export default function Proyectos() {
     }
   };
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest(".relative")) setMenuOpenId(null);
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
-
+  // 🔹 Mapear estados visuales
   const getStatusInfo = (status: string) => {
     const statusMap: Record<string, any> = {
-      planning: { label: "Planificación", color: "bg-blue-500", textColor: "text-blue-700", bgColor: "bg-blue-100", icon: Circle },
-      "in-progress": { label: "En Progreso", color: "bg-yellow-500", textColor: "text-yellow-700", bgColor: "bg-yellow-100", icon: Clock },
-      completed: { label: "Completado", color: "bg-green-500", textColor: "text-green-700", bgColor: "bg-green-100", icon: CheckCircle },
-      "on-hold": { label: "En Pausa", color: "bg-gray-500", textColor: "text-gray-700", bgColor: "bg-gray-100", icon: AlertCircle },
+      planning: { label: "Planificación", bgColor: "bg-blue-100", textColor: "text-blue-700", icon: Circle },
+      "in-progress": { label: "En Progreso", bgColor: "bg-yellow-100", textColor: "text-yellow-700", icon: Clock },
+      completed: { label: "Completado", bgColor: "bg-green-100", textColor: "text-green-700", icon: CheckCircle },
+      "on-hold": { label: "En Pausa", bgColor: "bg-gray-100", textColor: "text-gray-700", icon: AlertCircle },
     };
     return statusMap[status] || statusMap["planning"];
   };
 
+  // 🔹 Color por prioridad
   const getPriorityColor = (priority?: string) => {
     const colors: Record<string, string> = {
       critical: "border-red-500",
@@ -88,6 +110,7 @@ export default function Proyectos() {
     return priority ? colors[priority] || colors["medium"] : colors["medium"];
   };
 
+  // 🔹 Filtrar proyectos
   const filteredProjects = projects.filter((project) => {
     const matchesSearch =
       project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -102,8 +125,8 @@ export default function Proyectos() {
   const completedProjects = projects.filter((p) => p.status === "completed").length;
 
   return (
-    <div className="p-8">
-      {/* Header */}
+    <div className="p-8 min-h-screen overflow-y-auto scroll-smooth">
+      {/* 🔹 Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 sm:gap-0">
         <div>
           <h2 className="text-3xl font-bold text-text-primary mb-2">Gestión de Proyectos</h2>
@@ -114,19 +137,29 @@ export default function Proyectos() {
             <Filter className="w-4 h-4 mr-2" />
             Filtros
           </Button>
-          <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+          <Button
+            variant="primary"
+            onClick={() => {
+              setIsEditing(false);
+              setProjectToEdit(null);
+              setIsModalOpen(true);
+            }}
+          >
             <Plus className="w-4 h-4 mr-2" />
             Nuevo Proyecto
           </Button>
         </div>
       </div>
 
-      {/* Alert */}
+      {/* 🔹 Alerta */}
       <div className="mb-6">
-        <Alert type="info" message="Tienes proyectos que requieren atención. Asigna recursos según prioridad." />
+        <Alert
+          type="info"
+          message="Tienes proyectos que requieren atención. Asigna recursos según prioridad."
+        />
       </div>
 
-      {/* Stats */}
+      {/* 🔹 Estadísticas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard title="Proyectos Activos" value={activeProjects.toString()} change={15.2} icon={Clock} status="info" />
         <StatCard title="Completados" value={completedProjects.toString()} change={8.5} icon={CheckCircle} status="success" />
@@ -134,7 +167,7 @@ export default function Proyectos() {
         <StatCard title="Gasto Acumulado" value={`$${(totalSpent / 1000).toFixed(0)}K`} change={-5.2} icon={DollarSign} status="warning" />
       </div>
 
-      {/* Projects Grid */}
+      {/* 🔹 Grid de Proyectos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredProjects.map((project) => {
           const statusInfo = getStatusInfo(project.status || "");
@@ -153,7 +186,8 @@ export default function Proyectos() {
                     {statusInfo.label}
                   </div>
                 </div>
-                {/* Menu trois points + menu contextuel */}
+
+                {/* 🔹 Menú de opciones */}
                 <div className="relative" data-project-menu>
                   <button
                     onClick={(e) => {
@@ -169,23 +203,35 @@ export default function Proyectos() {
                   {menuOpenId === project.id && (
                     <div
                       className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20"
-                      onClick={(e) => e.stopPropagation()} 
+                      onClick={(e) => e.stopPropagation()}
                     >
+                      {/* Botón Editar */}
+                      <button
+                        onClick={() => {
+                          setIsEditing(true);
+                          setProjectToEdit(project);
+                          setIsModalOpen(true);
+                          setMenuOpenId(null);
+                        }}
+                        className="w-full text-left px-4 py-2 text-blue-600 hover:bg-gray-50 rounded-md flex items-center gap-2"
+                      >
+                        <Edit className="h-4 w-4" /> Editar
+                      </button>
+
+                      {/* Botón Eliminar */}
                       <button
                         onClick={() => {
                           setProjectToDelete(project);
                           setDeleteModalOpen(true);
                           setMenuOpenId(null);
                         }}
-                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-50 rounded-md"
+                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-50 rounded-md flex items-center gap-2"
                       >
-                        Eliminar
+                        <Trash2 className="h-4 w-4" /> Eliminar
                       </button>
-                      {/* aquí se pueden agregar opciones */}
                     </div>
                   )}
                 </div>
-
               </div>
 
               <p className="text-text-secondary text-sm mb-4 line-clamp-2">{project.description}</p>
@@ -202,32 +248,42 @@ export default function Proyectos() {
         })}
       </div>
 
-      {filteredProjects.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-text-secondary mb-4">
-            <Search className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">No se encontraron proyectos</p>
-            <p className="text-sm">Intenta ajustar los filtros de búsqueda</p>
-          </div>
-        </div>
-      )}
-
-      {/* Create Project Modal */}
+      {/* 🔹 Modal Crear / Editar */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Crear Nuevo Proyecto"
+        title={isEditing ? "Editar Proyecto" : "Crear Nuevo Proyecto"}
         footer={
           <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
             Cancelar
           </Button>
         }
       >
-        {/* ✅ Passe la callback ici */}
-        <ProjectForm onProjectCreated={handleProjectCreated} />
+        <ProjectForm
+          onProjectCreated={handleProjectCreated}
+          initialData={projectToEdit || undefined}
+          isEditing={isEditing}
+        />
       </Modal>
 
-      {/* Delete Confirmation Modal */}
+      {/* 🔹 Modal Confirmación Edición */}
+      <Modal
+        isOpen={confirmEditModalOpen}
+        onClose={() => setConfirmEditModalOpen(false)}
+        title="Confirmar edición"
+        footer={
+          <Button variant="primary" onClick={() => setConfirmEditModalOpen(false)}>
+            OK
+          </Button>
+        }
+      >
+        <p className="text-text-secondary">
+          ¿Estás seguro que quieres editar el proyecto{" "}
+          <span className="font-semibold text-text-primary">{projectToEdit?.name}</span>?
+        </p>
+      </Modal>
+
+      {/* 🔹 Modal Eliminar */}
       <Modal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
@@ -235,7 +291,7 @@ export default function Proyectos() {
         footer={
           <>
             <Button variant="secondary" onClick={() => setDeleteModalOpen(false)}>
-              Regresar
+              Cancelar
             </Button>
             <Button variant="danger" onClick={handleDelete} disabled={isDeleting}>
               {isDeleting ? "Eliminando..." : "Eliminar"}

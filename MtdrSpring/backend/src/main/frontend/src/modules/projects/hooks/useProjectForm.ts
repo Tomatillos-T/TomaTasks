@@ -1,65 +1,84 @@
-// projects/hooks/useProjectForm.ts
-import { useEffect, useState, useCallback } from "react"
-import { createProject } from "../services/projectService"
-import type { CreateProjectPayload } from "../services/projectService"
-import { getTeams } from "../services/teamService"
-import type { Team } from "../services/teamService"
+import { useEffect, useState, useCallback } from "react";
+import { createProject } from "../services/projectService";
+import type { Project, CreateProjectPayload } from "../services/projectService";
+import { getTeams } from "../services/teamService";
+import type { Team } from "../services/teamService";
+import { HttpClient } from "../../../services/httpClient";
 
-
-export type ProjectStatus = "planning" | "in-progress" | "on-hold" | "completed" | "cancelled"
-
-export interface ProjectFormData {
-  name: string
-  description: string
-  status: ProjectStatus
-  startDate: string
-  deliveryDate: string
-  endDate: string
-  teamId: string
+// Fonction pour update
+async function updateProject(id: string, payload: CreateProjectPayload): Promise<Project> {
+  return HttpClient.put<Project>(`/api/projects/${id}`, payload, { auth: true });
 }
 
-export type SubmitStatus = { type: "success" | "error" | null; message: string }
+export type ProjectStatus = "planning" | "in-progress" | "on-hold" | "completed" | "cancelled";
 
-export function useProjectForm() {
+export interface ProjectFormData {
+  name: string;
+  description: string;
+  status: ProjectStatus;
+  startDate: string;
+  deliveryDate: string;
+  endDate: string;
+  teamId: string;
+}
+
+export type SubmitStatus = { type: "success" | "error" | null; message: string };
+
+interface UseProjectFormProps {
+  initialData?: Project;
+}
+
+export function useProjectForm({ initialData }: UseProjectFormProps = {}) {
   const [formData, setFormData] = useState<ProjectFormData>({
-    name: "",
-    description: "",
-    status: "planning",
-    startDate: "",
-    deliveryDate: "",
-    endDate: "",
-    teamId: "",
-  })
+    name: initialData?.name || "",
+    description: initialData?.description || "",
+    status: initialData?.status || "planning",
+    startDate: initialData?.startDate || "",
+    deliveryDate: initialData?.deliveryDate || "",
+    endDate: initialData?.endDate || "",
+    teamId: initialData?.team?.id || "",
+  });
 
-  const [teams, setTeams] = useState<Team[]>([])
-  const [isLoadingTeams, setIsLoadingTeams] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>({ type: null, message: "" })
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [isLoadingTeams, setIsLoadingTeams] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>({ type: null, message: "" });
 
-  const [tempProjectId, setTempProjectId] = useState<string | null>(null)
-  const [isCreatingProjectForTeam, setIsCreatingProjectForTeam] = useState(false)
+  const [tempProjectId, setTempProjectId] = useState<string | null>(null);
+  const [isCreatingProjectForTeam, setIsCreatingProjectForTeam] = useState(false);
 
   const fetchTeams = useCallback(async () => {
-    setIsLoadingTeams(true)
+    setIsLoadingTeams(true);
     try {
-      const data = await getTeams()
-      setTeams(data)
-    } catch (error) {
-      console.error(error)
-      setTeams([])
+      const data = await getTeams();
+      setTeams(data);
+    } catch {
+      setTeams([]);
     } finally {
-      setIsLoadingTeams(false)
+      setIsLoadingTeams(false);
     }
-  }, [])
+  }, []);
+
+  useEffect(() => { fetchTeams(); }, [fetchTeams]);
 
   useEffect(() => {
-    fetchTeams()
-  }, [fetchTeams])
+    if (initialData) {
+      setFormData({
+        name: initialData.name || "",
+        description: initialData.description || "",
+        status: initialData.status || "planning",
+        startDate: initialData.startDate || "",
+        deliveryDate: initialData.deliveryDate || "",
+        endDate: initialData.endDate || "",
+        teamId: initialData.team?.id || "",
+      });
+    }
+  }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const resetForm = () => {
     setFormData({
@@ -70,31 +89,24 @@ export function useProjectForm() {
       deliveryDate: "",
       endDate: "",
       teamId: "",
-    })
-    setTempProjectId(null)
-    setSubmitStatus({ type: null, message: "" })
-  }
+    });
+    setTempProjectId(null);
+    setSubmitStatus({ type: null, message: "" });
+  };
 
   const isProjectFormValid = () => {
-    return formData.name.trim() !== "" && formData.description.trim() !== "" && formData.startDate !== ""
-  }
+    return formData.name.trim() !== "" && formData.description.trim() !== "" && formData.startDate !== "";
+  };
 
-  // Crear proyecto temporalmente antes de abrir modal de equipo.
-  // Devuelve el id creado (o el tempProjectId existente).
   const createTemporaryProjectIfNeeded = async (): Promise<string | null> => {
-    if (tempProjectId) return tempProjectId
+    if (tempProjectId) return tempProjectId;
 
     if (!isProjectFormValid()) {
-      setSubmitStatus({
-        type: "error",
-        message: "Por favor completa los campos requeridos del proyecto antes de crear un equipo.",
-      })
-      return null
+      setSubmitStatus({ type: "error", message: "Por favor completa los campos requeridos." });
+      return null;
     }
 
-    setIsCreatingProjectForTeam(true)
-    setSubmitStatus({ type: null, message: "" })
-
+    setIsCreatingProjectForTeam(true);
     try {
       const payload: CreateProjectPayload = {
         name: formData.name.trim(),
@@ -104,57 +116,50 @@ export function useProjectForm() {
         deliveryDate: formData.deliveryDate || null,
         endDate: formData.endDate || null,
         team: null,
-      }
+      };
 
-      const created = await createProject(payload)
-      setTempProjectId(created.id)
-      setSubmitStatus({ type: "success", message: `Proyecto guardado. Ahora puedes crear el equipo.` })
-      return created.id
+      const created = await createProject(payload);
+      setTempProjectId(created.id);
+      setSubmitStatus({ type: "success", message: "Proyecto guardado. Ahora puedes crear el equipo." });
+      return created.id;
     } catch (err: any) {
-      setSubmitStatus({ type: "error", message: err?.message || "No se pudo crear el proyecto." })
-      return null
-    } finally {
-      setIsCreatingProjectForTeam(false)
-    }
-  }
-
-  const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault()
-
-    // Si ya existe un proyecto temporal, solo finalizar y resetear.
-    if (tempProjectId) {
-      setSubmitStatus({ type: "success", message: "Proyecto creado correctamente." })
-      setTimeout(() => {
-        resetForm()
-      }, 2000)
-      return
-    }
-
-    setIsSubmitting(true)
-    setSubmitStatus({ type: null, message: "" })
-
-    try {
-      const payload: CreateProjectPayload = {
-        name: formData.name.trim(),
-        description: formData.description.trim(),
-        status: formData.status,
-        startDate: formData.startDate,
-        deliveryDate: formData.deliveryDate || null,
-        endDate: formData.endDate || null,
-        team: formData.teamId ? { id: formData.teamId } : null,
-      }
-
-      const created = await createProject(payload)
-      setSubmitStatus({ type: "success", message: `Proyecto "${created.name}" creado correctamente.` })
-      setTimeout(() => resetForm(), 2000)
-      return created;
-    } catch (err: any) {
-      setSubmitStatus({ type: "error", message: err?.message || "No se pudo crear el proyecto." })
+      setSubmitStatus({ type: "error", message: err?.message || "No se pudo crear el proyecto." });
       return null;
     } finally {
-      setIsSubmitting(false)
+      setIsCreatingProjectForTeam(false);
     }
-  }
+  };
+
+  const handleSubmit = async () => {
+    if (!isProjectFormValid()) return null;
+
+    const payload: CreateProjectPayload = {
+      name: formData.name.trim(),
+      description: formData.description.trim(),
+      status: formData.status,
+      startDate: formData.startDate,
+      deliveryDate: formData.deliveryDate || null,
+      endDate: formData.endDate || null,
+      team: formData.teamId ? { id: formData.teamId } : null,
+    };
+
+    setIsSubmitting(true);
+    try {
+      let result: Project;
+      if (initialData?.id) {
+        result = await updateProject(initialData.id, payload);
+      } else {
+        result = await createProject(payload);
+      }
+      setSubmitStatus({ type: "success", message: "Proyecto guardado correctamente." });
+      return result;
+    } catch (err: any) {
+      setSubmitStatus({ type: "error", message: err?.message || "Error al guardar el proyecto." });
+      return null;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return {
     formData,
@@ -164,15 +169,12 @@ export function useProjectForm() {
     isSubmitting,
     submitStatus,
     setSubmitStatus,
-
     teams,
     fetchTeams,
     isLoadingTeams,
-
     tempProjectId,
     isCreatingProjectForTeam,
     createTemporaryProjectIfNeeded,
-
     handleSubmit,
-  } as const
+  } as const;
 }
