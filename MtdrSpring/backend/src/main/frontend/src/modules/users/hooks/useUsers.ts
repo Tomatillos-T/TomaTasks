@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import getUsersAdapter from "@/modules/users/adapters/getUsersAdapter";
 import createUserAdapter, { type CreateUserParams } from "@/modules/users/adapters/createUserAdapter";
+import updateUserAdapter, { type UpdateUserParams } from "@/modules/users/adapters/updateUserAdapter";
+import deleteUserAdapter from "@/modules/users/adapters/deleteUserAdapter";
+import type { User } from "@/modules/users/models/user";
 
 export default function useUsers() {
   const queryClient = useQueryClient();
@@ -8,10 +11,10 @@ export default function useUsers() {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["users"],
     queryFn: getUsersAdapter,
-    staleTime: 5 * 60 * 1000, // Los datos se consideran frescos por 5 minutos
-    gcTime: 10 * 60 * 1000, // Mantener en caché por 10 minutos
-    refetchOnMount: false, // No refetch si hay datos en caché
-    refetchOnWindowFocus: false, // No refetch al volver a la ventana
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const createMutation = useMutation({
@@ -21,11 +24,35 @@ export default function useUsers() {
     },
   });
 
-  const createUser = async (params: CreateUserParams) => {
+  const updateMutation = useMutation({
+    mutationFn: updateUserAdapter,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteUserAdapter,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+
+  const createUser = async (params: CreateUserParams): Promise<User | null> => {
     const result = await createMutation.mutateAsync(params);
-    if (result.status !== 200) {
-      throw new Error(result.message);
-    }
+    if (result.status !== 200) throw new Error(result.message);
+    return result.data;
+  };
+
+  const updateUser = async (params: UpdateUserParams): Promise<User | null> => {
+    const result = await updateMutation.mutateAsync(params);
+    if (result.status !== 200) throw new Error(result.message);
+    return result.data;
+  };
+
+  const deleteUser = async (id: string): Promise<User | null> => {
+    const result = await deleteMutation.mutateAsync(id);
+    if (result.status !== 200) throw new Error(result.message);
     return result.data;
   };
 
@@ -35,6 +62,10 @@ export default function useUsers() {
     isError,
     error,
     createUser,
+    updateUser,
+    deleteUser,
     isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
   };
 }

@@ -12,8 +12,8 @@ import TeamForm from "@/modules/teams/components/TeamForm";
 import SprintForm from "@/modules/sprint/components/SprintForm";
 import ProjectForm from "@/modules/projects/components/ProjectForm";
 import UserStoryForm from "@/modules/userStory/components/UserStoryForm";
-import TaskForm from "@/modules/task/components/TaskForm";
 import User from "@/pages/User";
+import Users from "@/pages/Users";
 import Tasks from "@/pages/task/Tasks";
 import GenerateDummyTasks from "@/pages/GenerateDummyTasks";
 import Equipo from "@/pages/Equipo";
@@ -39,8 +39,8 @@ export default function AppRouter() {
         <Route path="/teamForm" element={<TeamForm />} />
         <Route path="/sprintForm" element={<SprintForm />} />
         <Route path="/userStoryForm" element={<UserStoryForm />} />
-        <Route path="/taskForm" element={<TaskForm />} />
         <Route path="/user" element={<User />} />
+        <Route path="/usuarios" element={<Users />} />
         <Route path="/generate-dummy-tasks" element={<GenerateDummyTasks />} />
 
         <Route path="/equipos/:id" element={<Equipo />} />

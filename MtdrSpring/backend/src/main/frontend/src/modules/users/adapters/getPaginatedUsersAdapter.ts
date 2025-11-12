@@ -1,9 +1,4 @@
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email?: string;
-}
+import type { User } from "@/modules/users/models/user";
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -12,15 +7,12 @@ interface PaginatedResponse<T> {
 }
 
 const PAGE_SIZE = 10;
-
-// In-memory cache to simulate pagination
 let cachedUsers: User[] | null = null;
 
 export default async function getPaginatedUsersAdapter(
   page: number = 0
 ): Promise<PaginatedResponse<User>> {
   try {
-    // If we don't have cached data, fetch from API
     if (!cachedUsers) {
       const response = await fetch("/api/user", {
         method: "GET",
@@ -37,7 +29,6 @@ export default async function getPaginatedUsersAdapter(
       cachedUsers = await response.json();
     }
 
-    // Simulate pagination by slicing the cached data
     const startIndex = page * PAGE_SIZE;
     const endIndex = startIndex + PAGE_SIZE;
     const paginatedData = (cachedUsers || []).slice(startIndex, endIndex);
@@ -58,7 +49,6 @@ export default async function getPaginatedUsersAdapter(
   }
 }
 
-// Function to clear cache (useful when data changes)
 export function clearUsersCache() {
   cachedUsers = null;
 }
