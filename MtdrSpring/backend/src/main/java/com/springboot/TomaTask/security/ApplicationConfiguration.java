@@ -15,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class ApplicationConfiguration {
-    
+
     private final UserRepository userRepository;
 
     public ApplicationConfiguration(UserRepository userRepository) {
@@ -27,12 +27,7 @@ public class ApplicationConfiguration {
         return username -> {
             User user = userRepository.findByEmail(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            
-            // Forzar la inicialización del role para evitar LazyInitializationException
-            if (user.getRole() != null) {
-                user.getRole().getRole();  
-            }
-            
+
             return user;
         };
     }
@@ -49,8 +44,7 @@ public class ApplicationConfiguration {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService());
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService());
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
