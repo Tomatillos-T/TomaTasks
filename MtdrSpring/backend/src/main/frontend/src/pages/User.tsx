@@ -1,6 +1,8 @@
 // User.tsx
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useUserContext } from "@/contexts/UserContext";
+import { useAuth } from "@/hooks/useAuth";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import Alert from "@/components/Alert";
@@ -14,7 +16,9 @@ interface SubmitStatus {
 }
 
 export default function User() {
+  const navigate = useNavigate();
   const { user, setUser, isAuthenticated } = useUserContext();
+  const { logout } = useAuth();
   const [formData, setFormData] = useState<UserType | null>(user || null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -122,6 +126,11 @@ export default function User() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
   return (
     <section className="min-h-screen flex items-center justify-center bg-background-default">
       <div className="w-full h-full m-4 p-4 bg-background-paper rounded-2xl shadow-lg space-y-6">
@@ -134,13 +143,22 @@ export default function User() {
               Manage your account details below.
             </p>
           </div>
-          <Button
-            type="button"
-            variant={isEditing ? "secondary" : "primary"}
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            {isEditing ? "Cancel" : "Edit"}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+            <Button
+              type="button"
+              variant={isEditing ? "secondary" : "primary"}
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              {isEditing ? "Cancel" : "Edit"}
+            </Button>
+          </div>
         </div>
 
         {submitStatus.type && (
