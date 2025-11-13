@@ -1,6 +1,16 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, Calendar, FileText, Package, Settings, Users, Menu, X, Kanban } from "lucide-react";
+import {
+  BarChart3,
+  Calendar,
+  FileText,
+  Package,
+  Settings,
+  Users,
+  Menu,
+  X,
+  Kanban,
+} from "lucide-react";
 import { useUserContext } from "@/contexts/UserContext";
 
 type SidebarProps = {
@@ -20,10 +30,33 @@ const navItems: NavItem[] = [
   { id: "dashboard", icon: BarChart3, label: "Dashboard", path: "/dashboard" },
   { id: "tasks", icon: FileText, label: "Tareas", path: "/tareas" },
   { id: "kanban", icon: Kanban, label: "Kanban", path: "/kanban" },
-  { id: "clients", icon: Users, label: "Equipos", path: "/equipos", requiredRoles: ["ROLE_ADMIN"] },
-  { id: "inventory", icon: Package, label: "Proyectos", path: "/proyectos", requiredRoles: ["ROLE_ADMIN"] },
-  { id: "calendar", icon: Calendar, label: "Calendario", path: "/calendario", requiredRoles: ["ROLE_ADMIN"] },
-  { id: "settings", icon: Settings, label: "Configuración", path: "/configuracion" },
+  {
+    id: "clients",
+    icon: Users,
+    label: "Equipos",
+    path: "/equipos",
+    requiredRoles: ["ROLE_ADMIN"],
+  },
+  {
+    id: "inventory",
+    icon: Package,
+    label: "Proyectos",
+    path: "/proyectos",
+    requiredRoles: ["ROLE_ADMIN"],
+  },
+  {
+    id: "calendar",
+    icon: Calendar,
+    label: "Calendario",
+    path: "/calendario",
+    requiredRoles: ["ROLE_ADMIN"],
+  },
+  {
+    id: "settings",
+    icon: Settings,
+    label: "Configuración",
+    path: "/configuracion",
+  },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
@@ -33,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
 
   // Filter nav items based on user role
   const visibleNavItems = useMemo(() => {
-    const userRole = user?.role?.role;
+    const userRole = user?.role;
     if (!userRole) return [];
 
     return navItems.filter((item) => {

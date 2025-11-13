@@ -1,5 +1,4 @@
 import { Routes, Route } from "react-router-dom";
-import Login from "@/pages/Login";
 import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
 import Layout from "@/components/Layout";
@@ -18,6 +17,8 @@ import TaskForm from "@/modules/task/components/TaskForm";
 import User from "@/pages/User";
 import Tasks from "@/pages/task/Tasks";
 import GenerateDummyTasks from "@/pages/GenerateDummyTasks";
+import RedirectionRoute from "@/components/RedirectionRoute";
+import LoginRoute from "@/components/LoginRoute";
 
 // Definición de las rutas de la aplicación
 
@@ -25,7 +26,7 @@ export default function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<LoginRoute />} />
 
       {/* Rutas protegidas del dashboard con sidebar fijo */}
       <Route
@@ -123,6 +124,7 @@ export default function AppRouter() {
             </RoleBasedRoute>
           }
         />
+        <Route path="*" element={<RedirectionRoute redirect="/dashboard" />} />
       </Route>
     </Routes>
   );
