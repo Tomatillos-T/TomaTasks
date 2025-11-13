@@ -15,6 +15,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -35,6 +36,13 @@ public class UserService {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    public List<UserDTO> getUsersWithoutTeam() {
+        List<User> users = userRepository.findByTeamIsNull();
+        return users.stream()
+                .map(UserMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     public User findByEmail(String email) {

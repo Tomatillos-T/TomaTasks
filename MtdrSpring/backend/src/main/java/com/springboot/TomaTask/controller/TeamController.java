@@ -40,6 +40,21 @@ public class TeamController {
         return ResponseEntity.ok(teamService.getTeamMembers(id));
     }
 
+    @PostMapping("/{teamId}/members/{userId}")
+    public ResponseEntity<TeamDTO> addMemberToTeam(@PathVariable String teamId, @PathVariable String userId) {
+        return ResponseEntity.ok(teamService.addMemberToTeam(teamId, userId));
+    }
+
+    @PostMapping("/{teamId}/members")
+    public ResponseEntity<TeamDTO> addMembersToTeam(@PathVariable String teamId, @RequestBody Set<String> userIds) {
+        return ResponseEntity.ok(teamService.addMembersToTeam(teamId, userIds));
+    }
+
+    @DeleteMapping("/{teamId}/members/{userId}")
+    public ResponseEntity<TeamDTO> removeMemberFromTeam(@PathVariable String teamId, @PathVariable String userId) {
+        return ResponseEntity.ok(teamService.removeMemberFromTeam(teamId, userId));
+    }
+
     @PostMapping
     public ResponseEntity<TeamDTO> createTeam(@RequestBody TeamDTO teamDTO) {
         TeamDTO createdTeam = teamService.createTeam(teamDTO);

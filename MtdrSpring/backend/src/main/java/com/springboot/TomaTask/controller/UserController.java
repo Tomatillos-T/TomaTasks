@@ -28,6 +28,11 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    @GetMapping("/without-team")
+    public ResponseEntity<List<UserDTO>> getUsersWithoutTeam() {
+        return ResponseEntity.ok(userService.getUsersWithoutTeam());
+    }
+
     @PostMapping
     public ResponseEntity<UserDTO> addUser(@RequestBody CreateUserRequest request) {
         try {

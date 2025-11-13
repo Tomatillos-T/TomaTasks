@@ -8,6 +8,9 @@ import com.springboot.TomaTask.model.Project;
 import com.springboot.TomaTask.model.Team;
 import com.springboot.TomaTask.repository.ProjectRepository;
 import com.springboot.TomaTask.repository.TeamRepository;
+import com.springboot.TomaTask.repository.UserRepository;
+import com.springboot.TomaTask.model.User;
+
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -24,12 +27,16 @@ import java.util.stream.Collectors;
 public class TeamService {
     private final TeamRepository teamRepository;
     private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
 
     public TeamService(TeamRepository teamRepository,
-            ProjectRepository projectRepository) {
+                    ProjectRepository projectRepository,
+                    UserRepository userRepository) {
         this.teamRepository = teamRepository;
         this.projectRepository = projectRepository;
+        this.userRepository = userRepository;
     }
+
 
     public List<TeamDTO> getAllTeams() {
         return TeamMapper.toDTOList(teamRepository.findAll());
@@ -63,6 +70,68 @@ public class TeamService {
                 .map(UserMapper::toDTO)
                 .collect(Collectors.toSet());
     }
+
+    @Transactional
+    public TeamDTO addMemberToTeam(String teamId, String userId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found with ID: " + teamId));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        // Evitar duplicados
+        if (team.getMembers().contains(user)) {
+            throw new RuntimeException("User is already a member of this team");
+        }
+
+        user.setTeam(team); // Relación bidireccional
+        team.getMembers().add(user);
+
+        teamRepository.save(team);
+        return TeamMapper.toDTOWithNested(team, true);
+    }
+
+    @Transactional
+    public TeamDTO addMembersToTeam(String teamId, Set<String> userIds) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found with ID: " + teamId));
+
+        Set<User> users = userRepository.findAllById(userIds).stream().collect(Collectors.toSet());
+
+        if (users.isEmpty()) {
+            throw new RuntimeException("No valid users found for provided IDs");
+        }
+
+        users.forEach(user -> {
+            if (!team.getMembers().contains(user)) {
+                user.setTeam(team);
+                team.getMembers().add(user);
+            }
+        });
+
+        teamRepository.save(team);
+        return TeamMapper.toDTOWithNested(team, true);
+    }
+
+    @Transactional
+    public TeamDTO removeMemberFromTeam(String teamId, String userId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found with ID: " + teamId));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        if (!team.getMembers().contains(user)) {
+            throw new RuntimeException("User is not a member of this team");
+        }
+
+        team.getMembers().remove(user);
+        user.setTeam(null);
+
+        teamRepository.save(team);
+        return TeamMapper.toDTOWithNested(team, true);
+    }
+
 
     @Transactional
     public TeamDTO createTeam(TeamDTO teamDTO) {

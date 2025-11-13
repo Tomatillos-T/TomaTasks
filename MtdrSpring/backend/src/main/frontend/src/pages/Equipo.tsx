@@ -4,10 +4,14 @@ import { Users, FolderKanban, MoreHorizontal, Loader2 } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
+import Modal from '@/components/Modal';
 import { ResponseStatus } from "@/models/responseStatus";
 import { DataTableAdvanced } from '@/components/DataTable/DataTableAdvanced';
 import type { FilterData } from '@/components/DataTable/types';
 import useTeam from '@/modules/team/hooks/useTeam';
+import useUsersWithoutTeam from '@/modules/team/hooks/useUsersWithoutTeam';
+import useAddTeamMember from '@/modules/team/hooks/useAddTeamMember';
+import useRemoveTeamMember from '@/modules/team/hooks/useRemoveTeamMember';
 import type { TeamMember } from '@/modules/teams/services/teamService';
 import {
   useReactTable,
@@ -28,8 +32,59 @@ export default function Equipo() {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState('resumen');
   const [memberSearchInput, setMemberSearchInput] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const { team, members, project, isLoading, isError } = useTeam(id || '');
+  const { usersWithoutTeam, isLoading: loadingUsers, refetch: refetchUsers } = useUsersWithoutTeam();
+  const { addMember, isAdding } = useAddTeamMember();
+  const { removeMember, isRemoving } = useRemoveTeamMember();
+
+  const handleAddMember = async (userId: string) => {
+    if (!id) return;
+    
+    try {
+      setError(null);
+      await addMember({ teamId: id, userId });
+      setShowAddModal(false);
+      refetchUsers();
+    } catch (error) {
+      const errorMessage = (error as Error).message || 'Error al agregar miembro';
+      setError(errorMessage);
+      console.error('Error al agregar miembro:', error);
+    }
+  };
+
+  const handleRemoveMember = async () => {
+    if (!id || !selectedMember) return;
+
+    try {
+      setError(null);
+      await removeMember({ teamId: id, userId: selectedMember.id });
+      setShowRemoveModal(false);
+      setSelectedMember(null);
+      refetchUsers();
+    } catch (error) {
+      const errorMessage = (error as Error).message || 'Error al remover miembro';
+      setError(errorMessage);
+      console.error('Error al remover miembro:', error);
+    }
+  };
+
+  const openRemoveModal = (member: TeamMember) => {
+    setSelectedMember(member);
+    setShowRemoveModal(true);
+    setError(null);
+  };
+
+  const closeModals = () => {
+    setShowAddModal(false);
+    setShowRemoveModal(false);
+    setSelectedMember(null);
+    setError(null);
+  };
 
   const memberColumns: ColumnDef<TeamMember>[] = [
     {
@@ -82,13 +137,8 @@ export default function Equipo() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onSelect={() => console.log('Editar rol', row.original)}
-              >
-                Cambiar rol
-              </DropdownMenuItem>
-              <DropdownMenuItem
                 className="text-red-600"
-                onSelect={() => console.log('Remover miembro', row.original)}
+                onSelect={() => openRemoveModal(row.original)}
               >
                 Remover del equipo
               </DropdownMenuItem>
@@ -210,11 +260,18 @@ export default function Equipo() {
               <h2 className="text-lg font-semibold text-text-primary">
                 Miembros del Equipo
               </h2>
-              <Button>
+              <Button onClick={() => setShowAddModal(true)} disabled={isAdding}>
                 <Users className="w-4 h-4" />
                 Agregar Miembro
               </Button>
             </div>
+
+            {error && (
+              <div className="bg-error-light border border-error-main text-error-main px-4 py-3 rounded mb-4">
+                {error}
+              </div>
+            )}
+
             {members.length === 0 ? (
               <div className="text-center py-12">
                 <Users className="mx-auto h-12 w-12 text-text-secondary mb-3" />
@@ -230,6 +287,96 @@ export default function Equipo() {
                 filters={memberFilters}
                 isRefetching={false}
               />
+            )}
+
+            {/* Modal: Agregar Miembro */}
+            {showAddModal && (
+              <Modal
+                title="Agregar miembros"
+                isOpen={showAddModal}
+                onClose={closeModals}
+              >
+                {error && (
+                  <div className="bg-error-light border border-error-main text-error-main px-4 py-3 rounded mb-4 text-sm">
+                    {error}
+                  </div>
+                )}
+                
+                {loadingUsers ? (
+                  <p className="text-center text-text-secondary py-4">Cargando usuarios...</p>
+                ) : usersWithoutTeam.length === 0 ? (
+                  <p className="text-center text-text-secondary py-4">
+                    No hay usuarios disponibles sin equipo
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-background-contrast">
+                    {usersWithoutTeam.map((user) => (
+                      <li
+                        key={user.id}
+                        className="flex justify-between items-center py-2 px-2 hover:bg-background-contrast/30 rounded-md"
+                      >
+                        <div>
+                          <p className="font-medium">
+                            {user.firstName} {user.lastName}
+                          </p>
+                          <p className="text-sm text-text-secondary">{user.email}</p>
+                        </div>
+                        <Button
+                          variant="secondary"
+                          disabled={isAdding}
+                          onClick={() => handleAddMember(user.id)}
+                        >
+                          {isAdding ? 'Agregando...' : 'Agregar'}
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Modal>
+            )}
+
+            {/* Modal: Confirmar Eliminación */}
+            {showRemoveModal && selectedMember && (
+              <Modal
+                title="Remover Miembro"
+                isOpen={showRemoveModal}
+                onClose={closeModals}
+              >
+                <div className="space-y-4">
+                  {error && (
+                    <div className="bg-error-light border border-error-main text-error-main px-4 py-3 rounded text-sm">
+                      {error}
+                    </div>
+                  )}
+
+                  <p className="text-text-secondary">
+                    ¿Estás seguro de que deseas remover a{' '}
+                    <span className="font-semibold text-text-primary">
+                      {selectedMember.firstName} {selectedMember.lastName}
+                    </span>{' '}
+                    del equipo? Esta acción no se puede deshacer.
+                  </p>
+
+                  <div className="flex justify-end gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={closeModals}
+                      disabled={isRemoving}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleRemoveMember}
+                      disabled={isRemoving}
+                      className="bg-error-main hover:bg-error-dark"
+                    >
+                      {isRemoving ? 'Removiendo...' : 'Remover'}
+                    </Button>
+                  </div>
+                </div>
+              </Modal>
             )}
           </div>
         );
