@@ -47,18 +47,15 @@ export interface CreateTeamPayload {
   projectId?: string;
 }
 
-
 export type TeamStatus = "ACTIVO" | "INACTIVO";
 
 export async function getTeams(): Promise<Team[]> {
   try {
     const response = await HttpClient.get<Team[]>("/api/teams", { auth: true });
-
     return response.map(team => ({
       ...team,
       status: team.status in TeamStatusEnum ? team.status as TeamStatusEnum : TeamStatusEnum.INACTIVO,
     }));
-
   } catch (error) {
     const err = error as HttpError;
     throw { message: err.message, status: err.status };
@@ -68,12 +65,10 @@ export async function getTeams(): Promise<Team[]> {
 export async function getTeamsWithoutProject(): Promise<Team[]> {
   try {
     const response = await HttpClient.get<Team[]>("/api/teams/without-project", { auth: true });
-
     return response.map(team => ({
       ...team,
       status: team.status in TeamStatusEnum ? team.status as TeamStatusEnum : TeamStatusEnum.INACTIVO,
     }));
-
   } catch (error) {
     const err = error as HttpError;
     throw { message: err.message, status: err.status };

@@ -6,8 +6,8 @@ import Modal from "../components/Modal";
 import Alert from "../components/Alert";
 import StatCard from "../components/StatCard";
 import ProjectForm from "../modules/projects/components/ProjectForm";
-import type { Project } from "../modules/teams/services/projectService";
-import { getProjects } from "../modules/teams/services/projectService";
+import type { Project } from "../modules/projects/services/projectService";
+import { getProjects } from "../modules/projects/services/projectService";
 
 export default function Proyectos() {
   const [isModalOpen, setIsModalOpen] = useState(false)

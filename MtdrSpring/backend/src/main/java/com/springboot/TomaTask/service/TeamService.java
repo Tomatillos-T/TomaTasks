@@ -64,6 +64,7 @@ public class TeamService {
                 .collect(Collectors.toSet());
     }
 
+    @Transactional
     public TeamDTO createTeam(TeamDTO teamDTO) {
         if (teamDTO.getName() == null || teamDTO.getName().trim().isEmpty()) {
             throw new RuntimeException("Team name is required");
@@ -90,6 +91,7 @@ public class TeamService {
         return TeamMapper.toDTOWithNested(savedTeam, true);
     }
 
+    @Transactional
     public TeamDTO updateTeam(String id, TeamDTO teamDTO) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Team not found with ID: " + id));
@@ -117,6 +119,7 @@ public class TeamService {
         return TeamMapper.toDTOWithNested(updatedTeam, true);
     }
 
+    @Transactional
     public void deleteTeam(String id) {
         teamRepository.deleteById(id);
     }

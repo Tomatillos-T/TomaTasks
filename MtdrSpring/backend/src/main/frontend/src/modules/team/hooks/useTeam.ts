@@ -1,9 +1,9 @@
 // hooks/useTeam.ts
 import { useQuery } from "@tanstack/react-query";
 import { getTeamById, getTeamMembers } from "@/modules/teams/services/teamService";
-import { getProjects } from "@/modules/teams/services/projectService";
+import { getProjects } from "@/modules/projects/services/projectService";
 import type { Team, TeamMember } from "@/modules/teams/services/teamService";
-import type { Project } from "@/modules/teams/services/projectService";
+import type { Project } from "@/modules/projects/services/projectService";
 
 export default function useTeam(teamId: string) {
   // Fetch team details
