@@ -1,9 +1,12 @@
 package com.springboot.TomaTask.controller;
 
+import com.springboot.TomaTask.dto.CreateUserRequest;
+import com.springboot.TomaTask.dto.PaginationRequestDTO;
 import com.springboot.TomaTask.dto.UserDTO;
 import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,20 +25,27 @@ public class UserController {
         return ResponseEntity.ok(userService.findAll());
     }
 
+    @PostMapping("/search")
+    public ResponseEntity<Page<UserDTO>> searchUsers(@RequestBody PaginationRequestDTO request) {
+        Page<UserDTO> dtoPage = userService.searchUsers(request);
+        return ResponseEntity.ok(dtoPage);
+    }
+
     @GetMapping(value = "/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable String id) {
         return userService.getUserById(id);
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserDTO> addUser(@RequestBody CreateUserRequest request) {
         try {
-            UserDTO savedUser = userService.addUserDTO(userDTO);
+            UserDTO savedUser = userService.addUser(request);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("location", savedUser.getId());
             responseHeaders.set("Access-Control-Expose-Headers", "location");
             return ResponseEntity.ok().headers(responseHeaders).body(savedUser);
         } catch (Exception e) {
+            e.printStackTrace(); // Para ver el error
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }

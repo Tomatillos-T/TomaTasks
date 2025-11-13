@@ -7,7 +7,7 @@ import { useMemo } from "react";
 export const useRole = () => {
   const { user } = useUserContext();
 
-  const userRole = user?.role?.role;
+  const userRole = user?.role;
 
   const hasRole = (roles: string | string[]): boolean => {
     if (!userRole) return false;

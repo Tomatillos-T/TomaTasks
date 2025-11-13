@@ -25,8 +25,8 @@ export default function Tasks() {
     ],
     []
   );
-
   return (
+
     <div className="h-full flex flex-col p-6 min-h-0">
       <div className="flex justify-between items-center mb-4 flex-shrink-0">
         <h1 className="text-2xl font-bold text-text-primary">Tareas</h1>
