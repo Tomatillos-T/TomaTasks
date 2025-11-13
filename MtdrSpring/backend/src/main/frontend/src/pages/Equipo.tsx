@@ -219,10 +219,6 @@ export default function Equipo() {
               <div className="text-center py-12">
                 <Users className="mx-auto h-12 w-12 text-text-secondary mb-3" />
                 <p className="text-text-secondary text-lg mb-4">No hay miembros disponibles</p>
-                <Button>
-                  <Users className="w-4 h-4" />
-                  Agregar Miembro
-                </Button>
               </div>
             ) : (
               <DataTableAdvanced
