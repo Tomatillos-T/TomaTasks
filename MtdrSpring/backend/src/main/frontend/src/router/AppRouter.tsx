@@ -1,8 +1,9 @@
 import { Routes, Route } from "react-router-dom";
-import Login from "@/pages/Login";
 import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
 import Layout from "@/components/Layout";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import RoleBasedRoute from "@/components/RoleBasedRoute";
 import TomaTaskMockup from "@/pages/TomaTaskMockUp";
 import Kanban from "@/pages/Kanban";
 import Equipos from "@/pages/Equipos";
@@ -16,6 +17,8 @@ import TaskForm from "@/modules/task/components/TaskForm";
 import User from "@/pages/User";
 import Tasks from "@/pages/task/Tasks";
 import GenerateDummyTasks from "@/pages/GenerateDummyTasks";
+import RedirectionRoute from "@/components/RedirectionRoute";
+import LoginRoute from "@/components/LoginRoute";
 
 // Definición de las rutas de la aplicación
 
@@ -23,24 +26,105 @@ export default function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<LoginRoute />} />
 
-      {/* Rutas del dashboard con sidebar fijo */}
-      <Route path="/" element={<Layout />}>
+      {/* Rutas protegidas del dashboard con sidebar fijo */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
+        {/* Rutas accesibles para todos los usuarios autenticados */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tareas" element={<Tasks />} />
         <Route path="/kanban" element={<Kanban />} />
-        <Route path="/equipos" element={<Equipos />} />
-        <Route path="/proyectos" element={<Proyectos />} />
-        <Route path="/calendario" element={<Calendario />} />
-        <Route path="/palette" element={<TomaTaskMockup />} />
-        <Route path="/projectForm" element={<ProjectForm />} />
-        <Route path="/teamForm" element={<TeamForm />} />
-        <Route path="/sprintForm" element={<SprintForm />} />
-        <Route path="/userStoryForm" element={<UserStoryForm />} />
-        <Route path="/taskForm" element={<TaskForm />} />
         <Route path="/user" element={<User />} />
-        <Route path="/generate-dummy-tasks" element={<GenerateDummyTasks />} />
+
+        {/* Rutas solo para ADMIN */}
+        <Route
+          path="/equipos"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <Equipos />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/proyectos"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <Proyectos />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/calendario"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <Calendario />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/palette"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <TomaTaskMockup />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/projectForm"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <ProjectForm />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/teamForm"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <TeamForm />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/sprintForm"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <SprintForm />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/userStoryForm"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <UserStoryForm />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/taskForm"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <TaskForm />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/generate-dummy-tasks"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <GenerateDummyTasks />
+            </RoleBasedRoute>
+          }
+        />
+        <Route path="*" element={<RedirectionRoute redirect="/dashboard" />} />
       </Route>
     </Routes>
   );

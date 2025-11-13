@@ -1,25 +1,81 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, Calendar, FileText, Package, Settings, Users, Menu, X, Kanban } from "lucide-react";
+import {
+  BarChart3,
+  Calendar,
+  FileText,
+  Package,
+  Settings,
+  Users,
+  Menu,
+  X,
+  Kanban,
+} from "lucide-react";
+import { useUserContext } from "@/contexts/UserContext";
 
 type SidebarProps = {
   activeTab: string;
   setActiveTab: (id: string) => void;
 };
 
-const navItems = [
+type NavItem = {
+  id: string;
+  icon: React.ElementType;
+  label: string;
+  path: string;
+  requiredRoles?: string[]; // If undefined, accessible to all authenticated users
+};
+
+const navItems: NavItem[] = [
   { id: "dashboard", icon: BarChart3, label: "Dashboard", path: "/dashboard" },
   { id: "tasks", icon: FileText, label: "Tareas", path: "/tareas" },
   { id: "kanban", icon: Kanban, label: "Kanban", path: "/kanban" },
-  { id: "clients", icon: Users, label: "Equipos", path: "/equipos" },
-  { id: "inventory", icon: Package, label: "Proyectos", path: "/proyectos" },
-  { id: "calendar", icon: Calendar, label: "Calendario", path: "/calendario" },
-  { id: "settings", icon: Settings, label: "Configuración", path: "/configuracion" },
-] as const;
+  {
+    id: "clients",
+    icon: Users,
+    label: "Equipos",
+    path: "/equipos",
+    requiredRoles: ["ROLE_ADMIN"],
+  },
+  {
+    id: "inventory",
+    icon: Package,
+    label: "Proyectos",
+    path: "/proyectos",
+    requiredRoles: ["ROLE_ADMIN"],
+  },
+  {
+    id: "calendar",
+    icon: Calendar,
+    label: "Calendario",
+    path: "/calendario",
+    requiredRoles: ["ROLE_ADMIN"],
+  },
+  {
+    id: "settings",
+    icon: Settings,
+    label: "Configuración",
+    path: "/configuracion",
+  },
+];
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const { user } = useUserContext();
+
+  // Filter nav items based on user role
+  const visibleNavItems = useMemo(() => {
+    const userRole = user?.role;
+    if (!userRole) return [];
+
+    return navItems.filter((item) => {
+      // If no required roles specified, show to all authenticated users
+      if (!item.requiredRoles) return true;
+      // Otherwise, check if user has one of the required roles
+      return item.requiredRoles.includes(userRole);
+    });
+  }, [user]);
 
   return (
     <>
@@ -46,7 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
         `}
       >
         <nav className="space-y-1">
-          {navItems.map(({ id, icon: Icon, label, path }) => {
+          {visibleNavItems.map(({ id, icon: Icon, label, path }) => {
             const isActive = activeTab === id;
             return (
               <button
