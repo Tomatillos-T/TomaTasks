@@ -4,6 +4,11 @@ import { useNavigate } from "react-router-dom";
 import Button from "@/components/Button";
 import Badge from "@/components/Badge";
 import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/Tooltip";
+import {
   getTeams,
   createTeam,
   updateTeam,
@@ -34,9 +39,9 @@ export default function Equipos() {
       setError(null);
       const data = await getTeams();
       setTeams(data);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error al cargar equipos:", error);
-      setError(error.message || "Error al cargar los equipos");
+      setError(error instanceof Error ? error.message : "Error al cargar los equipos");
     } finally {
       setLoading(false);
     }
@@ -60,9 +65,9 @@ export default function Equipos() {
       await createTeam(payload);
       setIsCreateModalOpen(false);
       await fetchTeams();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error al crear el equipo:", error);
-      setError(error.message || "Error al crear el equipo");
+      setError(error instanceof Error ? error.message : "Error al crear el equipo");
     } finally {
       setSubmitting(false);
     }
@@ -84,9 +89,9 @@ export default function Equipos() {
       setIsEditModalOpen(false);
       setSelectedTeam(null);
       await fetchTeams();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error al actualizar el equipo:", error);
-      setError(error.message || "Error al actualizar el equipo");
+      setError(error instanceof Error ? error.message : "Error al actualizar el equipo");
     } finally {
       setSubmitting(false);
     }
@@ -100,9 +105,9 @@ export default function Equipos() {
       setIsDeleteModalOpen(false);
       setSelectedTeam(null);
       await fetchTeams();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error al eliminar el equipo:", error);
-      setError(error.message || "Error al eliminar el equipo");
+      setError(error instanceof Error ? error.message : "Error al eliminar el equipo");
     } finally {
       setSubmitting(false);
     }
@@ -152,7 +157,9 @@ export default function Equipos() {
 
       {!loading && teams.length === 0 && (
         <div className="text-center py-16">
-          <p className="text-text-secondary text-lg mb-4">No hay equipos disponibles</p>
+          <p className="text-text-secondary text-lg mb-4">
+            No hay equipos disponibles
+          </p>
         </div>
       )}
 
@@ -161,37 +168,47 @@ export default function Equipos() {
           {teams.map((team) => (
             <div
               key={team.id}
-              className="bg-background-paper p-6 rounded-xl border border-background-contrast shadow-sm hover:shadow-md transition-shadow"
+              className="bg-background-paper p-6 rounded-xl border border-background-contrast shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => navigate(`/equipos/${team.id}`)}
             >
               <div className="flex justify-between items-start mb-4">
-                <h3
-                  className="font-semibold text-lg text-text-primary cursor-pointer hover:text-primary-main"
-                  onClick={() => navigate(`/equipos/${team.id}`)}
-                >
+                <h3 className="font-semibold text-lg text-text-primary cursor-pointer hover:text-primary-main">
                   {team.name}
                 </h3>
                 <div className="flex gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openEditModal(team);
-                    }}
-                    className="p-2 hover:bg-background-subtle rounded-lg transition-colors"
-                  >
-                    <Pencil className="w-4 h-4 text-text-secondary" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openDeleteModal(team);
-                    }}
-                    className="p-2 hover:bg-background-subtle rounded-lg transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4 text-error-main" />
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditModal(team);
+                        }}
+                        className="p-2 hover:bg-background-subtle rounded-lg transition-colors"
+                      >
+                        <Pencil className="w-4 h-4 text-text-secondary" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Editar equipo</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteModal(team);
+                        }}
+                        className="p-2 hover:bg-background-subtle rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4 text-error-main" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Eliminar equipo</TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
-              <p className="text-text-secondary mb-4 line-clamp-2">{team.description}</p>
+              <p className="text-text-secondary mb-4 line-clamp-2">
+                {team.description}
+              </p>
               <div className="flex justify-between items-center">
                 <Badge variant={TeamStatusBadge[team.status]}>
                   {TeamStatusLabel[team.status]}
