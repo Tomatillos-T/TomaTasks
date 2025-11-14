@@ -91,15 +91,19 @@ public class RagService {
         // If specific commits were requested, also add overview
         if (commitIds != null && !commitIds.isEmpty()) {
             context.append("\n=== Commit Overview ===\n");
-            List<RepositoryService.CommitInfo> commits = repoService.getRecentCommits(20);
-            for (String commitId : commitIds) {
-                commits.stream()
-                    .filter(c -> c.hash.equals(commitId))
-                    .findFirst()
-                    .ifPresent(c -> context.append(String.format(
-                        "- [%s] %s by %s\n",
-                        c.hash.substring(0, 7), c.message, c.author
-                    )));
+            try {
+                List<RepositoryService.CommitInfo> commits = repoService.getRecentCommits(20, 0);
+                for (String commitId : commitIds) {
+                    commits.stream()
+                        .filter(c -> c.hash.equals(commitId))
+                        .findFirst()
+                        .ifPresent(c -> context.append(String.format(
+                            "- [%s] %s by %s\n",
+                            c.hash.substring(0, 7), c.message, c.author
+                        )));
+                }
+            } catch (Exception e) {
+                logger.warn("Could not fetch commit overview: {}", e.getMessage());
             }
         }
 

@@ -38,12 +38,14 @@ public class RagController {
     }
 
     /**
-     * Get recent commits
+     * Get recent commits with pagination
      */
     @GetMapping("/commits")
-    public ResponseEntity<?> getCommits(@RequestParam(defaultValue = "20") int limit) {
+    public ResponseEntity<?> getCommits(
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset) {
         try {
-            return ResponseEntity.ok(repoService.getRecentCommits(limit));
+            return ResponseEntity.ok(repoService.getRecentCommits(limit, offset));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                 .body(Map.of("error", e.getMessage()));

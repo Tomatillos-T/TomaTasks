@@ -67,7 +67,7 @@ public class EmbeddingService {
         // For now, process individually. Could be optimized with batch API if available
         return texts.stream()
             .map(this::generateEmbedding)
-            .toList();
+            .collect(java.util.stream.Collectors.toList());
     }
 
     /**

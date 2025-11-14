@@ -68,44 +68,49 @@ public class RepositoryService {
     }
 
     /**
-     * Get recent commits with caching
+     * Get recent commits with caching and pagination
      */
-    public List<CommitInfo> getRecentCommits(int limit) throws GitAPIException {
+    public List<CommitInfo> getRecentCommits(int limit, int offset) throws GitAPIException {
         // Try to get from cache first
-        List<VectorStoreService.CommitMetadata> cached = vectorStore.getCachedCommits(limit);
-        
-        if (!cached.isEmpty() && cached.size() >= limit) {
-            logger.info("Returning {} commits from cache", cached.size());
+        List<VectorStoreService.CommitMetadata> cached = vectorStore.getCachedCommits(limit, offset);
+
+        if (!cached.isEmpty()) {
+            logger.info("Returning {} commits from cache (offset: {})", cached.size(), offset);
             return cached.stream()
                 .map(c -> new CommitInfo(c.hash, c.message, c.author, c.timestamp))
-                .toList();
+                .collect(java.util.stream.Collectors.toList());
         }
 
-        // Fetch from git
-        List<CommitInfo> commits = new ArrayList<>();
-        Iterable<RevCommit> logs = git.log().setMaxCount(limit).call();
-        
-        for (RevCommit commit : logs) {
-            CommitInfo info = new CommitInfo(
-                commit.getName(),
-                commit.getFullMessage(),
-                commit.getAuthorIdent().getName(),
-                commit.getCommitTime()
-            );
-            commits.add(info);
-            
-            // Cache commit metadata
-            vectorStore.cacheCommit(
-                commit.getName(),
-                commit.getFullMessage(),
-                commit.getAuthorIdent().getName(),
-                commit.getCommitTime(),
-                null // diff will be cached on first access
-            );
+        // Fetch from git if cache is empty (first time or needs refresh)
+        if (offset == 0) {
+            List<CommitInfo> commits = new ArrayList<>();
+            Iterable<RevCommit> logs = git.log().setMaxCount(limit).call();
+
+            for (RevCommit commit : logs) {
+                CommitInfo info = new CommitInfo(
+                    commit.getName(),
+                    commit.getFullMessage(),
+                    commit.getAuthorIdent().getName(),
+                    commit.getCommitTime()
+                );
+                commits.add(info);
+
+                // Cache commit metadata
+                vectorStore.cacheCommit(
+                    commit.getName(),
+                    commit.getFullMessage(),
+                    commit.getAuthorIdent().getName(),
+                    commit.getCommitTime(),
+                    null // diff will be cached on first access
+                );
+            }
+
+            logger.info("Fetched and cached {} commits from git", commits.size());
+            return commits;
         }
-        
-        logger.info("Fetched and cached {} commits from git", commits.size());
-        return commits;
+
+        // Return empty list if offset > 0 but cache is empty
+        return new ArrayList<>();
     }
 
     /**

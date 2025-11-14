@@ -121,7 +121,7 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
       setInput("");
     };
 
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter" && !disabled) handleSendMessage();
     };
 
@@ -132,7 +132,7 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           disabled={disabled}
           className="flex-grow min-w-[200px] px-3 sm:px-4 py-2.5 sm:py-3 border border-background-contrast rounded-xl 
                    focus:outline-none focus:ring-2 focus:ring-primary-main
@@ -166,11 +166,15 @@ function Chatbot() {
   const [repoStatus, setRepoStatus] = useState<string>("Not synced");
   const [stats, setStats] = useState<Stats | null>(null);
   const [isIndexing, setIsIndexing] = useState(false);
+  const [isLoadingCommits, setIsLoadingCommits] = useState(false);
+  const [hasMoreCommits, setHasMoreCommits] = useState(true);
+  const [commitOffset, setCommitOffset] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputFieldRef = useRef<HTMLInputElement | null>(null);
+  const commitListRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    loadCommits();
+    loadCommits(true);
     loadStats();
     inputFieldRef.current?.focus();
   }, []);
@@ -181,14 +185,32 @@ function Chatbot() {
     }, 100);
   };
 
-  const loadCommits = async () => {
+  const loadCommits = async (reset: boolean = false) => {
+    if (isLoadingCommits || (!reset && !hasMoreCommits)) return;
+
     try {
-      const data = await HttpClient.get<Commit[]>("/api/rag/commits?limit=20", {
-        auth: true,
-      });
-      setCommits(data);
+      setIsLoadingCommits(true);
+      const offset = reset ? 0 : commitOffset;
+      const data = await HttpClient.get<Commit[]>(
+        `/api/rag/commits?limit=20&offset=${offset}`,
+        { auth: true }
+      );
+
+      if (data.length < 20) {
+        setHasMoreCommits(false);
+      }
+
+      if (reset) {
+        setCommits(data);
+        setCommitOffset(data.length);
+      } else {
+        setCommits((prev) => [...prev, ...data]);
+        setCommitOffset((prev) => prev + data.length);
+      }
     } catch (error) {
       console.error("Error loading commits:", error);
+    } finally {
+      setIsLoadingCommits(false);
     }
   };
 
@@ -208,7 +230,9 @@ function Chatbot() {
       setRepoStatus("Syncing...");
       await HttpClient.post("/api/rag/sync", {}, { auth: true });
       setRepoStatus("Synced ✓");
-      loadCommits();
+      setCommitOffset(0);
+      setHasMoreCommits(true);
+      loadCommits(true);
       loadStats();
     } catch (error) {
       console.error("Error syncing repo:", error);
@@ -285,6 +309,17 @@ function Chatbot() {
     setSelectedCommits((prev) =>
       prev.includes(hash) ? prev.filter((h) => h !== hash) : [...prev, hash]
     );
+  };
+
+  const handleCommitScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const scrollPosition = target.scrollTop + target.clientHeight;
+    const scrollHeight = target.scrollHeight;
+
+    // Load more when scrolled to 80% of the list
+    if (scrollPosition >= scrollHeight * 0.8 && hasMoreCommits && !isLoadingCommits) {
+      loadCommits(false);
+    }
   };
 
   return (
@@ -371,10 +406,14 @@ function Chatbot() {
           <h3 className="font-semibold text-base sm:text-lg mb-3 text-text-primary">
             Select Commits ({selectedCommits.length})
           </h3>
-          <div className="space-y-2">
+          <div
+            ref={commitListRef}
+            onScroll={handleCommitScroll}
+            className="space-y-2 max-h-96 overflow-y-auto pr-2"
+          >
             {commits.map((commit) => (
               <div key={commit.hash} className="text-xs sm:text-sm">
-                <label className="flex items-start gap-3 cursor-pointer hover:bg-background-subtle 
+                <label className="flex items-start gap-3 cursor-pointer hover:bg-background-subtle
                                p-3 rounded-lg transition-colors group">
                   <div className="relative flex items-center justify-center mt-0.5">
                     <input
@@ -383,7 +422,7 @@ function Chatbot() {
                       onChange={() => toggleCommit(commit.hash)}
                       className="sr-only peer"
                     />
-                    <div className="w-5 h-5 border-2 border-background-contrast rounded 
+                    <div className="w-5 h-5 border-2 border-background-contrast rounded
                                   peer-checked:bg-primary-main peer-checked:border-primary-main
                                   transition-all flex items-center justify-center">
                       {selectedCommits.includes(commit.hash) && (
@@ -405,6 +444,21 @@ function Chatbot() {
                 </label>
               </div>
             ))}
+
+            {/* Loading indicator */}
+            {isLoadingCommits && (
+              <div className="flex items-center justify-center py-4">
+                <RefreshCw className="w-5 h-5 animate-spin text-primary-main" />
+                <span className="ml-2 text-sm text-text-secondary">Loading more commits...</span>
+              </div>
+            )}
+
+            {/* End of list indicator */}
+            {!hasMoreCommits && commits.length > 0 && (
+              <div className="text-center py-4 text-xs text-text-secondary">
+                All commits loaded
+              </div>
+            )}
           </div>
         </div>
       </div>

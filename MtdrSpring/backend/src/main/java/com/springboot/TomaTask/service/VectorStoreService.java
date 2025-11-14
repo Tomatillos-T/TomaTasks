@@ -112,7 +112,7 @@ public class VectorStoreService {
      * Cache commit metadata
      */
     @Transactional
-    public void cacheCommit(String commitHash, String message, String author, 
+    public void cacheCommit(String commitHash, String message, String author,
                            long commitTime, String diff) {
         String sql =
             "MERGE INTO commit_cache t\n" +
@@ -129,12 +129,42 @@ public class VectorStoreService {
             "    INSERT (commit_hash, message, author, commit_time, diff_cached)\n" +
             "    VALUES (?, ?, ?, ?, ?)";
 
-        jdbcTemplate.update(sql,
-            commitHash, message, author, 
-            new java.sql.Timestamp(commitTime * 1000), diff,
-            commitHash, message, author, 
-            new java.sql.Timestamp(commitTime * 1000), diff
-        );
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            java.sql.Timestamp timestamp = new java.sql.Timestamp(commitTime * 1000);
+
+            // Set parameters with explicit types for CLOB columns
+            ps.setString(1, commitHash);
+            if (message != null) {
+                ps.setString(2, message);
+            } else {
+                ps.setNull(2, java.sql.Types.CLOB);
+            }
+            ps.setString(3, author);
+            ps.setTimestamp(4, timestamp);
+            if (diff != null) {
+                ps.setString(5, diff);
+            } else {
+                ps.setNull(5, java.sql.Types.CLOB);
+            }
+
+            // Repeat for INSERT clause
+            ps.setString(6, commitHash);
+            if (message != null) {
+                ps.setString(7, message);
+            } else {
+                ps.setNull(7, java.sql.Types.CLOB);
+            }
+            ps.setString(8, author);
+            ps.setTimestamp(9, timestamp);
+            if (diff != null) {
+                ps.setString(10, diff);
+            } else {
+                ps.setNull(10, java.sql.Types.CLOB);
+            }
+
+            return ps;
+        });
     }
 
     /**
@@ -161,21 +191,27 @@ public class VectorStoreService {
     /**
      * Get cached commits metadata
      */
-    public List<CommitMetadata> getCachedCommits(int limit) {
+    public List<CommitMetadata> getCachedCommits(int limit, int offset) {
         String sql =
             "SELECT commit_hash, message, author, commit_time, processed\n" +
             "FROM commit_cache\n" +
             "ORDER BY commit_time DESC\n" +
-            "FETCH FIRST ? ROWS ONLY";
+            "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
         return jdbcTemplate.query(sql,
-            (rs, rowNum) -> new CommitMetadata(
-                rs.getString("commit_hash"),
-                rs.getString("message"),
-                rs.getString("author"),
-                rs.getTimestamp("commit_time").getTime() / 1000,
-                "Y".equals(rs.getString("processed"))
-            ),
+            (rs, rowNum) -> {
+                String processed = rs.getString("processed");
+                java.sql.Timestamp timestamp = rs.getTimestamp("commit_time");
+
+                return new CommitMetadata(
+                    rs.getString("commit_hash"),
+                    rs.getString("message"),
+                    rs.getString("author"),
+                    timestamp != null ? timestamp.getTime() / 1000 : 0,
+                    "Y".equals(processed)
+                );
+            },
+            offset,
             limit
         );
     }
