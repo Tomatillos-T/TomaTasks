@@ -191,21 +191,26 @@ function Chatbot() {
     try {
       setIsLoadingCommits(true);
       const offset = reset ? 0 : commitOffset;
+
+      // Request one extra to check if there are more commits
       const data = await HttpClient.get<Commit[]>(
-        `/api/rag/commits?limit=20&offset=${offset}`,
+        `/api/rag/commits?limit=21&offset=${offset}`,
         { auth: true }
       );
 
-      if (data.length < 20) {
-        setHasMoreCommits(false);
-      }
+      // If we got 21 or more, there are more commits available
+      const hasMore = data.length > 20;
+      setHasMoreCommits(hasMore);
+
+      // Only take the first 20 for display
+      const commitsToShow = hasMore ? data.slice(0, 20) : data;
 
       if (reset) {
-        setCommits(data);
-        setCommitOffset(data.length);
+        setCommits(commitsToShow);
+        setCommitOffset(commitsToShow.length);
       } else {
-        setCommits((prev) => [...prev, ...data]);
-        setCommitOffset((prev) => prev + data.length);
+        setCommits((prev) => [...prev, ...commitsToShow]);
+        setCommitOffset((prev) => prev + commitsToShow.length);
       }
     } catch (error) {
       console.error("Error loading commits:", error);

@@ -181,11 +181,20 @@ public class VectorStoreService {
      */
     public String getCachedCommitDiff(String commitHash) {
         String sql = "SELECT diff_cached FROM commit_cache WHERE commit_hash = ?";
-        List<String> results = jdbcTemplate.query(sql, 
-            (rs, rowNum) -> rs.getString("diff_cached"), 
+        List<String> results = jdbcTemplate.query(sql,
+            (rs, rowNum) -> rs.getString("diff_cached"),
             commitHash
         );
         return results.isEmpty() ? null : results.get(0);
+    }
+
+    /**
+     * Get count of cached commits
+     */
+    public long getCachedCommitCount() {
+        String sql = "SELECT COUNT(*) FROM commit_cache";
+        Long count = jdbcTemplate.queryForObject(sql, Long.class);
+        return count != null ? count : 0;
     }
 
     /**
