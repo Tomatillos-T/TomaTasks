@@ -80,7 +80,7 @@ const Navbar: React.FC = () => {
               <p className="text-sm font-semibold text-text-primary">
                 {user?.firstName} {user?.lastName}
               </p>
-              <p className="text-xs text-text-secondary">{user?.role?.role}</p>
+              <p className="text-xs text-text-secondary">{user?.role}</p>
             </div>
             <ChevronDown className="w-4 h-4 text-text-secondary" />
           </div>

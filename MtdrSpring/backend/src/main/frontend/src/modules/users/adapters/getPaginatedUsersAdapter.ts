@@ -1,64 +1,72 @@
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email?: string;
-}
+import type { User } from "@/modules/users/models/user";
+import type PaginationParams from "@/models/paginatedParams";
+import type PaginationResponse from "@/models/paginationResponse";
+import type GeneralResponse from "@/models/generalResponse";
+import type JPAPaginatedResponse from "@/models/JPAPaginatedResponse";
+import {
+  mapFiltersToBackend,
+  mapSortingToBackend,
+} from "@/modules/users/utils/columnMapper";
 
-interface PaginatedResponse<T> {
-  data: T[];
-  nextPage: number | null;
-  hasMore: boolean;
-}
-
-const PAGE_SIZE = 10;
-
-// In-memory cache to simulate pagination
-let cachedUsers: User[] | null = null;
-
-export default async function getPaginatedUsersAdapter(
-  page: number = 0
-): Promise<PaginatedResponse<User>> {
+export default async function getPaginatedUsersAdapter({
+  page,
+  pageSize,
+  search,
+  filters,
+  sorting,
+}: PaginationParams): Promise<GeneralResponse<PaginationResponse<User[]>>> {
   try {
-    // If we don't have cached data, fetch from API
-    if (!cachedUsers) {
-      const response = await fetch("/api/user", {
-        method: "GET",
+    // Map frontend column names to backend property names
+    const mappedFilters = mapFiltersToBackend(filters);
+    const mappedSorting = mapSortingToBackend(sorting);
+
+    const requestBody = {
+      page: page - 1,
+      pageSize,
+      search,
+      filters: mappedFilters,
+      sorting: mappedSorting,
+    };
+
+    console.log("📤 Request to /api/user/search:", requestBody);
+
+    const response: JPAPaginatedResponse<User[]> = await fetch(
+      "/api/user/search",
+      {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("jwtToken") || ""}`,
         },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error en la solicitud: ${response.status}`);
+        body: JSON.stringify(requestBody),
       }
+    ).then((res) => {
+      console.log("📥 Response status:", res.status);
+      if (!res.ok) {
+        throw new Error(`Error en la solicitud: ${res.status}`);
+      }
+      return res.json();
+    });
 
-      cachedUsers = await response.json();
-    }
-
-    // Simulate pagination by slicing the cached data
-    const startIndex = page * PAGE_SIZE;
-    const endIndex = startIndex + PAGE_SIZE;
-    const paginatedData = (cachedUsers || []).slice(startIndex, endIndex);
-    const hasMore = endIndex < (cachedUsers || []).length;
+    console.log("📦 Parsed response:", response);
 
     return {
-      data: paginatedData,
-      nextPage: hasMore ? page + 1 : null,
-      hasMore,
+      data: {
+        items: response.content,
+        total: response.totalElements,
+      },
+      message: "Users fetched successfully",
+      status: 200,
     };
   } catch (error) {
-    console.error("Error al obtener usuarios:", error);
+    console.error("💥 Error in getPaginatedUsersAdapter:", error);
     return {
-      data: [],
-      nextPage: null,
-      hasMore: false,
+      data: {
+        items: [],
+        total: 0,
+      },
+      message: (error as Error).message || "Error fetching users",
+      status: 500,
     };
   }
-}
-
-// Function to clear cache (useful when data changes)
-export function clearUsersCache() {
-  cachedUsers = null;
 }

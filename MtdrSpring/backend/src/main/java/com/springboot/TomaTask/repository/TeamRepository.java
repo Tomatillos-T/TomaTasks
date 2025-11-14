@@ -12,4 +12,6 @@ import java.util.Optional;
 @Transactional
 public interface TeamRepository extends JpaRepository<Team, String> {
     Optional<Team> findByProject(Project project);
+
+    java.util.List<Team> findByProjectIsNull();
 }
