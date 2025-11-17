@@ -1,5 +1,5 @@
 // services/authService.ts
-import { HttpClient } from "../services/httpClient";
+import { HttpClient } from "@/services/httpClient";
 
 export interface LoginCredentials {
   email: string;
@@ -27,10 +27,7 @@ export interface User {
   lastName: string | null;
   email: string;
   phoneNumber: string | null;
-  role: {
-    id: string;
-    role: string;
-  };
+  role: string;
   enabled: boolean;
   username: string;
   telegramToken: string | null;
@@ -38,7 +35,10 @@ export interface User {
 
 class AuthService {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const data = await HttpClient.post<LoginResponse>("/api/auth/login", credentials);
+    const data = await HttpClient.post<LoginResponse>(
+      "/api/auth/login",
+      credentials
+    );
     localStorage.setItem("jwtToken", data.token);
     return data;
   }

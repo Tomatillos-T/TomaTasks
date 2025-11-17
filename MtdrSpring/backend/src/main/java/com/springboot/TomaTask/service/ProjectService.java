@@ -1,47 +1,53 @@
 package com.springboot.TomaTask.service;
 
+import com.springboot.TomaTask.dto.ProjectDTO;
+import com.springboot.TomaTask.mapper.ProjectMapper;
 import com.springboot.TomaTask.model.Project;
 import com.springboot.TomaTask.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
 public class ProjectService {
-
     private final ProjectRepository projectRepository;
 
     public ProjectService(ProjectRepository projectRepository) {
         this.projectRepository = projectRepository;
     }
 
-    public List<Project> getAllProjects() {
-        return projectRepository.findAll();
+    public List<ProjectDTO> getAllProjects() {
+        return ProjectMapper.toDTOList(projectRepository.findAll());
     }
 
-    public Project getProjectById(String id) {
-        return projectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado"));
+    public ProjectDTO getProjectById(String id) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Project not found with ID: " + id));
+        return ProjectMapper.toDTOWithNested(project, true);
     }
 
-    public Project createProject(Project project) {
-        if (project.getName() == null || project.getName().trim().isEmpty()) {
-            throw new RuntimeException("El nombre del proyecto es obligatorio");
+    public ProjectDTO createProject(ProjectDTO projectDTO) {
+        if (projectDTO.getName() == null || projectDTO.getName().trim().isEmpty()) {
+            throw new RuntimeException("Project name is required");
         }
-        return projectRepository.save(project);
+
+        Project project = ProjectMapper.toEntity(projectDTO);
+        Project savedProject = projectRepository.save(project);
+        return ProjectMapper.toDTOWithNested(savedProject, true);
     }
 
-    public Project updateProject(String id, Project details) {
-        Project project = getProjectById(id);
+    public ProjectDTO updateProject(String id, ProjectDTO projectDTO) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Project not found with ID: " + id));
 
-        project.setName(details.getName());
-        project.setDescription(details.getDescription());
-        project.setStatus(details.getStatus());
-        project.setStartDate(details.getStartDate());
-        project.setDeliveryDate(details.getDeliveryDate());
-        project.setEndDate(details.getEndDate());
+        project.setName(projectDTO.getName());
+        project.setDescription(projectDTO.getDescription());
+        project.setStatus(projectDTO.getStatus());
+        project.setStartDate(projectDTO.getStartDate());
+        project.setDeliveryDate(projectDTO.getDeliveryDate());
+        project.setEndDate(projectDTO.getEndDate());
 
-        return projectRepository.save(project);
+        Project updatedProject = projectRepository.save(project);
+        return ProjectMapper.toDTOWithNested(updatedProject, true);
     }
 
     public void deleteProject(String id) {

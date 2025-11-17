@@ -4,6 +4,8 @@ import com.springboot.TomaTask.auth.dto.LoginUserDto;
 import com.springboot.TomaTask.auth.dto.RegisterUserDto;
 import com.springboot.TomaTask.auth.dto.LoginResponse;
 import com.springboot.TomaTask.auth.service.AuthenticationService;
+import com.springboot.TomaTask.dto.UserDTO;
+import com.springboot.TomaTask.mapper.UserMapper;
 import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.service.JwtService;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +24,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<UserDTO> register(@RequestBody RegisterUserDto registerUserDto) {
         User registeredUser = authenticationService.register(registerUserDto);
-        return ResponseEntity.ok(registeredUser);
+        return ResponseEntity.ok(UserMapper.toDTO(registeredUser));  // Convert to DTO
     }
 
     @PostMapping("/login")
@@ -36,7 +38,7 @@ public class AuthenticationController {
         LoginResponse loginResponse = new LoginResponse()
                 .setToken(jwtToken)
                 .setExpiresIn(jwtService.getExpirationTime())
-                .setUser(authenticatedUser); 
+                .setUser(UserMapper.toDTO(authenticatedUser));
 
         return ResponseEntity.ok(loginResponse);
     }

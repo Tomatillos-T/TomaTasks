@@ -1,75 +1,203 @@
 package com.springboot.TomaTask.service;
 
-import com.springboot.TomaTask.model.Team;
+import com.springboot.TomaTask.dto.TeamDTO;
+import com.springboot.TomaTask.dto.UserDTO;
+import com.springboot.TomaTask.mapper.TeamMapper;
+import com.springboot.TomaTask.mapper.UserMapper;
 import com.springboot.TomaTask.model.Project;
+import com.springboot.TomaTask.model.Team;
+import com.springboot.TomaTask.repository.ProjectRepository;
 import com.springboot.TomaTask.repository.TeamRepository;
+import com.springboot.TomaTask.repository.UserRepository;
+import com.springboot.TomaTask.model.User;
+
+
+import jakarta.persistence.EntityNotFoundException;
+
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class TeamService {
-
     private final TeamRepository teamRepository;
+    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
 
-    public TeamService(TeamRepository teamRepository) {
+    public TeamService(TeamRepository teamRepository,
+                    ProjectRepository projectRepository,
+                    UserRepository userRepository) {
         this.teamRepository = teamRepository;
+        this.projectRepository = projectRepository;
+        this.userRepository = userRepository;
     }
 
-    public List<Team> getAllTeams() {
-        return teamRepository.findAll();
+
+    public List<TeamDTO> getAllTeams() {
+        return TeamMapper.toDTOList(teamRepository.findAll());
     }
 
-    public Team getTeamById(String id) {
-        return teamRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Equipo no encontrado"));
-    }
+    public List<TeamDTO> getTeamsWithoutProject() {
+        List<Team> teams = teamRepository.findByProjectIsNull();
 
-    public Team createTeam(Team team) {
-        if (team.getName() == null || team.getName().trim().isEmpty()) {
-            throw new RuntimeException("El nombre del equipo es obligatorio");
+        if (teams.isEmpty()) {
+            throw new EntityNotFoundException("No teams found without assigned project");
         }
 
-        Project project = team.getProject();
-        if (project == null) {
-            throw new RuntimeException("El Project es obligatorio");
-        }
-
-        // Verificar que el project no esté ya asociado a otro Team
-        if (teamRepository.findByProject(project).isPresent()) {
-            throw new RuntimeException("El Project ya está asociado a otro Team");
-        }
-
-        return teamRepository.save(team);
+        return TeamMapper.toDTOList(teams);
     }
 
-    public Team updateTeam(String id, Team teamDetails) {
-        Team team = getTeamById(id);
+    public TeamDTO getTeamById(String id) {
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Team not found with ID: " + id));
+        return TeamMapper.toDTOWithNested(team, true); // Incluye members
+    }
 
-        team.setName(teamDetails.getName());
-        team.setDescription(teamDetails.getDescription());
-        team.setStatus(teamDetails.getStatus());
+    public Set<UserDTO> getTeamMembers(String teamId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found with ID: " + teamId));
 
-        Project project = teamDetails.getProject();
-        if (project != null) {
-            // Verificar que el nuevo Project no esté asociado a otro Team
+        if (team.getMembers() == null || team.getMembers().isEmpty()) {
+            return new HashSet<>();
+        }
+
+        return team.getMembers().stream()
+                .map(UserMapper::toDTO)
+                .collect(Collectors.toSet());
+    }
+
+    @Transactional
+    public TeamDTO addMemberToTeam(String teamId, String userId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found with ID: " + teamId));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        // Evitar duplicados
+        if (team.getMembers().contains(user)) {
+            throw new RuntimeException("User is already a member of this team");
+        }
+
+        user.setTeam(team); // Relación bidireccional
+        team.getMembers().add(user);
+
+        teamRepository.save(team);
+        return TeamMapper.toDTOWithNested(team, true);
+    }
+
+    @Transactional
+    public TeamDTO addMembersToTeam(String teamId, Set<String> userIds) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found with ID: " + teamId));
+
+        Set<User> users = userRepository.findAllById(userIds).stream().collect(Collectors.toSet());
+
+        if (users.isEmpty()) {
+            throw new RuntimeException("No valid users found for provided IDs");
+        }
+
+        users.forEach(user -> {
+            if (!team.getMembers().contains(user)) {
+                user.setTeam(team);
+                team.getMembers().add(user);
+            }
+        });
+
+        teamRepository.save(team);
+        return TeamMapper.toDTOWithNested(team, true);
+    }
+
+    @Transactional
+    public TeamDTO removeMemberFromTeam(String teamId, String userId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found with ID: " + teamId));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        if (!team.getMembers().contains(user)) {
+            throw new RuntimeException("User is not a member of this team");
+        }
+
+        team.getMembers().remove(user);
+        user.setTeam(null);
+
+        teamRepository.save(team);
+        return TeamMapper.toDTOWithNested(team, true);
+    }
+
+
+    @Transactional
+    public TeamDTO createTeam(TeamDTO teamDTO) {
+        if (teamDTO.getName() == null || teamDTO.getName().trim().isEmpty()) {
+            throw new RuntimeException("Team name is required");
+        }
+
+        Team team = TeamMapper.toEntity(teamDTO);
+
+        // Set Project (opcional)
+        if (teamDTO.getProjectId() != null && !teamDTO.getProjectId().isBlank()) {
+            Project project = projectRepository.findById(teamDTO.getProjectId())
+                    .orElseThrow(() -> new RuntimeException("Project not found with ID: " + teamDTO.getProjectId()));
+
+            // Validar que el proyecto no esté asignado a otro equipo
+            if (teamRepository.findByProject(project).isPresent()) {
+                throw new RuntimeException("Project is already associated with a team");
+            }
+
+            team.setProject(project);
+        } else {
+            team.setProject(null);
+        }
+
+        Team savedTeam = teamRepository.save(team);
+        return TeamMapper.toDTOWithNested(savedTeam, true);
+    }
+
+    @Transactional
+    public TeamDTO updateTeam(String id, TeamDTO teamDTO) {
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Team not found with ID: " + id));
+
+        team.setName(teamDTO.getName());
+        team.setDescription(teamDTO.getDescription());
+        team.setStatus(teamDTO.getStatus());
+
+        // Update Project
+        if (teamDTO.getProjectId() != null) {
+            Project project = projectRepository.findById(teamDTO.getProjectId())
+                    .orElseThrow(() -> new RuntimeException("Project not found with ID: " + teamDTO.getProjectId()));
+
+            // Check if the new project is already assigned to another team
             teamRepository.findByProject(project).ifPresent(existingTeam -> {
                 if (!existingTeam.getId().equals(id)) {
-                    throw new RuntimeException("El Project ya está asociado a otro Team");
+                    throw new RuntimeException("Project is already associated with another team");
                 }
             });
+
             team.setProject(project);
         }
 
-        return teamRepository.save(team);
+        Team updatedTeam = teamRepository.save(team);
+        return TeamMapper.toDTOWithNested(updatedTeam, true);
     }
 
+    @Transactional
     public void deleteTeam(String id) {
         teamRepository.deleteById(id);
     }
 
-    public Team getTeamByProject(Project project) {
-        return teamRepository.findByProject(project)
-                .orElseThrow(() -> new RuntimeException("No existe un Team asociado a este Project"));
+    public TeamDTO getTeamByProjectId(String projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found with ID: " + projectId));
+        Team team = teamRepository.findByProject(project)
+                .orElseThrow(() -> new RuntimeException("No team found for this project"));
+        return TeamMapper.toDTOWithNested(team, true);
     }
 }

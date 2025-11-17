@@ -24,6 +24,9 @@ export interface Project {
   endDate?: string | null;
   team?: { id: string } | null;
 }
+export async function getProjects(): Promise<Project[]> {
+  return HttpClient.get<Project[]>("/api/projects", { auth: true });
+}
 
 export async function createProject(payload: CreateProjectPayload): Promise<Project> {
   return HttpClient.post<Project>("/api/projects", payload, { auth: true });

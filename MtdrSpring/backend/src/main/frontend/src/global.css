@@ -48,6 +48,37 @@
 
     --text-primary: #0f172a;
     --text-secondary: #334155;
+
+    /* Task Status Colors */
+    --status-todo-main: #3b82f6;
+    --status-todo-light: #60a5fa;
+    --status-todo-dark: #1d4ed8;
+    --status-todo-bg: #eff6ff;
+    --status-todo-contrast: #1e3a8a;
+
+    --status-pending-main: #6b7280;
+    --status-pending-light: #9ca3af;
+    --status-pending-dark: #374151;
+    --status-pending-bg: #f3f4f6;
+    --status-pending-contrast: #1f2937;
+
+    --status-inprogress-main: #eab308;
+    --status-inprogress-light: #facc15;
+    --status-inprogress-dark: #ca8a04;
+    --status-inprogress-bg: #fefce8;
+    --status-inprogress-contrast: #713f12;
+
+    --status-testing-main: #a855f7;
+    --status-testing-light: #c084fc;
+    --status-testing-dark: #7e22ce;
+    --status-testing-bg: #faf5ff;
+    --status-testing-contrast: #581c87;
+
+    --status-done-main: #22c55e;
+    --status-done-light: #4ade80;
+    --status-done-dark: #16a34a;
+    --status-done-bg: #f0fdf4;
+    --status-done-contrast: #14532d;
   }
 
   /* 🌑 Dark mode - Optimizado para legibilidad y contraste */
@@ -107,6 +138,37 @@
     /* Texto - Alto contraste */
     --text-primary: #f1f5f9; /* Casi blanco para legibilidad */
     --text-secondary: #94a3b8; /* Gris claro para secundario */
+
+    /* Task Status Colors - Dark Mode */
+    --status-todo-main: #60a5fa;
+    --status-todo-light: #93c5fd;
+    --status-todo-dark: #3b82f6;
+    --status-todo-bg: #1e3a8a;
+    --status-todo-contrast: #dbeafe;
+
+    --status-pending-main: #9ca3af;
+    --status-pending-light: #d1d5db;
+    --status-pending-dark: #6b7280;
+    --status-pending-bg: #374151;
+    --status-pending-contrast: #f3f4f6;
+
+    --status-inprogress-main: #facc15;
+    --status-inprogress-light: #fde047;
+    --status-inprogress-dark: #eab308;
+    --status-inprogress-bg: #713f12;
+    --status-inprogress-contrast: #fefce8;
+
+    --status-testing-main: #c084fc;
+    --status-testing-light: #d8b4fe;
+    --status-testing-dark: #a855f7;
+    --status-testing-bg: #581c87;
+    --status-testing-contrast: #faf5ff;
+
+    --status-done-main: #4ade80;
+    --status-done-light: #86efac;
+    --status-done-dark: #22c55e;
+    --status-done-bg: #14532d;
+    --status-done-contrast: #f0fdf4;
   }
 }
 
@@ -157,4 +219,102 @@
 
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
+
+  --color-status-todo-main: var(--status-todo-main);
+  --color-status-todo-light: var(--status-todo-light);
+  --color-status-todo-dark: var(--status-todo-dark);
+  --color-status-todo-bg: var(--status-todo-bg);
+  --color-status-todo-contrast: var(--status-todo-contrast);
+
+  --color-status-pending-main: var(--status-pending-main);
+  --color-status-pending-light: var(--status-pending-light);
+  --color-status-pending-dark: var(--status-pending-dark);
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-pending-contrast: var(--status-pending-contrast);
+
+  --color-status-inprogress-main: var(--status-inprogress-main);
+  --color-status-inprogress-light: var(--status-inprogress-light);
+  --color-status-inprogress-dark: var(--status-inprogress-dark);
+  --color-status-inprogress-bg: var(--status-inprogress-bg);
+  --color-status-inprogress-contrast: var(--status-inprogress-contrast);
+
+  --color-status-testing-main: var(--status-testing-main);
+  --color-status-testing-light: var(--status-testing-light);
+  --color-status-testing-dark: var(--status-testing-dark);
+  --color-status-testing-bg: var(--status-testing-bg);
+  --color-status-testing-contrast: var(--status-testing-contrast);
+
+  --color-status-done-main: var(--status-done-main);
+  --color-status-done-light: var(--status-done-light);
+  --color-status-done-dark: var(--status-done-dark);
+  --color-status-done-bg: var(--status-done-bg);
+  --color-status-done-contrast: var(--status-done-contrast);
+}
+
+/* Custom Scrollbar Styles */
+@layer base {
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--background-paper);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary-main);
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: var(--primary-dark);
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-main) var(--background-paper);
+  }
+
+  /* Smooth scrolling for the entire document */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Optional: Hide scrollbar for specific elements when not hovering */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Thin scrollbar variant - 4px */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  /* Dark mode scrollbar adjustments */
+  .dark ::-webkit-scrollbar-track {
+    background: var(--background-subtle);
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: var(--primary-main);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-light);
+  }
 }
