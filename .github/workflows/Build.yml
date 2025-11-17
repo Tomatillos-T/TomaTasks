@@ -1,30 +1,84 @@
-name: GraalVM build
+name: OCI CI/CD Pipeline
+
 on: [push, pull_request]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # GraalVM setup
       - uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '22'      # See 'Options' for more details
-          distribution: 'graalvm' # See 'Supported distributions' for available options
+          java-version: '22'
+          distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Extract files"
-        run:  |
-              cd MtdrSpring;
-              wget https://objectstorage.mx-queretaro-1.oraclecloud.com/n/axohot8ponib/b/reacttodo-uazrb/o/deployment_config.tgz;
-              tar -xzvf deployment_config.tgz;
-              source env.sh;
+        run: |
+          cd MtdrSpring
+          wget https://objectstorage.mx-queretaro-1.oraclecloud.com/n/axohot8ponib/b/reacttodo-uazrb/o/deployment_config.tgz
+          tar -xzvf deployment_config.tgz
+          source env.sh
 
       - name: "Docker Login"
-        run:  |
-              cd MtdrSpring;
-              cat at.cfg | docker login -u "axohot8ponib/a01198666@tec.mx" --password-stdin mx-queretaro-1.ocir.io
-        
+        run: |
+          cd MtdrSpring
+          cat at.cfg | docker login -u "axohot8ponib/a01198666@tec.mx" --password-stdin mx-queretaro-1.ocir.io
+
       - name: "Build"
         run: |
-             cd MtdrSpring;
-             source env.sh;
-             (cd backend;source build.sh)
+          cd MtdrSpring
+          source env.sh
+          (cd backend; source build.sh)
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '22'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Extract config"
+        run: |
+          cd MtdrSpring
+          wget https://objectstorage.mx-queretaro-1.oraclecloud.com/n/axohot8ponib/b/reacttodo-uazrb/o/deployment_config.tgz
+          tar -xzvf deployment_config.tgz
+          source env.sh
+
+      - name: "Check existing deployment"
+        id: k8scheck
+        run: |
+          echo "Checking for existing pods and services…"
+
+          svc_count=$(kubectl get services -n mtdrworkshop | grep -c tomatask || true)
+          pod_count=$(kubectl get pods -n mtdrworkshop | grep -c tomatask || true)
+
+          echo "Found $svc_count services"
+          echo "Found $pod_count pods"
+
+          if [ "$svc_count" -gt 0 ] || [ "$pod_count" -gt 0 ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: "Run undeployment"
+        if: steps.k8scheck.outputs.exists == 'true'
+        run: |
+          echo "Existing resources detected — running undeploy.sh"
+          cd MtdrSpring
+          ./undeploy.sh
+
+      - name: "Deploy"
+        run: |
+          echo "Starting new deployment…"
+          cd MtdrSpring
+          ./deploy.sh
