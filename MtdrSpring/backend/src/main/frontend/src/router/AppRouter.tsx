@@ -13,12 +13,13 @@ import TeamForm from "@/modules/teams/components/TeamForm";
 import SprintForm from "@/modules/sprint/components/SprintForm";
 import ProjectForm from "@/modules/projects/components/ProjectForm";
 import UserStoryForm from "@/modules/userStory/components/UserStoryForm";
-import TaskForm from "@/modules/task/components/TaskForm";
 import User from "@/pages/User";
+import Users from "@/pages/Users";
 import Tasks from "@/pages/task/Tasks";
 import GenerateDummyTasks from "@/pages/GenerateDummyTasks";
 import RedirectionRoute from "@/components/RedirectionRoute";
 import LoginRoute from "@/components/LoginRoute";
+import Equipo from "@/pages/Equipo";
 
 // Definición de las rutas de la aplicación
 
@@ -109,18 +110,28 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/taskForm"
-          element={
-            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
-              <TaskForm />
-            </RoleBasedRoute>
-          }
-        />
-        <Route
           path="/generate-dummy-tasks"
           element={
             <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
               <GenerateDummyTasks />
+            </RoleBasedRoute>
+          }
+        />
+
+        <Route
+          path="/usuarios"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <Users />
+            </RoleBasedRoute>
+          }
+        />
+
+        <Route
+          path="/equipos/:id"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <Equipo />
             </RoleBasedRoute>
           }
         />

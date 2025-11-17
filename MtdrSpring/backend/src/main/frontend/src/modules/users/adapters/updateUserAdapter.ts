@@ -1,27 +1,30 @@
 import type GeneralResponse from "@/models/generalResponse";
 import type { User, UserRole } from "@/modules/users/models/user";
 
-export interface CreateUserParams {
-  firstName: string;
-  lastName: string;
-  email: string;
+export interface UpdateUserParams {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
   phoneNumber?: string;
-  password: string;
-  role: UserRole;
+  password?: string;
+  role?: UserRole;
   teamId?: string;
 }
 
-export default async function createUserAdapter(
-  params: CreateUserParams
+export default async function updateUserAdapter(
+  params: UpdateUserParams
 ): Promise<GeneralResponse<User | null>> {
   try {
-    const response = await fetch("/api/user", {
-      method: "POST",
+    const { id, ...body } = params;
+
+    const response = await fetch(`/api/user/${id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("jwtToken") || ""}`,
       },
-      body: JSON.stringify(params),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -32,13 +35,13 @@ export default async function createUserAdapter(
 
     return {
       data: user,
-      message: "Usuario creado exitosamente",
+      message: "Usuario actualizado exitosamente",
       status: 200,
     };
   } catch (error) {
     return {
       data: null,
-      message: (error as Error).message || "Error al crear usuario",
+      message: (error as Error).message || "Error al actualizar usuario",
       status: 500,
     };
   }

@@ -1,10 +1,19 @@
 package com.springboot.TomaTask.service;
 
+import com.springboot.TomaTask.dto.ColumnFilterDTO;
+import com.springboot.TomaTask.dto.CreateUserRequest;
+import com.springboot.TomaTask.dto.PaginationRequestDTO;
+import com.springboot.TomaTask.dto.SortingDTO;
 import com.springboot.TomaTask.dto.UserDTO;
 import com.springboot.TomaTask.mapper.UserMapper;
 import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,6 +36,61 @@ public class UserService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
+    public Page<UserDTO> searchUsers(PaginationRequestDTO request) {
+        Specification<User> spec = buildSpecification(request);
+        Pageable pageable = PageRequest.of(
+                request.getPage(),
+                request.getPageSize(),
+                getSort(request.getSorting()));
+        return userRepository.findAll(spec, pageable).map(UserMapper::toDTO);
+    }
+
+    // Build Specification dynamically
+    private Specification<User> buildSpecification(PaginationRequestDTO request) {
+        Specification<User> spec = Specification.unrestricted();
+
+        // Search keyword
+        if (request.getSearch() != null && !request.getSearch().isEmpty()) {
+            String keyword = request.getSearch().toLowerCase();
+            spec = spec.and((root, query, cb) -> cb.or(
+                    cb.like(cb.lower(root.get("firstName")), "%" + keyword + "%"),
+                    cb.like(cb.lower(root.get("lastName")), "%" + keyword + "%"),
+                    cb.like(cb.lower(root.get("email")), "%" + keyword + "%"),
+                    cb.like(cb.lower(root.get("phoneNumber")), "%" + keyword + "%"),
+                    cb.equal(cb.lower(root.get("role")), keyword)));
+        }
+
+        // Dynamic filters
+        if (request.getFilters() != null) {
+            for (ColumnFilterDTO filter : request.getFilters()) {
+                // Skip empty filters
+                if (filter.getValue() == null || filter.getValue().isEmpty()) {
+                    continue;
+                }
+
+                spec = spec.and((root, query, cb) -> {
+                    List<String> filterValues = filter.getValue();
+                    return root.get(filter.getId()).in(filterValues);
+                });
+            }
+        }
+
+        return spec;
+    }
+
+    // Convert frontend sorting into Spring Sort
+    private Sort getSort(List<SortingDTO> sorting) {
+        if (sorting == null || sorting.isEmpty())
+            return Sort.unsorted();
+        Sort sort = Sort.by(sorting.get(0).isDesc() ? Sort.Direction.DESC : Sort.Direction.ASC,
+                sorting.get(0).getId());
+        for (int i = 1; i < sorting.size(); i++) {
+            SortingDTO s = sorting.get(i);
+            sort = sort.and(Sort.by(s.isDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, s.getId()));
+        }
+        return sort;
+    }
+
     public ResponseEntity<UserDTO> getUserById(String id) {
         Optional<User> userData = userRepository.findById(id);
         if (userData.isPresent()) {
@@ -44,8 +108,10 @@ public class UserService {
         return userRepository.findByEmail(email).isPresent();
     }
 
-    public User addUser(User user) {
-        return userRepository.save(user);
+    public UserDTO addUser(CreateUserRequest request) {
+        User user = UserMapper.toEntityFromCreateRequest(request);
+        User savedUser = userRepository.save(user);
+        return UserMapper.toDTO(savedUser);
     }
 
     public UserDTO addUserDTO(UserDTO userDTO) {

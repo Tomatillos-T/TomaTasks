@@ -1,10 +1,12 @@
 import type GeneralResponse from "@/models/generalResponse";
 import type { User } from "@/modules/users/models/user";
 
-export default async function getUsersAdapter(): Promise<GeneralResponse<User[]>> {
+export default async function deleteUserAdapter(
+  id: string
+): Promise<GeneralResponse<User | null>> {
   try {
-    const response = await fetch("/api/user", {
-      method: "GET",
+    const response = await fetch(`/api/user/${id}`, {
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("jwtToken") || ""}`,
@@ -15,18 +17,17 @@ export default async function getUsersAdapter(): Promise<GeneralResponse<User[]>
       throw new Error(`Error en la solicitud: ${response.status}`);
     }
 
-    const users: User[] = await response.json();
+    const user: User = await response.json();
 
     return {
-      data: users,
-      message: "Usuarios obtenidos exitosamente",
+      data: user,
+      message: "Usuario eliminado exitosamente",
       status: 200,
     };
   } catch (error) {
-    console.error("Error al obtener usuarios:", error);
     return {
-      data: [],
-      message: (error as Error).message || "Error al obtener usuarios",
+      data: null,
+      message: (error as Error).message || "Error al eliminar usuario",
       status: 500,
     };
   }

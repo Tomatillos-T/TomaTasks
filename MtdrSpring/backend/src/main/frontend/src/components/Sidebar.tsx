@@ -52,6 +52,13 @@ const navItems: NavItem[] = [
     requiredRoles: ["ROLE_ADMIN"],
   },
   {
+    id: "users",
+    icon: Calendar,
+    label: "Usuarios",
+    path: "/usuarios",
+    requiredRoles: ["ROLE_ADMIN"],
+  },
+  {
     id: "settings",
     icon: Settings,
     label: "Configuración",

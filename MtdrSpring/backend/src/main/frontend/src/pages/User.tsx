@@ -181,7 +181,7 @@ export default function User() {
           <Input
             label="Role"
             name="role"
-            value={formData?.role?.role || ""}
+            value={formData?.role || ""}
             disabled
           />
           <Input

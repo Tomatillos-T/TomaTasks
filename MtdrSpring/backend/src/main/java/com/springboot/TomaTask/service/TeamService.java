@@ -1,21 +1,32 @@
 package com.springboot.TomaTask.service;
 
 import com.springboot.TomaTask.dto.TeamDTO;
+import com.springboot.TomaTask.dto.UserDTO;
 import com.springboot.TomaTask.mapper.TeamMapper;
+import com.springboot.TomaTask.mapper.UserMapper;
 import com.springboot.TomaTask.model.Project;
 import com.springboot.TomaTask.model.Team;
 import com.springboot.TomaTask.repository.ProjectRepository;
 import com.springboot.TomaTask.repository.TeamRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class TeamService {
     private final TeamRepository teamRepository;
     private final ProjectRepository projectRepository;
 
     public TeamService(TeamRepository teamRepository,
-                      ProjectRepository projectRepository) {
+            ProjectRepository projectRepository) {
         this.teamRepository = teamRepository;
         this.projectRepository = projectRepository;
     }
@@ -24,10 +35,33 @@ public class TeamService {
         return TeamMapper.toDTOList(teamRepository.findAll());
     }
 
+    public List<TeamDTO> getTeamsWithoutProject() {
+        List<Team> teams = teamRepository.findByProjectIsNull();
+
+        if (teams.isEmpty()) {
+            throw new EntityNotFoundException("No teams found without assigned project");
+        }
+
+        return TeamMapper.toDTOList(teams);
+    }
+
     public TeamDTO getTeamById(String id) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Team not found with ID: " + id));
-        return TeamMapper.toDTOWithNested(team, true);
+        return TeamMapper.toDTOWithNested(team, true); // Incluye members
+    }
+
+    public Set<UserDTO> getTeamMembers(String teamId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found with ID: " + teamId));
+
+        if (team.getMembers() == null || team.getMembers().isEmpty()) {
+            return new HashSet<>();
+        }
+
+        return team.getMembers().stream()
+                .map(UserMapper::toDTO)
+                .collect(Collectors.toSet());
     }
 
     public TeamDTO createTeam(TeamDTO teamDTO) {
@@ -37,19 +71,19 @@ public class TeamService {
 
         Team team = TeamMapper.toEntity(teamDTO);
 
-        // Set Project
-        if (teamDTO.getProjectId() != null) {
+        // Set Project (opcional)
+        if (teamDTO.getProjectId() != null && !teamDTO.getProjectId().isBlank()) {
             Project project = projectRepository.findById(teamDTO.getProjectId())
                     .orElseThrow(() -> new RuntimeException("Project not found with ID: " + teamDTO.getProjectId()));
-            
-            // Check if project already has a team
+
+            // Validar que el proyecto no esté asignado a otro equipo
             if (teamRepository.findByProject(project).isPresent()) {
                 throw new RuntimeException("Project is already associated with a team");
             }
-            
+
             team.setProject(project);
         } else {
-            throw new RuntimeException("Project ID is required");
+            team.setProject(null);
         }
 
         Team savedTeam = teamRepository.save(team);
@@ -68,14 +102,14 @@ public class TeamService {
         if (teamDTO.getProjectId() != null) {
             Project project = projectRepository.findById(teamDTO.getProjectId())
                     .orElseThrow(() -> new RuntimeException("Project not found with ID: " + teamDTO.getProjectId()));
-            
+
             // Check if the new project is already assigned to another team
             teamRepository.findByProject(project).ifPresent(existingTeam -> {
                 if (!existingTeam.getId().equals(id)) {
                     throw new RuntimeException("Project is already associated with another team");
                 }
             });
-            
+
             team.setProject(project);
         }
 

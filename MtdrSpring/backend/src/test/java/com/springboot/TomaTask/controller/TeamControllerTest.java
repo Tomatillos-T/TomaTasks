@@ -30,6 +30,7 @@ public class TeamControllerTest {
 
     private TeamDTO teamDTO1;
     private TeamDTO teamDTO2;
+    private TeamDTO teamDTOWithoutProject;
 
     @BeforeEach
     void setUp() {
@@ -44,6 +45,12 @@ public class TeamControllerTest {
         teamDTO2.setDescription("Frontend team");
         teamDTO2.setStatus("planning");
         teamDTO2.setProjectId("project-2");
+
+        teamDTOWithoutProject = new TeamDTO();
+        teamDTOWithoutProject.setName("Unassigned Team");
+        teamDTOWithoutProject.setDescription("Team without project");
+        teamDTOWithoutProject.setStatus("active");
+        teamDTOWithoutProject.setProjectId(null);
     }
 
     @Test
@@ -80,6 +87,20 @@ public class TeamControllerTest {
         assertNotNull(response.getBody());
         assertEquals("Team 1", response.getBody().getName());
         verify(teamService, times(1)).createTeam(teamDTO1);
+    }
+
+    @Test
+    void testCreateTeamWithoutProject() {
+        when(teamService.createTeam(any(TeamDTO.class))).thenReturn(teamDTOWithoutProject);
+
+        ResponseEntity<TeamDTO> response = assertDoesNotThrow(
+                () -> teamController.createTeam(teamDTOWithoutProject));
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Unassigned Team", response.getBody().getName());
+        assertNull(response.getBody().getProjectId());
+        verify(teamService, times(1)).createTeam(teamDTOWithoutProject);
     }
 
     @Test
