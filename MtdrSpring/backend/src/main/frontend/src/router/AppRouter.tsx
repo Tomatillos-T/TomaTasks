@@ -85,14 +85,6 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/teamForm"
-          element={
-            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
-              <TeamForm />
-            </RoleBasedRoute>
-          }
-        />
-        <Route
           path="/sprintForm"
           element={
             <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
