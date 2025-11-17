@@ -206,13 +206,20 @@ interface DropdownMenuItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'on
   onSelect?: (event: Event) => void;
 }
 
+interface DropdownMenuItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
+  onSelect?: (event: Event) => void;
+  disabled?: boolean;
+}
+
 export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
   className = "",
   children,
   onSelect,
+  disabled = false,
   ...props
 }) => {
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (disabled) return;
     if (onSelect) {
       const event = new Event("select", { bubbles: true });
       onSelect(event);
@@ -225,10 +232,14 @@ export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
   return (
     <div
       className={clsx(
-        "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-background-subtle focus:bg-background-subtle",
+        "relative flex select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
+        disabled
+          ? "opacity-50 cursor-not-allowed"
+          : "cursor-pointer hover:bg-background-subtle focus:bg-background-subtle",
         className
       )}
       role="menuitem"
+      aria-disabled={disabled}
       onClick={handleClick}
       {...props}
     >

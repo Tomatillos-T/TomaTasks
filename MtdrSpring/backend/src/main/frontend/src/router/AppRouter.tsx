@@ -9,7 +9,6 @@ import Kanban from "@/pages/Kanban";
 import Equipos from "@/pages/Equipos";
 import Proyectos from "@/pages/Proyectos";
 import Calendario from "@/pages/Calendario";
-import TeamForm from "@/modules/teams/components/TeamForm";
 import SprintForm from "@/modules/sprint/components/SprintForm";
 import ProjectForm from "@/modules/projects/components/ProjectForm";
 import UserStoryForm from "@/modules/userStory/components/UserStoryForm";

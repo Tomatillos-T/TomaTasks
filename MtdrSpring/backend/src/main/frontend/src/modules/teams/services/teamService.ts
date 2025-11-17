@@ -23,7 +23,7 @@ export interface TeamMember {
   lastName: string;
   email: string;
   phoneNumber?: string;
-  role: 'ROLE_DEVELOPER' | 'ROLE_ADMIN';
+  role: "ROLE_DEVELOPER" | "ROLE_ADMIN";
   teamId?: string;
   createdAt: string;
   updatedAt: string;
@@ -47,18 +47,18 @@ export interface CreateTeamPayload {
   projectId?: string;
 }
 
-
 export type TeamStatus = "ACTIVO" | "INACTIVO";
 
 export async function getTeams(): Promise<Team[]> {
   try {
     const response = await HttpClient.get<Team[]>("/api/teams", { auth: true });
-
     return response.map(team => ({
       ...team,
-      status: team.status in TeamStatusEnum ? team.status as TeamStatusEnum : TeamStatusEnum.INACTIVO,
+      status:
+        team.status in TeamStatusEnum
+          ? (team.status as TeamStatusEnum)
+          : TeamStatusEnum.INACTIVO,
     }));
-
   } catch (error) {
     const err = error as HttpError;
     throw { message: err.message, status: err.status };
@@ -68,12 +68,13 @@ export async function getTeams(): Promise<Team[]> {
 export async function getTeamsWithoutProject(): Promise<Team[]> {
   try {
     const response = await HttpClient.get<Team[]>("/api/teams/without-project", { auth: true });
-
     return response.map(team => ({
       ...team,
-      status: team.status in TeamStatusEnum ? team.status as TeamStatusEnum : TeamStatusEnum.INACTIVO,
+      status:
+        team.status in TeamStatusEnum
+          ? (team.status as TeamStatusEnum)
+          : TeamStatusEnum.INACTIVO,
     }));
-
   } catch (error) {
     const err = error as HttpError;
     throw { message: err.message, status: err.status };
@@ -91,10 +92,7 @@ export async function getTeamById(id: string): Promise<Team> {
 
 export async function getTeamMembers(teamId: string): Promise<TeamMember[]> {
   try {
-    const members = await HttpClient.get<TeamMember[]>(
-      `/api/teams/${teamId}/members`, 
-      { auth: true }
-    );
+    const members = await HttpClient.get<TeamMember[]>(`/api/teams/${teamId}/members`, { auth: true });
     return Array.isArray(members) ? members : [];
   } catch (error) {
     const err = error as HttpError;
@@ -123,6 +121,43 @@ export async function updateTeam(id: string, payload: Partial<CreateTeamPayload>
 export async function deleteTeam(id: string): Promise<void> {
   try {
     await HttpClient.delete(`/api/teams/${id}`, { auth: true });
+  } catch (error) {
+    const err = error as HttpError;
+    throw { message: err.message, status: err.status };
+  }
+}
+
+
+/**
+ * Añadir un miembro a un equipo
+ */
+export async function addMemberToTeam(teamId: string, userId: string): Promise<Team> {
+  try {
+    return await HttpClient.post<Team>(`/api/teams/${teamId}/members/${userId}`, {}, { auth: true });
+  } catch (error) {
+    const err = error as HttpError;
+    throw { message: err.message, status: err.status };
+  }
+}
+
+/**
+ * Añadir múltiples miembros a un equipo
+ */
+export async function addMembersToTeam(teamId: string, userIds: string[]): Promise<Team> {
+  try {
+    return await HttpClient.post<Team>(`/api/teams/${teamId}/members`, userIds, { auth: true });
+  } catch (error) {
+    const err = error as HttpError;
+    throw { message: err.message, status: err.status };
+  }
+}
+
+/**
+ * Eliminar un miembro de un equipo
+ */
+export async function removeMemberFromTeam(teamId: string, userId: string): Promise<Team> {
+  try {
+    return await HttpClient.delete<Team>(`/api/teams/${teamId}/members/${userId}`, { auth: true });
   } catch (error) {
     const err = error as HttpError;
     throw { message: err.message, status: err.status };
