@@ -20,6 +20,9 @@ public class RagController {
         this.repoService = repoService;
     }
 
+    /**
+     * Query repository using RAG with vector search
+     */
     @PostMapping("/query")
     public ResponseEntity<Map<String, String>> query(@RequestBody Map<String, Object> request) {
         try {
@@ -34,16 +37,24 @@ public class RagController {
         }
     }
 
+    /**
+     * Get recent commits with pagination
+     */
     @GetMapping("/commits")
-    public ResponseEntity<?> getCommits(@RequestParam(defaultValue = "20") int limit) {
+    public ResponseEntity<?> getCommits(
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset) {
         try {
-            return ResponseEntity.ok(repoService.getRecentCommits(limit));
+            return ResponseEntity.ok(repoService.getRecentCommits(limit, offset));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                 .body(Map.of("error", e.getMessage()));
         }
     }
 
+    /**
+     * Sync repository and update cache
+     */
     @PostMapping("/sync")
     public ResponseEntity<Map<String, String>> syncRepo() {
         try {
@@ -53,5 +64,50 @@ public class RagController {
             return ResponseEntity.internalServerError()
                 .body(Map.of("error", e.getMessage()));
         }
+    }
+
+    /**
+     * Index specific commits (generate embeddings)
+     */
+    @PostMapping("/index")
+    public ResponseEntity<Map<String, String>> indexCommits(@RequestBody Map<String, Object> request) {
+        try {
+            List<String> commitIds = (List<String>) request.get("commitIds");
+            
+            if (commitIds == null || commitIds.isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "commitIds are required"));
+            }
+            
+            ragService.indexCommits(commitIds);
+            return ResponseEntity.ok(Map.of(
+                "status", "Indexing started", 
+                "commits", String.valueOf(commitIds.size())
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Get RAG statistics
+     */
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>> getStats() {
+        try {
+            return ResponseEntity.ok(ragService.getStatistics());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Health check
+     */
+    @GetMapping("/health")
+    public ResponseEntity<Map<String, String>> health() {
+        return ResponseEntity.ok(Map.of("status", "healthy"));
     }
 }

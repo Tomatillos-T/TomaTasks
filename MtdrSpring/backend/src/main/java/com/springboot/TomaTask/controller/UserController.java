@@ -1,10 +1,12 @@
 package com.springboot.TomaTask.controller;
 
 import com.springboot.TomaTask.dto.CreateUserRequest;
+import com.springboot.TomaTask.dto.PaginationRequestDTO;
 import com.springboot.TomaTask.dto.UserDTO;
 import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,12 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.findAll());
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<Page<UserDTO>> searchUsers(@RequestBody PaginationRequestDTO request) {
+        Page<UserDTO> dtoPage = userService.searchUsers(request);
+        return ResponseEntity.ok(dtoPage);
     }
 
     @GetMapping(value = "/{id}")

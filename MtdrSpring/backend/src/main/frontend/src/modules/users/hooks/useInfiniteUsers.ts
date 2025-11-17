@@ -1,30 +1,24 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import getPaginatedUsersAdapter from "../adapters/getPaginatedUsersAdapter";
+import { useQuery } from "@tanstack/react-query";
+import getUsersAdapter from "../adapters/getUsersAdapter";
 
 export default function useInfiniteUsers() {
   const {
     data,
     isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
     error,
-  } = useInfiniteQuery({
-    queryKey: ["users", "infinite"],
-    queryFn: ({ pageParam = 0 }) => getPaginatedUsersAdapter(pageParam),
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-    initialPageParam: 0,
+  } = useQuery({
+    queryKey: ["users", "all"],
+    queryFn: getUsersAdapter,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
-  // Flatten all pages into a single array
-  const users = data?.pages.flatMap((page) => page.data) ?? [];
-
   return {
-    users,
+    users: data?.data ?? [],
     isLoading,
-    isFetchingNextPage,
-    hasNextPage: hasNextPage ?? false,
-    fetchNextPage,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: () => {},
     error,
   };
 }
