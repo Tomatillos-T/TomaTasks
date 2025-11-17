@@ -74,11 +74,11 @@ jobs:
         if: steps.k8scheck.outputs.exists == 'true'
         run: |
           echo "Existing resources detected — running undeploy.sh"
-          cd MtdrSpring
+          cd MtdrSpring/backend
           ./undeploy.sh
 
       - name: "Deploy"
         run: |
           echo "Starting new deployment…"
-          cd MtdrSpring
+          cd MtdrSpring/backend
           ./deploy.sh
