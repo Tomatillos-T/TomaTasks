@@ -1,3 +1,3 @@
 echo delete frontend deployment and service...
-kubectl -n mtdrworkshop delete deployment TomaTask-springboot-deployment
-kubectl -n mtdrworkshop delete service TomaTask-springboot-service
+kubectl -n mtdrworkshop delete deployment tomatask-springboot-deployment
+kubectl -n mtdrworkshop delete service tomatask-springboot-service
