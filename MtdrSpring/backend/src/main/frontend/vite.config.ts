@@ -21,4 +21,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Minimize information disclosure in production builds
+    sourcemap: false, // Disable source maps in production
+    minify: 'esbuild', // Use esbuild for minification (faster, already included)
+  },
 });
