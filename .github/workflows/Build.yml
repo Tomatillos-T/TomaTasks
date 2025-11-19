@@ -97,7 +97,7 @@ jobs:
         if: steps.k8scheck.outputs.exists == 'true'
         run: |
           echo "Existing resources detected — running undeploy.sh"
-          cd MtdrSpring/backend
+          chmod +x undeploy.sh
           ./undeploy.sh
 
       - name: "Deploy"
