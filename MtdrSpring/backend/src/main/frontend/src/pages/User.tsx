@@ -222,8 +222,8 @@ export default function User() {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-background-default">
-      <div className="w-full h-full m-4 p-4 bg-background-paper rounded-2xl shadow-lg space-y-6">
+    <section className="min-h-screen flex items-center justify-center bg-background-default py-8">
+      <div className="w-full max-w-4xl mx-4 p-6 bg-background-paper rounded-2xl shadow-lg space-y-6 overflow-y-auto max-h-[calc(100vh-4rem)]">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-text-primary">

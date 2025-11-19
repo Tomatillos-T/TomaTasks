@@ -35,7 +35,7 @@ public class SecurityConfiguration {
                 .formLogin(form -> form.disable())
                 .authorizeHttpRequests(auth -> auth
                         // Endpoints públicos de la API
-                        .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/public/**", "/api/oauth/**").permitAll()
 
                         // Protege únicamente el namespace de API
                         .requestMatchers("/api/**").authenticated()

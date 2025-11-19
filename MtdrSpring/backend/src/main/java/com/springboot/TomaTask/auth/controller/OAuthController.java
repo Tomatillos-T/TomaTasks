@@ -39,29 +39,9 @@ public class OAuthController {
     }
 
     /**
-     * Handle GitHub OAuth callback
-     * GET /api/auth/github/callback?code=xxx&state=userId
-     */
-    @GetMapping("/callback")
-    public RedirectView handleCallback(
-            @RequestParam String code,
-            @RequestParam String state) {
-
-        try {
-            String userId = state; // state contains userId for CSRF protection
-            gitHubOAuthService.linkGitHubAccount(userId, code);
-
-            // Redirect to frontend with success message
-            return new RedirectView("http://localhost:3000/user?github=success");
-        } catch (Exception e) {
-            // Redirect to frontend with error message
-            return new RedirectView("http://localhost:3000/user?github=error&message=" + e.getMessage());
-        }
-    }
-
-    /**
      * Link GitHub account to user (alternative endpoint for frontend code submission)
-     * POST /api/user/{userId}/github/link
+     * POST /api/auth/github/{userId}/link
+     * Note: The actual OAuth callback is handled by OAuthCallbackController at /api/oauth/callback/github
      */
     @PostMapping("/{userId}/link")
     public ResponseEntity<?> linkGitHubAccount(
