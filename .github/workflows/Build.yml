@@ -5,6 +5,18 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      OCI_CLI_USER:            ${{ secrets.OCI_CLI_USER }}
+      OCI_CLI_TENANCY:         ${{ secrets.OCI_CLI_TENANCY }}
+      OCI_CLI_FINGERPRINT:     ${{ secrets.OCI_CLI_FINGERPRINT }}
+      OCI_CLI_KEY_CONTENT:     ${{ secrets.OCI_CLI_KEY_CONTENT }}
+      OCI_CLI_REGION:          ${{ secrets.OCI_CLI_REGION }}
+      OCI_DOCKER_REPO:         ${{ secrets.OCI_DOCKER_REPO }}
+      OCI_AUTH_TOKEN:          ${{ secrets.OCI_AUTH_TOKEN }}
+      OCI_COMPARTMENT_OCID:    ${{ secrets.OCI_COMPARTMENT_OCID }}
+      OCI_CLUSTER_OCID:        ${{ secrets.OCI_CLUSTER_OCID }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -18,7 +30,7 @@ jobs:
       - name: "Extract files"
         run: |
           cd MtdrSpring
-          wget https://objectstorage.mx-queretaro-1.oraclecloud.com/n/axohot8ponib/b/reacttodo-uazrb/o/deployment_config.tgz
+          wget "${{ secrets.OCI_PAR_URL }}"
           tar -xzvf deployment_config.tgz
           source env.sh
 
@@ -26,6 +38,13 @@ jobs:
         run: |
           cd MtdrSpring
           cat at.cfg | docker login -u "axohot8ponib/a01198666@tec.mx" --password-stdin mx-queretaro-1.ocir.io
+
+      - name: Get or create OCIR repo
+        id: get-ocir
+        uses: oracle-actions/get-ocir-repository@v1.3.0
+        with:
+          name: reacttodo/uazrb
+          compartment: ${{ secrets.OCI_COMPARTMENT_OCID }}
 
       - name: "Build"
         run: |
@@ -52,6 +71,12 @@ jobs:
           wget https://objectstorage.mx-queretaro-1.oraclecloud.com/n/axohot8ponib/b/reacttodo-uazrb/o/deployment_config.tgz
           tar -xzvf deployment_config.tgz
           source env.sh
+  
+      - name: Configure kubectl for OKE
+        id: kubectl-oke-action
+        uses: oracle-actions/configure-kubectl-oke@v1.5.0
+        with:
+          cluster: ${{ secrets.OCI_CLUSTER_OCID }}
 
       - name: "Check existing deployment"
         id: k8scheck
