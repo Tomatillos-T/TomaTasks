@@ -87,7 +87,7 @@ jobs:
           echo "Found $svc_count services"
           echo "Found $pod_count pods"
 
-          if [ "$svc_count" -gt 0 ] || [ "$pod_count" -gt 0 ]; then
+          if [ "$svc_count" -gt 1 ] || [ "$pod_count" -gt 0 ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
