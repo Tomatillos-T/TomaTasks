@@ -47,7 +47,6 @@ jobs:
       OCI_AUTH_TOKEN:          ${{ secrets.OCI_AUTH_TOKEN }}
       OCI_COMPARTMENT_OCID:    ${{ secrets.OCI_COMPARTMENT_OCID }}
       OCI_CLUSTER_OCID:        ${{ secrets.OCI_CLUSTER_OCID }}
-      OCI_CLI_PASSPHRASE:      ${{ secrets.OCI_CLI_PASSPHRASE  }}
     
     steps:
       - uses: actions/checkout@v4
@@ -65,16 +64,6 @@ jobs:
           tar -xzvf deployment_config.tgz
           source env.sh
 
-      - name: Setup OCI CLI
-        uses: oracle-actions/setup-oci-cli@v1
-        with:
-          user: ${{ secrets.OCI_CLI_USER }}
-          fingerprint: ${{ secrets.OCI_CLI_FINGERPRINT }}
-          tenancy: ${{ secrets.OCI_CLI_TENANCY }}
-          region: ${{ secrets.OCI_CLI_REGION }}
-          api_key: ${{ secrets.OCI_CLI_KEY_CONTENT }}
-          passphrase: ${{ secrets.OCI_CLI_PASSPHRASE }}
-      
       - name: Configure kubectl for OKE
         id: kubectl-oke-action
         uses: oracle-actions/configure-kubectl-oke@v1.5.0
