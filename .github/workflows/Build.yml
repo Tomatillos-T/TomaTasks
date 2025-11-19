@@ -47,7 +47,7 @@ jobs:
       OCI_AUTH_TOKEN:          ${{ secrets.OCI_AUTH_TOKEN }}
       OCI_COMPARTMENT_OCID:    ${{ secrets.OCI_COMPARTMENT_OCID }}
       OCI_CLUSTER_OCID:        ${{ secrets.OCI_CLUSTER_OCID }}
-
+      OCI_CLI_PASSPHRASE:      ${{ secrets.OCI_CLI_PASSPHRASE  }}
     
     steps:
       - uses: actions/checkout@v4
@@ -70,7 +70,7 @@ jobs:
         uses: oracle-actions/configure-kubectl-oke@v1.5.0
         with:
           cluster: ${{ secrets.OCI_CLUSTER_OCID }}
-          passphrase: ${{ secrets.KUBECONFIG_PASSPHRASE }}
+          passphrase: ${{ secrets.OCI_CLI_PASSPHRASE  }}
 
       - name: "Check existing deployment"
         id: k8scheck
