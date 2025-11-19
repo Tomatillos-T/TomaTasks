@@ -61,7 +61,7 @@ jobs:
       - name: "Extract config"
         run: |
           cd MtdrSpring
-          wget https://objectstorage.mx-queretaro-1.oraclecloud.com/n/axohot8ponib/b/reacttodo-uazrb/o/deployment_config.tgz
+          wget "${{ secrets.OCI_PAR_URL }}"
           tar -xzvf deployment_config.tgz
           source env.sh
   
@@ -70,6 +70,7 @@ jobs:
         uses: oracle-actions/configure-kubectl-oke@v1.5.0
         with:
           cluster: ${{ secrets.OCI_CLUSTER_OCID }}
+          passphrase: ${{ secrets.KUBECONFIG_PASSPHRASE }}
 
       - name: "Check existing deployment"
         id: k8scheck
