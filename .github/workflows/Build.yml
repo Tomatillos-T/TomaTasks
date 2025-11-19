@@ -39,13 +39,6 @@ jobs:
           cd MtdrSpring
           cat at.cfg | docker login -u "axohot8ponib/a01198666@tec.mx" --password-stdin mx-queretaro-1.ocir.io
 
-      - name: Get or create OCIR repo
-        id: get-ocir
-        uses: oracle-actions/get-ocir-repository@v1.3.0
-        with:
-          name: reacttodo/uazrb
-          compartment: ${{ secrets.OCI_COMPARTMENT_OCID }}
-
       - name: "Build"
         run: |
           cd MtdrSpring
