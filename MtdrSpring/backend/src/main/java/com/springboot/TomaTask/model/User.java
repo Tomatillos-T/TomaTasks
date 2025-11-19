@@ -68,6 +68,15 @@ public class User implements UserDetails {
     @Column(name = "telegram_token", unique = true)
     private String telegramToken;
 
+    @Column(name = "github_id", unique = true)
+    private String githubId;
+
+    @Column(name = "github_username")
+    private String githubUsername;
+
+    @Column(name = "github_access_token", length = 1000)
+    private String githubAccessToken;
+
     // Constructors
     public User() {
     }
@@ -178,6 +187,30 @@ public class User implements UserDetails {
 
     public void setTelegramToken(String telegramToken) {
         this.telegramToken = telegramToken;
+    }
+
+    public String getGithubId() {
+        return githubId;
+    }
+
+    public void setGithubId(String githubId) {
+        this.githubId = githubId;
+    }
+
+    public String getGithubUsername() {
+        return githubUsername;
+    }
+
+    public void setGithubUsername(String githubUsername) {
+        this.githubUsername = githubUsername;
+    }
+
+    public String getGithubAccessToken() {
+        return githubAccessToken;
+    }
+
+    public void setGithubAccessToken(String githubAccessToken) {
+        this.githubAccessToken = githubAccessToken;
     }
 
     @Override
