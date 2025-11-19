@@ -41,10 +41,6 @@ public class Sprint {
     @JsonIgnore
     private Set<Task> tasks = new HashSet<>();
 
-    @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private Set<UserStory> userStories = new HashSet<>();
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -136,14 +132,6 @@ public class Sprint {
 
     public void setTasks(Set<Task> tasks) {
         this.tasks = tasks;
-    }
-
-    public Set<UserStory> getUserStories() {
-        return userStories;
-    }
-
-    public void setUserStories(Set<UserStory> userStories) {
-        this.userStories = userStories;
     }
 
     public LocalDateTime getCreatedAt() {

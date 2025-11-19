@@ -1,6 +1,7 @@
 import type { TaskDTO } from "@/modules/task/models/taskDTO";
 import type Task from "@/modules/task/models/task";
 import { TaskStatus } from "@/modules/task/models/taskStatus";
+import { TaskPriority, TaskEstimation } from "@/modules/task/models/taskEnums";
 
 /**
  * Maps backend TaskDTO to frontend Task model
@@ -12,6 +13,14 @@ export function mapTaskDTOToTask(dto: TaskDTO): Task {
     description: dto.description,
     estimation: dto.timeEstimate,
     status: mapStatusToEnum(dto.status),
+
+    // New fields
+    timeTaken: dto.timeTaken ?? null,
+    priority: dto.priority ? mapPriorityToEnum(dto.priority) : null,
+    complexityEstimation: dto.estimation
+      ? mapEstimationToEnum(dto.estimation)
+      : null,
+
     userStory: {
       id: dto.userStoryId ?? null,
       name: dto.userStoryName ?? null,
@@ -77,4 +86,62 @@ export function mapStatusToBackend(status: TaskStatus): string {
     default:
       return "TODO";
   }
+}
+
+/**
+ * Maps string priority to TaskPriority enum
+ */
+function mapPriorityToEnum(priority: string): TaskPriority {
+  switch (priority) {
+    case "LOW":
+      return TaskPriority.LOW;
+    case "MODERATE":
+      return TaskPriority.MODERATE;
+    case "HIGH":
+      return TaskPriority.HIGH;
+    case "URGENT":
+      return TaskPriority.URGENT;
+    default:
+      return TaskPriority.LOW;
+  }
+}
+
+/**
+ * Maps TaskPriority enum to backend string value
+ */
+export function mapPriorityToBackend(priority: TaskPriority | null | undefined): string | undefined {
+  if (!priority) return undefined;
+  return priority; // Already in correct format (uppercase)
+}
+
+/**
+ * Maps string estimation to TaskEstimation enum
+ */
+function mapEstimationToEnum(estimation: string): TaskEstimation {
+  switch (estimation) {
+    case "XS":
+      return TaskEstimation.XS;
+    case "S":
+      return TaskEstimation.S;
+    case "M":
+      return TaskEstimation.M;
+    case "L":
+      return TaskEstimation.L;
+    case "XL":
+      return TaskEstimation.XL;
+    case "XXL":
+      return TaskEstimation.XXL;
+    default:
+      return TaskEstimation.M;
+  }
+}
+
+/**
+ * Maps TaskEstimation enum to backend string value
+ */
+export function mapEstimationToBackend(
+  estimation: TaskEstimation | null | undefined
+): string | undefined {
+  if (!estimation) return undefined;
+  return estimation; // Already in correct format (uppercase)
 }

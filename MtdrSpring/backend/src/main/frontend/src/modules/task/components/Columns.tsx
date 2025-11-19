@@ -4,6 +4,11 @@ import { TaskStatus } from "@/modules/task/models/taskStatus";
 import Badge, { type BadgeProps } from "@/components/Badge";
 import type { TaskTableMeta } from "@/modules/task/models/taskTableMeta";
 import { ColumnDropDownMenu } from "@/modules/task/components/ColumnDropDown";
+import {
+  priorityLabels,
+  priorityColors,
+  estimationLabels,
+} from "@/modules/task/models/taskEnums";
 
 export const columns: ColumnDef<Task>[] = [
   {
@@ -13,6 +18,57 @@ export const columns: ColumnDef<Task>[] = [
   {
     accessorKey: "estimation",
     header: "Estimación (hrs)",
+  },
+  {
+    accessorKey: "priority",
+    header: "Prioridad",
+    cell: ({ row }) => {
+      const priority = row.original.priority;
+      if (!priority) return <span className="text-gray-400">-</span>;
+
+      const colors = priorityColors[priority];
+      return (
+        <span
+          className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${colors.bg} ${colors.text}`}
+        >
+          {priorityLabels[priority]}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "complexityEstimation",
+    header: "Complejidad",
+    cell: ({ row }) => {
+      const estimation = row.original.complexityEstimation;
+      if (!estimation) return <span className="text-gray-400">-</span>;
+
+      return (
+        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+          {estimationLabels[estimation]}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "timeTaken",
+    header: "Tiempo Real (hrs)",
+    cell: ({ row }) => {
+      const timeTaken = row.original.timeTaken;
+      const timeEstimate = row.original.estimation;
+
+      if (timeTaken === null || timeTaken === undefined) {
+        return <span className="text-gray-400">-</span>;
+      }
+
+      const isOverBudget = timeEstimate && timeTaken > timeEstimate;
+      return (
+        <span className={isOverBudget ? "text-red-600 font-semibold" : ""}>
+          {timeTaken}
+          {isOverBudget && " ⚠️"}
+        </span>
+      );
+    },
   },
   {
     accessorKey: "assignee.name",

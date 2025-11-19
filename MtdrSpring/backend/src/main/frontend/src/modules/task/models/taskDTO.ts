@@ -5,6 +5,12 @@ export interface TaskDTO {
   description: string;
   timeEstimate: number;
   status: string;
+
+  // New fields from backend
+  timeTaken?: number | null;
+  priority?: string | null;
+  estimation?: string | null;
+
   startDate: string | null;
   endDate: string | null;
   deliveryDate: string | null;

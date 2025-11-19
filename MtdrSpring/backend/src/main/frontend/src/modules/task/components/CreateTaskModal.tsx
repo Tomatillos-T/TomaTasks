@@ -5,11 +5,18 @@ import Textarea from "@/components/TextArea";
 import Button from "@/components/Button";
 import Alert from "@/components/Alert";
 import InfiniteSelect from "@/components/InfiniteSelect";
+import Select from "@/components/Select";
 import createTaskAdapter from "@/modules/task/adapters/createTaskAdapter";
 import { useQueryClient } from "@tanstack/react-query";
 import useInfiniteUsers from "@/modules/users/hooks/useInfiniteUsers";
 import useInfiniteSprints from "@/modules/sprint/hooks/useInfiniteSprints";
 import useInfiniteUserStories from "@/modules/userStory/hooks/useInfiniteUserStories";
+import {
+  TaskPriority,
+  TaskEstimation,
+  priorityLabels,
+  estimationLabels,
+} from "@/modules/task/models/taskEnums";
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -29,6 +36,8 @@ export default function CreateTaskModal({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [timeEstimate, setTimeEstimate] = useState<number>(0);
+  const [priority, setPriority] = useState<TaskPriority | "">("");
+  const [estimation, setEstimation] = useState<TaskEstimation | "">("");
   const [assigneeId, setAssigneeId] = useState("");
   const [sprintId, setSprintId] = useState("");
   const [userStoryId, setUserStoryId] = useState("");
@@ -72,6 +81,8 @@ export default function CreateTaskModal({
       name,
       description,
       timeEstimate,
+      priority: priority || undefined,
+      estimation: estimation || undefined,
       assigneeId: assigneeId || undefined,
       sprintId: sprintId || undefined,
       userStoryId: userStoryId || undefined,
@@ -98,6 +109,8 @@ export default function CreateTaskModal({
     setName("");
     setDescription("");
     setTimeEstimate(0);
+    setPriority("");
+    setEstimation("");
     setAssigneeId("");
     setSprintId("");
     setUserStoryId("");
@@ -166,6 +179,32 @@ export default function CreateTaskModal({
           min={0}
           placeholder="0"
         />
+
+        <Select
+          label="Prioridad"
+          value={priority}
+          onChange={(e) => setPriority(e.target.value as TaskPriority | "")}
+        >
+          <option value="">Sin prioridad</option>
+          {Object.values(TaskPriority).map((p) => (
+            <option key={p} value={p}>
+              {priorityLabels[p]}
+            </option>
+          ))}
+        </Select>
+
+        <Select
+          label="Complejidad (T-shirt sizing)"
+          value={estimation}
+          onChange={(e) => setEstimation(e.target.value as TaskEstimation | "")}
+        >
+          <option value="">Sin estimación de complejidad</option>
+          {Object.values(TaskEstimation).map((e) => (
+            <option key={e} value={e}>
+              {estimationLabels[e]}
+            </option>
+          ))}
+        </Select>
 
         <InfiniteSelect
           label="Asignar a usuario"

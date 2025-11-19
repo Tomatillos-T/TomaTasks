@@ -1,6 +1,8 @@
 package com.springboot.TomaTask.dto;
 
 import com.springboot.TomaTask.model.Task.Status;
+import com.springboot.TomaTask.model.Task.Priority;
+import com.springboot.TomaTask.model.Task.Estimation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -10,22 +12,22 @@ public class TaskDTO {
     private String description;
     private Integer timeEstimate;
     private Status status;
+    private Integer timeTaken;
+    private Priority priority;
+    private Estimation estimation;
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalDate deliveryDate;
 
-    private String userStoryId;
     private String sprintId;
     private String assigneeId;
 
     // Denormalized fields for easy access
     private String assigneeName;
     private String sprintName;
-    private String userStoryName;
 
     private UserDTO assignee;
     private SprintDTO sprint;
-    private UserStoryDTO userStory;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -85,14 +87,6 @@ public class TaskDTO {
 
     public void setStatus(Status status) {
         this.status = status;
-    }
-
-    public String getUserStoryId() {
-        return userStoryId;
-    }
-
-    public void setUserStoryId(String userStoryId) {
-        this.userStoryId = userStoryId;
     }
 
     public String getSprintId() {
@@ -159,14 +153,6 @@ public class TaskDTO {
         this.sprint = sprint;
     }
 
-    public UserStoryDTO getUserStory() {
-        return userStory;
-    }
-
-    public void setUserStory(UserStoryDTO userStory) {
-        this.userStory = userStory;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -199,11 +185,27 @@ public class TaskDTO {
         this.sprintName = sprintName;
     }
 
-    public String getUserStoryName() {
-        return userStoryName;
+    public Integer getTimeTaken() {
+        return timeTaken;
     }
 
-    public void setUserStoryName(String userStoryName) {
-        this.userStoryName = userStoryName;
+    public void setTimeTaken(Integer timeTaken) {
+        this.timeTaken = timeTaken;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+
+    public Estimation getEstimation() {
+        return estimation;
+    }
+
+    public void setEstimation(Estimation estimation) {
+        this.estimation = estimation;
     }
 }

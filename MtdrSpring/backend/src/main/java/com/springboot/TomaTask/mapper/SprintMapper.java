@@ -51,12 +51,6 @@ public class SprintMapper {
                         .map(TaskMapper::toDTO)
                         .collect(Collectors.toSet()));
             }
-
-            if (sprint.getUserStories() != null && !sprint.getUserStories().isEmpty()) {
-                dto.setUserStories(sprint.getUserStories().stream()
-                        .map(UserStoryMapper::toDTO)
-                        .collect(Collectors.toSet()));
-            }
         }
 
         return dto;

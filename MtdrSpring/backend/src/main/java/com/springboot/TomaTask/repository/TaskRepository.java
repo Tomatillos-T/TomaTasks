@@ -14,6 +14,5 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, String>, JpaSpecificationExecutor<Task> {
     List<Task> findByStatus(Task.Status status);
     List<Task> findBySprintId(String sprintId);
-    List<Task> findByUserStoryId(String userStoryId);
     List<Task> findByUserId(String userId);
 }
