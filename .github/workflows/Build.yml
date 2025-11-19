@@ -64,11 +64,17 @@ jobs:
           tar -xzvf deployment_config.tgz
           source env.sh
 
-      - name: Configure kubectl for OKE
+            - name: Configure kubectl for OKE
         id: kubectl-oke-action
         uses: oracle-actions/configure-kubectl-oke@v1.5.0
         with:
           cluster: ${{ secrets.OCI_CLUSTER_OCID }}
+        env:
+          OCI_CLI_USER:        ${{ secrets.OCI_CLI_USER }}
+          OCI_CLI_TENANCY:     ${{ secrets.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+          OCI_CLI_REGION:      ${{ secrets.OCI_CLI_REGION }}
 
       - name: "Check existing deployment"
         id: k8scheck
