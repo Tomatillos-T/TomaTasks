@@ -33,7 +33,7 @@ jobs:
           source env.sh
           (cd backend; source build.sh)
 
-  deploy:
+  undeploy:
     runs-on: ubuntu-latest
     needs: build
 
@@ -96,12 +96,5 @@ jobs:
       - name: "Run undeployment"
         if: steps.k8scheck.outputs.exists == 'true'
         run: |
-          echo "Existing resources detected — running undeploy.sh"
-          chmod +x undeploy.sh
-          ./undeploy.sh
-
-      - name: "Deploy"
-        run: |
-          echo "Starting new deployment…"
-          cd MtdrSpring/backend
-          ./deploy.sh
+          kubectl -n mtdrworkshop delete deployment todolistapp-springboot-deployment || true
+          kubectl -n mtdrworkshop delete service todolistapp-springboot-service || true
