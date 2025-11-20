@@ -96,5 +96,5 @@ jobs:
       - name: "Run undeployment"
         if: steps.k8scheck.outputs.exists == 'true'
         run: |
-          kubectl -n mtdrworkshop delete deployment todolistapp-springboot-deployment || true
-          kubectl -n mtdrworkshop delete service todolistapp-springboot-service || true
+          kubectl -n mtdrworkshop delete deployment tomatask-springboot-deployment || true
+          kubectl -n mtdrworkshop delete service tomatask-springboot-service || true
