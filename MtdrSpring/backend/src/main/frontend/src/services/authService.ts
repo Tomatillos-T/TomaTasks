@@ -31,6 +31,8 @@ export interface User {
   enabled: boolean;
   username: string;
   telegramToken: string | null;
+  githubId?: string;
+  githubUsername?: string;
 }
 
 class AuthService {

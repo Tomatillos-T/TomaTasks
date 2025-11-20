@@ -18,4 +18,5 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
     Optional<User> findByEmail(String email);
     List<User> findByTeamIsNull();
     Optional<User> findByTelegramToken(String telegramToken);
+    Optional<User> findByGithubId(String githubId);
 }
