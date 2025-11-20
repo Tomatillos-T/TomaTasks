@@ -14,6 +14,8 @@ public class UserDTO {
     private String teamId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String githubId;
+    private String githubUsername;
 
     // Constructors
     public UserDTO() {
@@ -97,5 +99,21 @@ public class UserDTO {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getGithubId() {
+        return githubId;
+    }
+
+    public void setGithubId(String githubId) {
+        this.githubId = githubId;
+    }
+
+    public String getGithubUsername() {
+        return githubUsername;
+    }
+
+    public void setGithubUsername(String githubUsername) {
+        this.githubUsername = githubUsername;
     }
 }

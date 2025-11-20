@@ -33,9 +33,13 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .formLogin(form -> form.disable())
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.deny())
+                        .contentTypeOptions(contentType -> contentType.disable()) // Handled by custom filter
+                )
                 .authorizeHttpRequests(auth -> auth
                         // Endpoints públicos de la API
-                        .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/public/**", "/api/oauth/**").permitAll()
 
                         // Protege únicamente el namespace de API
                         .requestMatchers("/api/**").authenticated()

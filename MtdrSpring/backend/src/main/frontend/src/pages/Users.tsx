@@ -1,43 +1,17 @@
-import React, { useState, useMemo } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import {
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  type ColumnDef,
-} from "@tanstack/react-table";
+import { useMemo } from "react";
 import { DataTableAdvanced } from "@/components/DataTable/DataTableAdvanced";
 import { ResponseStatus } from "@/models/responseStatus";
 import Button from "@/components/Button";
 import { type User, UserRole, roleLabels } from "@/modules/users/models/user";
 import useUsers from "@/modules/users/hooks/useUsers";
-import UserForm from "@/modules/users/components/UserForm";
+import { columns } from "@/modules/users/components/UserColumns";
+import type { FilterData } from "@/components/DataTable/types";
+import { UserRole } from "@/modules/users/models/user";
 
 export default function Users() {
-  const {
-    users,
-    isLoading,
-    createUser,
-    updateUser,
-    deleteUser,
-    isCreating,
-    isUpdating,
-    isDeleting,
-  } = useUsers();
+  const { status, table, searchInput, setSearchInput, isRefetching } = useUsers();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [searchInput, setSearchInput] = useState("");
-
-  const filteredUsers = useMemo(() => {
-    return users.filter((u) =>
-      `${u.firstName} ${u.lastName}`
-        .toLowerCase()
-        .includes(searchInput.toLowerCase())
-    );
-  }, [users, searchInput]);
-
-  const columns = useMemo<ColumnDef<User>[]>(
+  const filters: FilterData[] = useMemo(
     () => [
       {
         accessorKey: "firstName",
@@ -81,71 +55,25 @@ export default function Users() {
         ),
       },
     ],
-    [deleteUser]
+    []
   );
 
-  const table = useReactTable({
-    data: filteredUsers,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-  });
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-
-    const payload = {
-      firstName: formData.get("firstName") as string,
-      lastName: formData.get("lastName") as string,
-      email: formData.get("email") as string,
-      phoneNumber: formData.get("phoneNumber") as string,
-      password: formData.get("password") as string,
-      role: formData.get("role") as UserRole,
-    };
-
-    try {
-      if (editingUser) {
-        await updateUser({ id: editingUser.id, ...payload });
-      } else {
-        await createUser(payload);
-      }
-      setIsModalOpen(false);
-      setEditingUser(null);
-    } catch (error) {
-      console.error("Error al guardar usuario:", error);
-    }
-  };
-
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="h-full flex flex-col p-6 min-h-0">
+      <div className="flex justify-between items-center mb-4 flex-shrink-0">
         <h1 className="text-2xl font-bold text-text-primary">Usuarios</h1>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4" />
-          Crear Usuario
-        </Button>
       </div>
-
-      <DataTableAdvanced
-        columns={columns}
-        table={table}
-        status={isLoading ? ResponseStatus.PENDING : ResponseStatus.SUCCESS}
-        searchInput={searchInput}
-        setSearchInput={setSearchInput}
-        filters={[]}
-      />
-
-      <UserForm
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingUser(null);
-        }}
-        onSubmit={handleSubmit}
-        isSubmitting={isCreating || isUpdating || isDeleting}
-        editingUser={editingUser}
-      />
+      <div className="flex-1 min-h-0 relative">
+        <DataTableAdvanced
+          columns={columns}
+          table={table}
+          status={status}
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+          filters={filters}
+          isRefetching={isRefetching}
+        />
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import tomatoLogo from '@/assets/tomato.svg';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
@@ -10,15 +10,18 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, loading, error } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     try {
       await login({ email, password });
-      // Login exitoso, redirigir al dashboard
-      navigate('/dashboard');
+
+      // Redirigir al usuario a la página que intentaba acceder o al dashboard
+      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
     } catch (err) {
       // El error ya se maneja en el hook useAuth
       console.error('Error en login:', err);

@@ -37,6 +37,8 @@ public class UserMapper {
         if (user.getTeam() != null) {
             dto.setTeamId(user.getTeam().getId());
         }
+        dto.setGithubId(user.getGithubId());
+        dto.setGithubUsername(user.getGithubUsername());
         return dto;
     }
     

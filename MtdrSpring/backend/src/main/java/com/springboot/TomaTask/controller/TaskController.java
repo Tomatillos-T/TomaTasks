@@ -63,4 +63,27 @@ public class TaskController {
     public ResponseEntity<List<TaskDTO>> getTasksByAssigneeId(@PathVariable String assigneeId) {
         return ResponseEntity.ok(taskService.getTasksByAssigneeId(assigneeId));
     }
+
+    /**
+     * Get all completed tasks for a specific sprint
+     * @param sprintId the ID of the sprint
+     * @return HTTP 200 with list of completed tasks (DONE status)
+     */
+    @GetMapping("/sprint/{sprintId}/completed")
+    public ResponseEntity<List<TaskDTO>> getCompletedTasksBySprintId(@PathVariable String sprintId) {
+        return ResponseEntity.ok(taskService.getCompletedTasksBySprintId(sprintId));
+    }
+
+    /**
+     * Get all completed tasks for a specific user in a specific sprint
+     * @param sprintId the ID of the sprint
+     * @param userId the ID of the user (assignee)
+     * @return HTTP 200 with list of completed tasks (DONE status) for the user in the sprint
+     */
+    @GetMapping("/sprint/{sprintId}/user/{userId}/completed")
+    public ResponseEntity<List<TaskDTO>> getCompletedTasksBySprintAndUser(
+            @PathVariable String sprintId,
+            @PathVariable String userId) {
+        return ResponseEntity.ok(taskService.getCompletedTasksBySprintIdAndUserId(sprintId, userId));
+    }
 }

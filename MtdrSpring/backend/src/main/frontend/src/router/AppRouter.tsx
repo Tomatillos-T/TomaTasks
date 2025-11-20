@@ -1,9 +1,10 @@
 import { Routes, Route } from "react-router-dom";
-import Login from "@/pages/Login";
 import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
 import KPIReports from "@/pages/KPIReports";
 import Layout from "@/components/Layout";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import RoleBasedRoute from "@/components/RoleBasedRoute";
 import TomaTaskMockup from "@/pages/TomaTaskMockUp";
 import Kanban from "@/pages/Kanban";
 import Equipos from "@/pages/Equipos";
@@ -14,6 +15,8 @@ import ProjectForm from "@/modules/projects/components/ProjectForm";
 import User from "@/pages/User";
 import Users from "@/pages/Users";
 import Tasks from "@/pages/task/Tasks";
+import RedirectionRoute from "@/components/RedirectionRoute";
+import LoginRoute from "@/components/LoginRoute";
 import Equipo from "@/pages/Equipo";
 
 // Definición de las rutas de la aplicación
@@ -22,23 +25,83 @@ export default function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<LoginRoute />} />
 
-      {/* Rutas del dashboard con sidebar fijo */}
-      <Route path="/" element={<Layout />}>
+      {/* Rutas protegidas del dashboard con sidebar fijo */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
+        {/* Rutas accesibles para todos los usuarios autenticados */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/kpi-reports" element={<KPIReports />} />
         <Route path="/tareas" element={<Tasks />} />
         <Route path="/kanban" element={<Kanban />} />
-        <Route path="/equipos" element={<Equipos />} />
-        <Route path="/proyectos" element={<Proyectos />} />
-        <Route path="/calendario" element={<Calendario />} />
-        <Route path="/palette" element={<TomaTaskMockup />} />
-        <Route path="/projectForm" element={<ProjectForm />} />
-        <Route path="/sprintForm" element={<SprintForm />} />
         <Route path="/user" element={<User />} />
-        <Route path="/usuarios" element={<Users />} />
-        <Route path="/equipos/:id" element={<Equipo />} />
+
+        {/* Rutas solo para ADMIN */}
+        <Route
+          path="/equipos"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <Equipos />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/proyectos"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <Proyectos />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/projectForm"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <ProjectForm />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/sprintForm"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <SprintForm />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/userStoryForm"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <UserStoryForm />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/usuarios"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <Users />
+            </RoleBasedRoute>
+          }
+        />
+
+        <Route
+          path="/equipos/:id"
+          element={
+            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <Equipo />
+            </RoleBasedRoute>
+          }
+        />
+        <Route path="*" element={<RedirectionRoute redirect="/dashboard" />} />
       </Route>
     </Routes>
   );

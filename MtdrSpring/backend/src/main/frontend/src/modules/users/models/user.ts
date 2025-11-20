@@ -21,4 +21,6 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   telegramToken?: string;
+  githubId?: string;
+  githubUsername?: string;
 }

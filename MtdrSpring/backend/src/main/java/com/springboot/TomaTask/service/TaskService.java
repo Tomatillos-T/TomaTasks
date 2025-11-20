@@ -191,4 +191,26 @@ public class TaskService {
     public List<TaskDTO> getTasksByAssigneeId(String assigneeId) {
         return TaskMapper.toDTOList(taskRepository.findByUserId(assigneeId));
     }
+
+    /**
+     * Get all completed tasks for a specific sprint
+     * @param sprintId the ID of the sprint
+     * @return list of TaskDTOs with status DONE for the given sprint
+     */
+    public List<TaskDTO> getCompletedTasksBySprintId(String sprintId) {
+        List<Task> completedTasks = taskRepository.findBySprintIdAndStatus(sprintId, Task.Status.DONE);
+        return TaskMapper.toDTOList(completedTasks);
+    }
+
+    /**
+     * Get all completed tasks for a specific user in a specific sprint
+     * @param sprintId the ID of the sprint
+     * @param userId the ID of the user (assignee)
+     * @return list of TaskDTOs with status DONE for the given user in the given sprint
+     */
+    public List<TaskDTO> getCompletedTasksBySprintIdAndUserId(String sprintId, String userId) {
+        List<Task> completedTasks = taskRepository.findBySprintIdAndUserIdAndStatus(
+            sprintId, userId, Task.Status.DONE);
+        return TaskMapper.toDTOList(completedTasks);
+    }
 }
