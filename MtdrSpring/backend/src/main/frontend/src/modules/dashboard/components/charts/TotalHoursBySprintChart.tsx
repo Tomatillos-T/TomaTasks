@@ -8,6 +8,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  LabelList,
 } from "recharts";
 import { Loader2 } from "lucide-react";
 import { useTotalHoursBySprint } from "@/modules/dashboard/hooks/useChartData";
@@ -91,7 +92,14 @@ const TotalHoursBySprintChart: React.FC = () => {
             cursor={{ fill: "rgba(155, 135, 245, 0.1)" }}
           />
           <Legend />
-          <Bar dataKey="Hours Invested" fill="#9b87f5" radius={[8, 8, 0, 0]} />
+          <Bar dataKey="Hours Invested" fill="#9b87f5" radius={[8, 8, 0, 0]}>
+            <LabelList
+              dataKey="Hours Invested"
+              position="top"
+              className="fill-text-primary"
+              style={{ fontSize: "12px", fontWeight: "600" }}
+            />
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>
