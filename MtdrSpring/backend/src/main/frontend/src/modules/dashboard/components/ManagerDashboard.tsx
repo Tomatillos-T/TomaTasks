@@ -309,9 +309,9 @@ const ManagerDashboard: React.FC = () => {
                         <td className="py-3 px-4">
                           <span
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              Math.abs(variance) <= 10
+                              variance <= 5
                                 ? "bg-success-bg text-success-dark"
-                                : Math.abs(variance) <= 25
+                                : variance <= 25
                                 ? "bg-warning-bg text-warning-dark"
                                 : "bg-error-bg text-error-dark"
                             }`}

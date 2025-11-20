@@ -4,11 +4,9 @@ import com.springboot.TomaTask.dto.TaskDTO;
 import com.springboot.TomaTask.model.Sprint;
 import com.springboot.TomaTask.model.Task;
 import com.springboot.TomaTask.model.User;
-import com.springboot.TomaTask.model.UserStory;
 import com.springboot.TomaTask.repository.SprintRepository;
 import com.springboot.TomaTask.repository.TaskRepository;
 import com.springboot.TomaTask.repository.UserRepository;
-import com.springboot.TomaTask.repository.UserStoryRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,9 +47,6 @@ public class TaskServiceTest {
     private TaskRepository taskRepository;
 
     @Mock
-    private UserStoryRepository userStoryRepository;
-
-    @Mock
     private SprintRepository sprintRepository;
 
     @Mock
@@ -68,7 +63,6 @@ public class TaskServiceTest {
     private TaskDTO taskDTO1;
     private TaskDTO taskDTO2;
 
-    private UserStory userStory1;
     private Sprint sprint1;
     private User user1;
 
@@ -77,10 +71,6 @@ public class TaskServiceTest {
         // GIVEN: Setup test data with real entities (no mocking data objects)
 
         // Create real entities for relationships
-        userStory1 = new UserStory();
-        userStory1.setName("User Story 1");
-        userStory1.setDescription("As a user, I want to create tasks");
-
         sprint1 = new Sprint();
         sprint1.setDescription("Sprint 1");
         sprint1.setStatus("active");
@@ -97,7 +87,6 @@ public class TaskServiceTest {
         task1.setDescription("Task 1 description");
         task1.setStatus(Task.Status.TODO);
         task1.setTimeEstimate(5);
-        task1.setUserStory(userStory1);
         task1.setSprint(sprint1);
         task1.setUser(user1);
 
@@ -125,7 +114,6 @@ public class TaskServiceTest {
         taskDTO2.setDescription("Task description");
         taskDTO2.setStatus(Task.Status.TODO);
         taskDTO2.setTimeEstimate(3);
-        taskDTO2.setUserStoryId("user-story-1");
         taskDTO2.setSprintId("sprint-1");
         taskDTO2.setAssigneeId("user-1");
     }
@@ -206,38 +194,6 @@ public class TaskServiceTest {
     }
 
     /**
-     * Test: Create task with UserStory relationship
-     * Edge Case: Valid UserStory relationship
-     * Expected: Task created with UserStory linked
-     */
-    @Test
-    void testCreateTask_WithUserStory_Success() {
-        // GIVEN: Task DTO with UserStory ID
-        TaskDTO taskWithStory = new TaskDTO();
-        taskWithStory.setName("Task with Story");
-        taskWithStory.setStatus(Task.Status.TODO);
-        taskWithStory.setUserStoryId("user-story-1");
-
-        when(userStoryRepository.findById("user-story-1")).thenReturn(Optional.of(userStory1));
-
-        Task savedTask = new Task();
-        savedTask.setName("Task with Story");
-        savedTask.setStatus(Task.Status.TODO);
-        savedTask.setUserStory(userStory1);
-
-        when(taskRepository.save(any(Task.class))).thenReturn(savedTask);
-
-        // WHEN: Creating the task
-        TaskDTO result = taskService.createTask(taskWithStory);
-
-        // THEN: Task is created with UserStory relationship
-        assertNotNull(result);
-        assertEquals("Task with Story", result.getName());
-        verify(userStoryRepository, times(1)).findById("user-story-1");
-        verify(taskRepository, times(1)).save(any(Task.class));
-    }
-
-    /**
      * Test: Create task with Sprint relationship
      * Edge Case: Valid Sprint relationship
      * Expected: Task created with Sprint linked
@@ -303,7 +259,7 @@ public class TaskServiceTest {
 
     /**
      * Test: Create task with all relationships
-     * Edge Case: All relationships (UserStory, Sprint, Assignee) provided
+     * Edge Case: All relationships (Sprint, Assignee) provided
      * Expected: Task created with all relationships linked
      */
     @Test
@@ -312,18 +268,15 @@ public class TaskServiceTest {
         TaskDTO taskWithAll = new TaskDTO();
         taskWithAll.setName("Task with All Relationships");
         taskWithAll.setStatus(Task.Status.TODO);
-        taskWithAll.setUserStoryId("user-story-1");
         taskWithAll.setSprintId("sprint-1");
         taskWithAll.setAssigneeId("user-1");
 
-        when(userStoryRepository.findById("user-story-1")).thenReturn(Optional.of(userStory1));
         when(sprintRepository.findById("sprint-1")).thenReturn(Optional.of(sprint1));
         when(userRepository.findById("user-1")).thenReturn(Optional.of(user1));
 
         Task savedTask = new Task();
         savedTask.setName("Task with All Relationships");
         savedTask.setStatus(Task.Status.TODO);
-        savedTask.setUserStory(userStory1);
         savedTask.setSprint(sprint1);
         savedTask.setUser(user1);
 
@@ -335,35 +288,9 @@ public class TaskServiceTest {
         // THEN: Task is created with all relationships
         assertNotNull(result);
         assertEquals("Task with All Relationships", result.getName());
-        verify(userStoryRepository, times(1)).findById("user-story-1");
         verify(sprintRepository, times(1)).findById("sprint-1");
         verify(userRepository, times(1)).findById("user-1");
         verify(taskRepository, times(1)).save(any(Task.class));
-    }
-
-    /**
-     * Test: Create task with invalid UserStory ID
-     * Edge Case: UserStory does not exist in database
-     * Expected: RuntimeException thrown with descriptive message
-     */
-    @Test
-    void testCreateTask_WithInvalidUserStoryId_ThrowsException() {
-        // GIVEN: Task DTO with non-existent UserStory ID
-        TaskDTO invalidTask = new TaskDTO();
-        invalidTask.setName("Task with Invalid Story");
-        invalidTask.setStatus(Task.Status.TODO);
-        invalidTask.setUserStoryId("non-existent-story");
-
-        when(userStoryRepository.findById("non-existent-story")).thenReturn(Optional.empty());
-
-        // WHEN & THEN: Creating task throws exception
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-            taskService.createTask(invalidTask)
-        );
-
-        assertEquals("UserStory not found with ID: non-existent-story", ex.getMessage());
-        verify(userStoryRepository, times(1)).findById("non-existent-story");
-        verify(taskRepository, never()).save(any());
     }
 
     /**

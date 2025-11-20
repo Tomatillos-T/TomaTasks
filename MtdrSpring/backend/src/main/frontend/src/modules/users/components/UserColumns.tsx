@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { User } from "@/modules/users/models/user";
-import { UserRole } from "@/modules/users/models/user";
+import { UserRole, roleLabels } from "@/modules/users/models/user";
 import Badge, { type BadgeProps } from "@/components/Badge";
 import type { UserTableMeta } from "@/modules/users/models/userTableMeta";
 import { UserColumnDropDown } from "@/modules/users/components/UserColumnDropDown";
@@ -26,16 +26,11 @@ export const columns: ColumnDef<User>[] = [
       const role = row.original.role;
 
       const variantMap: Record<UserRole, BadgeProps["variant"]> = {
-        [UserRole.ROLE_ADMIN]: "done",
-        [UserRole.ROLE_DEVELOPER]: "pending",
+        [UserRole.Admin]: "done",
+        [UserRole.Developer]: "pending",
       };
 
-      const labelMap: Record<UserRole, string> = {
-        [UserRole.ROLE_ADMIN]: "Administrador",
-        [UserRole.ROLE_DEVELOPER]: "Desarrollador",
-      };
-
-      return <Badge variant={variantMap[role] || "default"}>{labelMap[role]}</Badge>;
+      return <Badge variant={variantMap[role] || "default"}>{roleLabels[role]}</Badge>;
     },
   },
   {

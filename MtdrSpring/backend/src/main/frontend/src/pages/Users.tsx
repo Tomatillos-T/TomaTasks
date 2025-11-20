@@ -1,12 +1,9 @@
 import { useMemo } from "react";
 import { DataTableAdvanced } from "@/components/DataTable/DataTableAdvanced";
-import { ResponseStatus } from "@/models/responseStatus";
-import Button from "@/components/Button";
-import { type User, UserRole, roleLabels } from "@/modules/users/models/user";
+import { UserRole, roleLabels } from "@/modules/users/models/user";
 import useUsers from "@/modules/users/hooks/useUsers";
 import { columns } from "@/modules/users/components/UserColumns";
 import type { FilterData } from "@/components/DataTable/types";
-import { UserRole } from "@/modules/users/models/user";
 
 export default function Users() {
   const { status, table, searchInput, setSearchInput, isRefetching } = useUsers();
@@ -14,45 +11,12 @@ export default function Users() {
   const filters: FilterData[] = useMemo(
     () => [
       {
-        accessorKey: "firstName",
-        header: "Nombre",
-        cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}`,
-      },
-      { accessorKey: "email", header: "Correo" },
-      { accessorKey: "phoneNumber", header: "Teléfono" },
-      {
-        accessorKey: "role",
-        header: "Rol",
-        cell: ({ row }) => roleLabels[row.original.role] || row.original.role,
-      },
-      {
-        id: "actions",
-        header: "",
-        cell: ({ row }) => (
-          <div className="flex gap-2 justify-end">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setEditingUser(row.original);
-                setIsModalOpen(true);
-              }}
-              className="p-2 hover:bg-background-subtle rounded-lg transition-colors"
-            >
-              <Pencil className="w-4 h-4 text-text-secondary" />
-            </button>
-            <button
-              onClick={async (e) => {
-                e.stopPropagation();
-                if (confirm(`¿Eliminar al usuario ${row.original.firstName}?`)) {
-                  await deleteUser(row.original.id);
-                }
-              }}
-              className="p-2 hover:bg-background-subtle rounded-lg transition-colors"
-            >
-              <Trash2 className="w-4 h-4 text-error-main" />
-            </button>
-          </div>
-        ),
+        column: "role",
+        title: "Rol",
+        data: Object.values(UserRole).map((role) => ({
+          label: roleLabels[role],
+          value: role,
+        })),
       },
     ],
     []

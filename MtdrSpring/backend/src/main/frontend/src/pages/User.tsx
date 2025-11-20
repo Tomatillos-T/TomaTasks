@@ -103,10 +103,10 @@ export default function User() {
         message: "Profile updated successfully.",
       });
       setIsEditing(false);
-    } catch (error: any) {
+    } catch (error) {
       setSubmitStatus({
         type: "error",
-        message: error.message || "Failed to update profile.",
+        message: error instanceof Error ? error.message : "Failed to update profile.",
       });
     } finally {
       setIsSubmitting(false);
@@ -147,10 +147,10 @@ export default function User() {
         message:
           "Token generado correctamente. Úsalo en el bot de Telegram para vincular tu cuenta.",
       });
-    } catch (error: any) {
+    } catch (error) {
       setSubmitStatus({
         type: "error",
-        message: error.message || "Error al generar el token.",
+        message: error instanceof Error ? error.message : "Error al generar el token.",
       });
     } finally {
       setIsSubmitting(false);
@@ -180,10 +180,10 @@ export default function User() {
         "GitHub OAuth",
         `width=${width},height=${height},left=${left},top=${top}`
       );
-    } catch (error: any) {
+    } catch (error) {
       setSubmitStatus({
         type: "error",
-        message: error.message || "Failed to initiate GitHub connection.",
+        message: error instanceof Error ? error.message : "Failed to initiate GitHub connection.",
       });
       setIsConnectingGithub(false);
     }
@@ -206,10 +206,10 @@ export default function User() {
         type: "success",
         message: "GitHub account disconnected successfully.",
       });
-    } catch (error: any) {
+    } catch (error) {
       setSubmitStatus({
         type: "error",
-        message: error.message || "Failed to disconnect GitHub account.",
+        message: error instanceof Error ? error.message : "Failed to disconnect GitHub account.",
       });
     } finally {
       setIsSubmitting(false);
@@ -401,7 +401,7 @@ export default function User() {
             </Button>
           )}
         </div>
-      </section>
+      </div>
 
       <Modal
         isOpen={isDeleteModalOpen}
@@ -430,6 +430,6 @@ export default function User() {
           undone.
         </p>
       </Modal>
-    </>
+    </section>
   );
 }

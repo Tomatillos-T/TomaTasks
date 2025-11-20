@@ -8,6 +8,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  LabelList,
 } from "recharts";
 import { Loader2 } from "lucide-react";
 import { useHoursByDeveloperSprint } from "@/modules/dashboard/hooks/useChartData";
@@ -118,7 +119,17 @@ const HoursByDeveloperChart: React.FC = () => {
               dataKey={developer.developerName}
               fill={DEVELOPER_COLORS[index % DEVELOPER_COLORS.length]}
               radius={[4, 4, 0, 0]}
-            />
+            >
+              <LabelList
+                dataKey={developer.developerName}
+                position="top"
+                className="fill-text-primary"
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "600",
+                }}
+              />
+            </Bar>
           ))}
         </BarChart>
       </ResponsiveContainer>

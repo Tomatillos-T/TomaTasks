@@ -148,31 +148,6 @@ public class TaskControllerTest {
     }
 
     /**
-     * Test: POST /api/tasks with invalid UserStory ID
-     * Edge Case: Service throws RuntimeException for invalid relationship
-     * Expected: Exception propagates to controller (will be handled by global exception handler)
-     */
-    @Test
-    void testCreateTask_WithInvalidUserStoryId_ThrowsException() {
-        // GIVEN: Task with invalid UserStory ID
-        TaskDTO invalidTask = new TaskDTO();
-        invalidTask.setName("Task with Invalid Story");
-        invalidTask.setStatus(Task.Status.TODO);
-        invalidTask.setUserStoryId("non-existent");
-
-        when(taskService.createTask(invalidTask))
-            .thenThrow(new RuntimeException("UserStory not found with ID: non-existent"));
-
-        // WHEN & THEN: Exception is thrown
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-            taskController.createTask(invalidTask)
-        );
-
-        assertEquals("UserStory not found with ID: non-existent", ex.getMessage());
-        verify(taskService, times(1)).createTask(invalidTask);
-    }
-
-    /**
      * Test: POST /api/tasks with invalid Sprint ID
      * Edge Case: Service throws RuntimeException for invalid Sprint
      * Expected: Exception propagates to controller
@@ -414,27 +389,6 @@ public class TaskControllerTest {
         assertNotNull(response.getBody());
         assertEquals(0, response.getBody().size());
         verify(taskService, times(1)).getTasksBySprintId("sprint-empty");
-    }
-
-    /**
-     * Test: GET /api/tasks/user-story/{userStoryId} returns tasks for user story
-     * Edge Case: UserStory has tasks
-     * Expected: HTTP 200 with list of tasks
-     */
-    @Test
-    void testGetTasksByUserStoryId() {
-        // GIVEN: UserStory has tasks
-        when(taskService.getTasksByUserStoryId("story-1"))
-            .thenReturn(Arrays.asList(taskDTO1));
-
-        // WHEN: Getting tasks by user story
-        ResponseEntity<List<TaskDTO>> response = taskController.getTasksByUserStoryId("story-1");
-
-        // THEN: Tasks returned with 200 OK
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        verify(taskService, times(1)).getTasksByUserStoryId("story-1");
     }
 
     /**
