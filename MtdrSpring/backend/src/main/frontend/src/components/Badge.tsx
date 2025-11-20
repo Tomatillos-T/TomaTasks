@@ -17,8 +17,8 @@ export const Badge: React.FC<BadgeProps> = ({
 
   const variantStyles = {
     default: "bg-primary-main text-primary-contrast border-transparent",
-    secondary: "bg-secondary-main/10 text-secondary-dark border border-secondary-main/20",
-    tertiary: "bg-tertiary-main/10 text-tertiary-dark border border-tertiary-main/20",
+    secondary: "bg-secondary-main text-secondary-contrast border-transparent",
+    tertiary: "bg-tertiary-main text-tertiary-contrast border-transparent",
     outline: "text-text-primary border border-background-contrast bg-transparent",
     success: "bg-success-bg text-success-contrast border-transparent",
     error: "bg-error-bg text-error-contrast border-transparent",

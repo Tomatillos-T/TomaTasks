@@ -11,20 +11,16 @@ export function mapTaskDTOToTask(dto: TaskDTO): Task {
     id: dto.id,
     name: dto.name,
     description: dto.description,
-    estimation: dto.timeEstimate,
+    timeEstimate: dto.timeEstimate,
     status: mapStatusToEnum(dto.status),
 
     // New fields
     timeTaken: dto.timeTaken ?? null,
     priority: dto.priority ? mapPriorityToEnum(dto.priority) : null,
-    complexityEstimation: dto.estimation
+    estimation: dto.estimation
       ? mapEstimationToEnum(dto.estimation)
       : null,
 
-    userStory: {
-      id: dto.userStoryId ?? null,
-      name: dto.userStoryName ?? null,
-    },
     sprint: {
       id: dto.sprintId ?? null,
       name: dto.sprintName ?? null,

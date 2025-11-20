@@ -1,5 +1,6 @@
 // services/authService.ts
 import { HttpClient } from "@/services/httpClient";
+import { mapRoleToFrontend, mapRoleToBackend } from "@/utils/roleMapper";
 
 export interface LoginCredentials {
   email: string;
@@ -27,10 +28,7 @@ export interface User {
   lastName: string | null;
   email: string;
   phoneNumber: string | null;
-  role: {
-    id: string;
-    role: string;
-  };
+  role: string;
   enabled: boolean;
   username: string;
   telegramToken: string | null;
@@ -38,13 +36,35 @@ export interface User {
 
 class AuthService {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const data = await HttpClient.post<LoginResponse>("/api/auth/login", credentials);
+    const data = await HttpClient.post<LoginResponse>(
+      "/api/auth/login",
+      credentials
+    );
+
+    // Map backend role format to frontend format
+    if (data.user && data.user.role) {
+      data.user.role = mapRoleToFrontend(data.user.role);
+    }
+
     localStorage.setItem("jwtToken", data.token);
     return data;
   }
 
   async register(userData: RegisterData): Promise<User> {
-    return HttpClient.post<User>("/api/auth/signup", userData);
+    // Map frontend role format to backend format before sending
+    const backendUserData = {
+      ...userData,
+      role: userData.role ? mapRoleToBackend(userData.role) : undefined,
+    };
+
+    const user = await HttpClient.post<User>("/api/auth/signup", backendUserData);
+
+    // Map backend role format to frontend format in response
+    if (user && user.role) {
+      user.role = mapRoleToFrontend(user.role);
+    }
+
+    return user;
   }
 
   logout(): void {

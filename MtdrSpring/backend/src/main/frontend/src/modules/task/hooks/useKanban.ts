@@ -2,6 +2,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-q
 import { useState, useCallback, useMemo } from "react";
 import type Task from "@/modules/task/models/task";
 import { TaskStatus } from "@/modules/task/models/taskStatus";
+import { TaskPriority, TaskEstimation } from "@/modules/task/models/taskEnums";
 import getTasksAdapter from "@/modules/task/adapters/getTasksAdapter";
 import updateTaskAdapter from "@/modules/task/adapters/updateTaskAdapter";
 import { mapStatusToBackend } from "@/modules/task/utils/taskMapper";
@@ -37,6 +38,13 @@ export interface UseKanbanResult {
   handleDragStart: (e: React.DragEvent<HTMLDivElement>, taskId: string, fromStatus: TaskStatus) => void;
   handleDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   handleDrop: (e: React.DragEvent<HTMLDivElement>, toStatus: TaskStatus) => void;
+  // Global filters
+  selectedPriorities: TaskPriority[];
+  setSelectedPriorities: React.Dispatch<React.SetStateAction<TaskPriority[]>>;
+  selectedEstimations: TaskEstimation[];
+  setSelectedEstimations: React.Dispatch<React.SetStateAction<TaskEstimation[]>>;
+  selectedSprintIds: string[];
+  setSelectedSprintIds: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const PAGE_SIZE = 10;
@@ -44,21 +52,52 @@ const PAGE_SIZE = 10;
 export default function useKanban(): UseKanbanResult {
   const queryClient = useQueryClient();
 
+  // Global filter state
+  const [selectedPriorities, setSelectedPriorities] = useState<TaskPriority[]>([]);
+  const [selectedEstimations, setSelectedEstimations] = useState<TaskEstimation[]>([]);
+  const [selectedSprintIds, setSelectedSprintIds] = useState<string[]>([]);
+
   // Create infinite query for each status
   const useColumnQuery = (status: TaskStatus) => {
     return useInfiniteQuery({
-      queryKey: ["kanban-tasks", status],
+      queryKey: ["kanban-tasks", status, selectedPriorities, selectedEstimations, selectedSprintIds],
       queryFn: async ({ pageParam = 1 }) => {
+        const filters = [
+          {
+            id: "status",
+            value: [mapStatusToBackend(status)], // Backend expects array of strings
+          },
+        ];
+
+        // Add priority filter if selected
+        if (selectedPriorities.length > 0) {
+          filters.push({
+            id: "priority",
+            value: selectedPriorities,
+          });
+        }
+
+        // Add complexity/estimation filter if selected
+        if (selectedEstimations.length > 0) {
+          filters.push({
+            id: "estimation",
+            value: selectedEstimations,
+          });
+        }
+
+        // Add sprint filter if selected
+        if (selectedSprintIds.length > 0) {
+          filters.push({
+            id: "sprint",
+            value: selectedSprintIds,
+          });
+        }
+
         const response = await getTasksAdapter({
           page: pageParam,
           pageSize: PAGE_SIZE,
           search: "",
-          filters: [
-            {
-              id: "status",
-              value: [mapStatusToBackend(status)], // Backend expects array of strings
-            },
-          ],
+          filters,
           sorting: [],
         });
         return response;
@@ -87,27 +126,20 @@ export default function useKanban(): UseKanbanResult {
       taskId: string;
       task: Task;
     }) => {
-      // Convert Task to TaskDTO format for backend
-      const taskDTO = {
-        id: task.id,
+      // Convert Task to update data format for backend
+      const taskData = {
         name: task.name,
         description: task.description,
-        timeEstimate: task.estimation,
+        timeEstimate: task.timeEstimate,
+        timeTaken: task.timeTaken || 0,
         status: mapStatusToBackend(task.status),
-        startDate: task.startDate ? task.startDate.toISOString() : null,
-        endDate: task.endDate ? task.endDate.toISOString() : null,
-        deliveryDate: task.deliveryDate ? task.deliveryDate.toISOString() : null,
-        userStoryId: task.userStory?.id || null,
-        sprintId: task.sprint?.id || null,
-        assigneeId: task.assignee?.id || null,
-        assigneeName: task.assignee?.name || null,
-        sprintName: task.sprint?.name || null,
-        userStoryName: task.userStory?.name || null,
-        createdAt: task.createdAt.toISOString(),
-        updatedAt: new Date().toISOString(),
+        priority: task.priority || undefined,
+        estimation: task.estimation || undefined,
+        assigneeId: task.assignee?.id || undefined,
+        sprintId: task.sprint?.id || undefined,
       };
 
-      return await updateTaskAdapter({ id: taskId, taskDTO });
+      return await updateTaskAdapter(taskId, taskData);
     },
     onMutate: ({ taskId, task }) => {
       // Cancel any outgoing refetches (synchronous to avoid delay)
@@ -119,7 +151,8 @@ export default function useKanban(): UseKanbanResult {
 
       const statuses = [TaskStatus.TODO, TaskStatus.INPROGRESS, TaskStatus.TESTING, TaskStatus.DONE];
       for (const status of statuses) {
-        const data = queryClient.getQueryData<InfiniteTaskData>(["kanban-tasks", status]);
+        const queryKey = ["kanban-tasks", status, selectedPriorities, selectedEstimations, selectedSprintIds];
+        const data = queryClient.getQueryData<InfiniteTaskData>(queryKey);
         if (data?.pages) {
           for (const page of data.pages) {
             const foundTask = page.data.items.find((t: Task) => t.id === taskId);
@@ -136,12 +169,14 @@ export default function useKanban(): UseKanbanResult {
       if (!oldStatus || !oldTask) return { oldStatus: null, oldTask: null };
 
       // Snapshot the previous values for rollback
-      const previousOldStatusData = queryClient.getQueryData(["kanban-tasks", oldStatus]);
-      const previousNewStatusData = queryClient.getQueryData(["kanban-tasks", task.status]);
+      const oldQueryKey = ["kanban-tasks", oldStatus, selectedPriorities, selectedEstimations, selectedSprintIds];
+      const newQueryKey = ["kanban-tasks", task.status, selectedPriorities, selectedEstimations, selectedSprintIds];
+      const previousOldStatusData = queryClient.getQueryData(oldQueryKey);
+      const previousNewStatusData = queryClient.getQueryData(newQueryKey);
 
       // Optimistically update: remove from old column
       if (oldStatus !== task.status) {
-        queryClient.setQueryData(["kanban-tasks", oldStatus], (old: InfiniteTaskData | undefined) => {
+        queryClient.setQueryData(oldQueryKey, (old: InfiniteTaskData | undefined) => {
           if (!old) return old;
           return {
             ...old,
@@ -157,7 +192,7 @@ export default function useKanban(): UseKanbanResult {
         });
 
         // Optimistically update: add to new column (prepend to first page)
-        queryClient.setQueryData(["kanban-tasks", task.status], (old: InfiniteTaskData | undefined) => {
+        queryClient.setQueryData(newQueryKey, (old: InfiniteTaskData | undefined) => {
           if (!old) return old;
           const updatedTask = { ...oldTask, status: task.status };
           return {
@@ -186,6 +221,9 @@ export default function useKanban(): UseKanbanResult {
         previousNewStatusData,
         oldStatus,
         newStatus: task.status,
+        selectedPriorities,
+        selectedEstimations,
+        selectedSprintIds,
       };
     },
     onError: (error, _variables, context) => {
@@ -193,20 +231,30 @@ export default function useKanban(): UseKanbanResult {
 
       // Rollback optimistic update on error
       if (context?.oldStatus && context?.previousOldStatusData) {
-        queryClient.setQueryData(["kanban-tasks", context.oldStatus], context.previousOldStatusData);
+        const oldQueryKey = ["kanban-tasks", context.oldStatus, context.selectedPriorities, context.selectedEstimations, context.selectedSprintIds];
+        queryClient.setQueryData(oldQueryKey, context.previousOldStatusData);
       }
       if (context?.newStatus && context?.previousNewStatusData) {
-        queryClient.setQueryData(["kanban-tasks", context.newStatus], context.previousNewStatusData);
+        const newQueryKey = ["kanban-tasks", context.newStatus, context.selectedPriorities, context.selectedEstimations, context.selectedSprintIds];
+        queryClient.setQueryData(newQueryKey, context.previousNewStatusData);
       }
     },
-    onSettled: (_data, _error, _variables, context) => {
-      // After mutation (success or error), refetch affected columns only
-      // This ensures data consistency with the server
+    onSuccess: (_data, _variables, context) => {
+      // On success, silently refetch in background to sync with server
+      // This won't cause UI flickering since optimistic update is already applied
       if (context?.oldStatus) {
-        queryClient.invalidateQueries({ queryKey: ["kanban-tasks", context.oldStatus] });
+        const oldQueryKey = ["kanban-tasks", context.oldStatus, context.selectedPriorities, context.selectedEstimations, context.selectedSprintIds];
+        queryClient.invalidateQueries({
+          queryKey: oldQueryKey,
+          refetchType: 'none' // Don't refetch immediately, just mark as stale
+        });
       }
       if (context?.newStatus && context?.newStatus !== context?.oldStatus) {
-        queryClient.invalidateQueries({ queryKey: ["kanban-tasks", context.newStatus] });
+        const newQueryKey = ["kanban-tasks", context.newStatus, context.selectedPriorities, context.selectedEstimations, context.selectedSprintIds];
+        queryClient.invalidateQueries({
+          queryKey: newQueryKey,
+          refetchType: 'none' // Don't refetch immediately, just mark as stale
+        });
       }
     },
   });
@@ -262,7 +310,7 @@ export default function useKanban(): UseKanbanResult {
   const [draggedFromStatus, setDraggedFromStatus] = useState<TaskStatus | null>(null);
 
   // Function to move task to new status (internal use only)
-  const moveTask = useCallback(async (taskId: string, newStatus: TaskStatus) => {
+  const moveTask = useCallback((taskId: string, newStatus: TaskStatus) => {
     // Find the task in all columns
     let task: Task | undefined;
     for (const column of columns) {
@@ -278,12 +326,8 @@ export default function useKanban(): UseKanbanResult {
     // Create updated task
     const updatedTask = { ...task, status: newStatus };
 
-    // Perform the mutation
-    try {
-      await updateTaskMutation.mutateAsync({ taskId, task: updatedTask });
-    } catch (error) {
-      console.error("Error moving task:", error);
-    }
+    // Perform the mutation (fire and forget - optimistic update handles UI)
+    updateTaskMutation.mutate({ taskId, task: updatedTask });
   }, [columns, updateTaskMutation]);
 
   // Drag & drop handlers
@@ -302,7 +346,7 @@ export default function useKanban(): UseKanbanResult {
     e.dataTransfer.dropEffect = "move";
   }, []);
 
-  const handleDrop = useCallback(async (
+  const handleDrop = useCallback((
     e: React.DragEvent<HTMLDivElement>,
     toStatus: TaskStatus
   ) => {
@@ -317,10 +361,10 @@ export default function useKanban(): UseKanbanResult {
       return;
     }
 
-    // Move the task to new status
-    await moveTask(draggedTaskId, toStatus);
+    // Move the task to new status (fire and forget - UI updates immediately)
+    moveTask(draggedTaskId, toStatus);
 
-    // Reset drag state
+    // Reset drag state immediately
     setDraggedTaskId(null);
     setDraggedFromStatus(null);
   }, [draggedTaskId, draggedFromStatus, moveTask]);
@@ -353,5 +397,11 @@ export default function useKanban(): UseKanbanResult {
     handleDragStart,
     handleDragOver,
     handleDrop,
+    selectedPriorities,
+    setSelectedPriorities,
+    selectedEstimations,
+    setSelectedEstimations,
+    selectedSprintIds,
+    setSelectedSprintIds,
   };
 }

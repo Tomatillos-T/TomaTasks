@@ -8,6 +8,7 @@ import {
   priorityLabels,
   priorityColors,
   estimationLabels,
+  estimationColors,
 } from "@/modules/task/models/taskEnums";
 
 export const columns: ColumnDef<Task>[] = [
@@ -16,7 +17,7 @@ export const columns: ColumnDef<Task>[] = [
     header: "Tarea",
   },
   {
-    accessorKey: "estimation",
+    accessorKey: "timeEstimate",
     header: "Estimación (hrs)",
   },
   {
@@ -24,12 +25,12 @@ export const columns: ColumnDef<Task>[] = [
     header: "Prioridad",
     cell: ({ row }) => {
       const priority = row.original.priority;
-      if (!priority) return <span className="text-gray-400">-</span>;
+      if (!priority) return <span className="text-text-secondary">-</span>;
 
       const colors = priorityColors[priority];
       return (
         <span
-          className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${colors.bg} ${colors.text}`}
+          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${colors.bg} ${colors.text}`}
         >
           {priorityLabels[priority]}
         </span>
@@ -37,14 +38,17 @@ export const columns: ColumnDef<Task>[] = [
     },
   },
   {
-    accessorKey: "complexityEstimation",
+    accessorKey: "estimation",
     header: "Complejidad",
     cell: ({ row }) => {
-      const estimation = row.original.complexityEstimation;
-      if (!estimation) return <span className="text-gray-400">-</span>;
+      const estimation = row.original.estimation;
+      if (!estimation) return <span className="text-text-secondary">-</span>;
 
+      const colors = estimationColors[estimation];
       return (
-        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+        <span
+          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${colors.bg} ${colors.text}`}
+        >
           {estimationLabels[estimation]}
         </span>
       );
@@ -55,7 +59,7 @@ export const columns: ColumnDef<Task>[] = [
     header: "Tiempo Real (hrs)",
     cell: ({ row }) => {
       const timeTaken = row.original.timeTaken;
-      const timeEstimate = row.original.estimation;
+      const timeEstimate = row.original.timeEstimate;
 
       if (timeTaken === null || timeTaken === undefined) {
         return <span className="text-gray-400">-</span>;
@@ -65,7 +69,6 @@ export const columns: ColumnDef<Task>[] = [
       return (
         <span className={isOverBudget ? "text-red-600 font-semibold" : ""}>
           {timeTaken}
-          {isOverBudget && " ⚠️"}
         </span>
       );
     },
@@ -126,7 +129,9 @@ export const columns: ColumnDef<Task>[] = [
       const task = row.original;
       const meta = table.options.meta as TaskTableMeta;
 
-      return <ColumnDropDownMenu task={task} meta={meta} />;
+      return (
+        <ColumnDropDownMenu task={task} meta={meta} onEdit={meta?.onEdit} />
+      );
     },
   },
 ];

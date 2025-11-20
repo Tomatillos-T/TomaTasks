@@ -123,131 +123,135 @@ export default function User() {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-background-default">
-      <div className="w-full h-full m-4 p-4 bg-background-paper rounded-2xl shadow-lg space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-text-primary">
-              User Profile
-            </h2>
-            <p className="text-sm text-text-secondary">
-              Manage your account details below.
-            </p>
+    <>
+      <section className="h-full overflow-y-auto">
+        <div className="container mx-auto px-4 py-6">
+          <div className="max-w-3xl mx-auto bg-background-paper rounded-2xl shadow-lg p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold text-text-primary">
+                  User Profile
+                </h2>
+                <p className="text-sm text-text-secondary">
+                  Manage your account details below.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant={isEditing ? "secondary" : "primary"}
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                {isEditing ? "Cancel" : "Edit"}
+              </Button>
+            </div>
+
+            {submitStatus.type && (
+              <Alert type={submitStatus.type} message={submitStatus.message} />
+            )}
+
+            <div className="grid grid-cols-1 gap-6">
+              <Input
+                label="User ID"
+                name="id"
+                value={formData?.id || ""}
+                disabled
+              />
+              <Input
+                label="Username"
+                name="username"
+                value={formData?.username || ""}
+                disabled
+              />
+              <Input
+                label="Role"
+                name="role"
+                value={formData?.role || ""}
+                disabled
+              />
+              <Input
+                label="First Name"
+                name="firstName"
+                value={formData?.firstName || ""}
+                onChange={handleChange}
+                disabled={!isEditing}
+              />
+              <Input
+                label="Last Name"
+                name="lastName"
+                value={formData?.lastName || ""}
+                onChange={handleChange}
+                disabled={!isEditing}
+              />
+              <Input
+                label="Email"
+                type="email"
+                name="email"
+                value={formData?.email || ""}
+                onChange={handleChange}
+                disabled={!isEditing}
+              />
+              <Input
+                label="Phone Number"
+                name="phoneNumber"
+                value={formData?.phoneNumber || ""}
+                onChange={handleChange}
+                disabled={!isEditing}
+              />
+              <Input
+                label="Enabled"
+                name="enabled"
+                value={formData?.enabled ? "Yes" : "No"}
+                disabled
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Input
+                label="Telegram Token"
+                name="telegramToken"
+                value={telegramToken || "No se ha generado un token"}
+                disabled
+              />
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleGenerateTelegramToken}
+                disabled={isSubmitting}
+              >
+                Generar Token para Telegram
+              </Button>
+              {telegramToken && (
+                <p className="text-sm text-text-secondary">
+                  Copia este token y envíalo al bot de Telegram para vincular tu
+                  cuenta.
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-between items-center mt-6">
+              <Button
+                type="button"
+                variant="danger"
+                onClick={() => setIsDeleteModalOpen(true)}
+                disabled={isSubmitting}
+              >
+                Delete Account
+              </Button>
+              {isEditing && (
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={handleSave}
+                  loading={isSubmitting}
+                  disabled={isSubmitting}
+                >
+                  Save Changes
+                </Button>
+              )}
+            </div>
           </div>
-          <Button
-            type="button"
-            variant={isEditing ? "secondary" : "primary"}
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            {isEditing ? "Cancel" : "Edit"}
-          </Button>
         </div>
-
-        {submitStatus.type && (
-          <Alert type={submitStatus.type} message={submitStatus.message} />
-        )}
-
-        <div className="grid grid-cols-1 gap-6">
-          <Input
-            label="User ID"
-            name="id"
-            value={formData?.id || ""}
-            disabled
-          />
-          <Input
-            label="Username"
-            name="username"
-            value={formData?.username || ""}
-            disabled
-          />
-          <Input
-            label="Role"
-            name="role"
-            value={formData?.role?.role || ""}
-            disabled
-          />
-          <Input
-            label="First Name"
-            name="firstName"
-            value={formData?.firstName || ""}
-            onChange={handleChange}
-            disabled={!isEditing}
-          />
-          <Input
-            label="Last Name"
-            name="lastName"
-            value={formData?.lastName || ""}
-            onChange={handleChange}
-            disabled={!isEditing}
-          />
-          <Input
-            label="Email"
-            type="email"
-            name="email"
-            value={formData?.email || ""}
-            onChange={handleChange}
-            disabled={!isEditing}
-          />
-          <Input
-            label="Phone Number"
-            name="phoneNumber"
-            value={formData?.phoneNumber || ""}
-            onChange={handleChange}
-            disabled={!isEditing}
-          />
-          <Input
-            label="Enabled"
-            name="enabled"
-            value={formData?.enabled ? "Yes" : "No"}
-            disabled
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Input
-            label="Telegram Token"
-            name="telegramToken"
-            value={telegramToken || "No se ha generado un token"}
-            disabled
-          />
-          <Button
-            type="button"
-            variant="primary"
-            onClick={handleGenerateTelegramToken}
-            disabled={isSubmitting}
-          >
-            Generar Token para Telegram
-          </Button>
-          {telegramToken && (
-            <p className="text-sm text-text-secondary">
-              Copia este token y envíalo al bot de Telegram para vincular tu
-              cuenta.
-            </p>
-          )}
-        </div>
-
-        <div className="flex justify-between items-center mt-6">
-          <Button
-            type="button"
-            variant="danger"
-            onClick={() => setIsDeleteModalOpen(true)}
-            disabled={isSubmitting}
-          >
-            Delete Account
-          </Button>
-          {isEditing && (
-            <Button
-              type="button"
-              variant="primary"
-              onClick={handleSave}
-              loading={isSubmitting}
-              disabled={isSubmitting}
-            >
-              Save Changes
-            </Button>
-          )}
-        </div>
-      </div>
+      </section>
 
       <Modal
         isOpen={isDeleteModalOpen}
@@ -276,6 +280,6 @@ export default function User() {
           undone.
         </p>
       </Modal>
-    </section>
+    </>
   );
 }

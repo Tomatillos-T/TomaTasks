@@ -5,18 +5,14 @@ export default interface Task {
   id: string;
   name: string;
   description: string;
-  estimation: number;
+  timeEstimate: number;
   status: TaskStatus;
 
   // New fields added
   timeTaken?: number | null;
   priority?: TaskPriority | null;
-  complexityEstimation?: TaskEstimation | null;
+  estimation?: TaskEstimation | null;
 
-  userStory: {
-    id: string | null;
-    name: string | null;
-  };
   sprint: {
     id: string | null;
     name: string | null;

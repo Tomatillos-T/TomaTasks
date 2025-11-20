@@ -9,7 +9,7 @@ import {
 import { DataTableAdvanced } from "@/components/DataTable/DataTableAdvanced";
 import { ResponseStatus } from "@/models/responseStatus";
 import Button from "@/components/Button";
-import { type User, UserRole } from "@/modules/users/models/user";
+import { type User, UserRole, roleLabels } from "@/modules/users/models/user";
 import useUsers from "@/modules/users/hooks/useUsers";
 import UserForm from "@/modules/users/components/UserForm";
 
@@ -49,10 +49,7 @@ export default function Users() {
       {
         accessorKey: "role",
         header: "Rol",
-        cell: ({ row }) =>
-          row.original.role === UserRole.ROLE_ADMIN
-            ? "Administrador"
-            : "Desarrollador",
+        cell: ({ row }) => roleLabels[row.original.role] || row.original.role,
       },
       {
         id: "actions",

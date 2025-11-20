@@ -1,15 +1,22 @@
 import type { TaskDTO } from "@/modules/task/models/taskDTO";
 import type GeneralResponse from "@/models/generalResponse";
 
-interface UpdateTaskParams {
-  id: string;
-  taskDTO: TaskDTO;
+interface UpdateTaskData {
+  name: string;
+  description: string;
+  timeEstimate: number;
+  timeTaken: number;
+  status: string;
+  priority?: string;
+  estimation?: string;
+  assigneeId?: string;
+  sprintId?: string;
 }
 
-export default async function updateTaskAdapter({
-  id,
-  taskDTO,
-}: UpdateTaskParams): Promise<GeneralResponse<TaskDTO | null>> {
+export default async function updateTaskAdapter(
+  id: string,
+  taskData: UpdateTaskData
+): Promise<GeneralResponse<TaskDTO | null>> {
   try {
     const response = await fetch(`/api/tasks/${id}`, {
       method: "PUT",
@@ -17,7 +24,7 @@ export default async function updateTaskAdapter({
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("jwtToken") || ""}`,
       },
-      body: JSON.stringify(taskDTO),
+      body: JSON.stringify(taskData),
     });
 
     if (!response.ok) {

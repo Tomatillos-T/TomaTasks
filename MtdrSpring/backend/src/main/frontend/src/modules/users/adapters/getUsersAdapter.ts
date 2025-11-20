@@ -1,5 +1,6 @@
 import type GeneralResponse from "@/models/generalResponse";
 import type { User } from "@/modules/users/models/user";
+import { mapRoleToFrontend } from "@/utils/roleMapper";
 
 export default async function getUsersAdapter(): Promise<GeneralResponse<User[]>> {
   try {
@@ -17,8 +18,14 @@ export default async function getUsersAdapter(): Promise<GeneralResponse<User[]>
 
     const users: User[] = await response.json();
 
+    // Map backend role format to frontend format
+    const mappedUsers = users.map(user => ({
+      ...user,
+      role: mapRoleToFrontend(user.role) as any,
+    }));
+
     return {
-      data: users,
+      data: mappedUsers,
       message: "Usuarios obtenidos exitosamente",
       status: 200,
     };

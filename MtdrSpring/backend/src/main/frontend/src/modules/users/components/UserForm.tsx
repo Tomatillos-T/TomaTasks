@@ -2,7 +2,7 @@ import React from "react";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
-import { type User, UserRole } from "@/modules/users/models/user";
+import { type User, UserRole, roleLabels } from "@/modules/users/models/user";
 
 interface UserFormProps {
   isOpen: boolean;
@@ -63,14 +63,12 @@ export default function UserForm({
           <select
             name="role"
             required
-            defaultValue={editingUser?.role || UserRole.ROLE_DEVELOPER}
+            defaultValue={editingUser?.role || UserRole.Developer}
             className="w-full border rounded px-3 py-2"
           >
             {Object.values(UserRole).map((role) => (
               <option key={role} value={role}>
-                {role === UserRole.ROLE_ADMIN
-                  ? "Administrador"
-                  : "Desarrollador"}
+                {roleLabels[role]}
               </option>
             ))}
           </select>

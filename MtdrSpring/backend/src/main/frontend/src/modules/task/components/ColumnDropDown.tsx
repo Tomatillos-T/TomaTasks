@@ -25,7 +25,8 @@ import { Ellipsis } from "lucide-react";
 export const ColumnDropDownMenu: React.FC<{
   task: Task;
   meta: TaskTableMeta;
-}> = ({ task, meta }) => {
+  onEdit?: (task: Task) => void;
+}> = ({ task, meta, onEdit }) => {
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [errorDialogOpen, setErrorDialogOpen] = React.useState(false);
@@ -34,6 +35,13 @@ export const ColumnDropDownMenu: React.FC<{
   const handleDelete = () => {
     setOpen(false);
     setDialogOpen(true);
+  };
+
+  const handleEdit = () => {
+    setOpen(false);
+    if (onEdit) {
+      onEdit(task);
+    }
   };
 
   const confirmDelete = async () => {
@@ -62,7 +70,9 @@ export const ColumnDropDownMenu: React.FC<{
             variant="ghost"
             className="h-8 w-8 p-0 border border-primary-foreground cursor-pointer"
           >
-            <Ellipsis style={{ width: '16px', height: '16px', minWidth: '16px' }} />
+            <Ellipsis
+              style={{ width: "16px", height: "16px", minWidth: "16px" }}
+            />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -75,13 +85,15 @@ export const ColumnDropDownMenu: React.FC<{
               Detalles
             </a>
           </DropdownMenuItem>
-          <DropdownMenuItem className="p-0">
-            <a
-              className="w-full h-full px-2 py-1.5 block"
-              href={`/task/${task.id}/edit`}
-            >
-              Editar
-            </a>
+          <DropdownMenuItem
+            className={onEdit ? "" : "p-0"}
+            onSelect={onEdit ? handleEdit : undefined}
+          >
+            {onEdit ? (
+              "Editar"
+            ) : (
+              <a className="w-full h-full px-2 py-1.5 block">Editar</a>
+            )}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={handleDelete} className="text-red-600">

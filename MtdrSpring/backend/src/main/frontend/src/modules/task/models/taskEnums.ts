@@ -36,40 +36,71 @@ export const priorityLabels: Record<TaskPriority, string> = {
  * Human-readable labels for Estimation
  */
 export const estimationLabels: Record<TaskEstimation, string> = {
-  [TaskEstimation.XS]: "XS - Muy Simple",
-  [TaskEstimation.S]: "S - Simple",
+  [TaskEstimation.XS]: "XS - Extra Chico",
+  [TaskEstimation.S]: "S - Chico",
   [TaskEstimation.M]: "M - Mediano",
-  [TaskEstimation.L]: "L - Complejo",
-  [TaskEstimation.XL]: "XL - Muy Complejo",
-  [TaskEstimation.XXL]: "XXL - Extremadamente Complejo",
+  [TaskEstimation.L]: "L - Grande",
+  [TaskEstimation.XL]: "XL - Extra Grande",
+  [TaskEstimation.XXL]: "XXL - Extra Extra Grande",
 };
 
 /**
  * Color configuration for Priority badges
+ * Uses theme-aware CSS variables for light/dark mode support
  */
 export const priorityColors: Record<
   TaskPriority,
-  { bg: string; text: string; border: string }
+  { bg: string; text: string }
 > = {
   [TaskPriority.URGENT]: {
-    bg: "bg-red-500",
-    text: "text-white",
-    border: "border-red-600",
+    bg: "bg-error-bg",
+    text: "text-error-dark",
   },
   [TaskPriority.HIGH]: {
-    bg: "bg-orange-500",
-    text: "text-white",
-    border: "border-orange-600",
+    bg: "bg-warning-bg",
+    text: "text-warning-dark",
   },
   [TaskPriority.MODERATE]: {
-    bg: "bg-yellow-500",
-    text: "text-gray-900",
-    border: "border-yellow-600",
+    bg: "bg-info-bg",
+    text: "text-info-dark",
   },
   [TaskPriority.LOW]: {
-    bg: "bg-green-500",
-    text: "text-white",
-    border: "border-green-600",
+    bg: "bg-success-bg",
+    text: "text-success-dark",
+  },
+};
+
+/**
+ * Color configuration for Estimation badges
+ * Uses theme-aware CSS variables for light/dark mode support
+ */
+export const estimationColors: Record<
+  TaskEstimation,
+  { bg: string; text: string }
+> = {
+  [TaskEstimation.XXL]: {
+    bg: "bg-error-bg",
+    text: "text-error-dark",
+  },
+  [TaskEstimation.XL]: {
+    bg: "bg-warning-bg",
+    text: "text-warning-dark",
+  },
+  [TaskEstimation.L]: {
+    bg: "bg-info-bg",
+    text: "text-info-dark",
+  },
+  [TaskEstimation.M]: {
+    bg: "bg-success-bg",
+    text: "text-success-dark",
+  },
+  [TaskEstimation.S]: {
+    bg: "bg-primary-main",
+    text: "text-primary-contrast",
+  },
+  [TaskEstimation.XS]: {
+    bg: "bg-secondary-main",
+    text: "text-secondary-contrast",
   },
 };
 

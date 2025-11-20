@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, FileText, Package, Settings, Users, Menu, X, Kanban, Pickaxe } from "lucide-react";
+import { BarChart3, FileText, Package, Settings, Users, Menu, X, Kanban, Pickaxe, TrendingUp } from "lucide-react";
 
 type SidebarProps = {
   activeTab: string;
@@ -9,6 +9,7 @@ type SidebarProps = {
 
 const navItems = [
   { id: "dashboard", icon: BarChart3, label: "Dashboard", path: "/dashboard" },
+  { id: "kpi-reports", icon: TrendingUp, label: "KPI Reports", path: "/kpi-reports" },
   { id: "tasks", icon: FileText, label: "Tareas", path: "/tareas" },
   { id: "kanban", icon: Kanban, label: "Kanban", path: "/kanban" },
   { id: "teams", icon: Pickaxe, label: "Equipos", path: "/equipos" },

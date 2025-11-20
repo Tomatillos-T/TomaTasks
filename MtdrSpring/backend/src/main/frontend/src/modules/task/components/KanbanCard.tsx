@@ -6,6 +6,7 @@ import {
   priorityLabels,
   priorityColors,
   estimationLabels,
+  estimationColors,
 } from "@/modules/task/models/taskEnums";
 
 interface KanbanCardProps {
@@ -34,7 +35,7 @@ const KanbanCard = memo(function KanbanCard({ task, onDragStart }: KanbanCardPro
         </h4>
         {task.priority && (
           <span
-            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium whitespace-nowrap ${priorityColors[task.priority].bg} ${priorityColors[task.priority].text}`}
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap ${priorityColors[task.priority].bg} ${priorityColors[task.priority].text}`}
           >
             {priorityLabels[task.priority]}
           </span>
@@ -48,19 +49,12 @@ const KanbanCard = memo(function KanbanCard({ task, onDragStart }: KanbanCardPro
         </p>
       )}
 
-      {/* Tags: User Story + Complexity */}
-      {(task.userStory?.name || task.complexityEstimation) && (
+      {/* Tags: Complexity */}
+      {task.estimation && (
         <div className="mb-3 flex flex-wrap gap-2">
-          {task.userStory?.name && (
-            <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-primary-main/10 text-primary-main">
-              {task.userStory.name}
-            </span>
-          )}
-          {task.complexityEstimation && (
-            <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-              {estimationLabels[task.complexityEstimation]}
-            </span>
-          )}
+          <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${estimationColors[task.estimation].bg} ${estimationColors[task.estimation].text}`}>
+            {estimationLabels[task.estimation]}
+          </span>
         </div>
       )}
 
@@ -80,18 +74,18 @@ const KanbanCard = memo(function KanbanCard({ task, onDragStart }: KanbanCardPro
           {task.timeTaken !== null && task.timeTaken !== undefined ? (
             <span
               className={
-                task.timeTaken > task.estimation
+                task.timeTaken > task.timeEstimate
                   ? "text-red-600 font-semibold flex items-center gap-0.5"
                   : ""
               }
             >
-              {task.timeTaken}/{task.estimation}h
-              {task.timeTaken > task.estimation && (
+              {task.timeTaken}/{task.timeEstimate}h
+              {task.timeTaken > task.timeEstimate && (
                 <AlertCircle className="w-3 h-3" />
               )}
             </span>
           ) : (
-            <span>{task.estimation}h</span>
+            <span>{task.timeEstimate}h</span>
           )}
         </div>
       </div>

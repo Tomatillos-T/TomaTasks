@@ -1,12 +1,49 @@
-import { Outlet } from "react-router-dom";
-import { useState } from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import Chatbot from "@/components/Chatbot";
 
+// Map paths to sidebar tab IDs
+const pathToTabMap: Record<string, string> = {
+  "/dashboard": "dashboard",
+  "/kpi-reports": "kpi-reports",
+  "/tareas": "tasks",
+  "/kanban": "kanban",
+  "/equipos": "teams",
+  "/proyectos": "projects",
+  "/usuarios": "users",
+  "/configuracion": "settings",
+};
+
 export default function Layout() {
   const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const location = useLocation();
+
+  // Determine active tab based on current pathname
+  const getActiveTabFromPath = (pathname: string): string => {
+    // Check for exact match first
+    if (pathToTabMap[pathname]) {
+      return pathToTabMap[pathname];
+    }
+
+    // Check if pathname starts with any of the mapped paths (for nested routes like /equipos/:id)
+    for (const [path, tabId] of Object.entries(pathToTabMap)) {
+      if (pathname.startsWith(path)) {
+        return tabId;
+      }
+    }
+
+    // Default to dashboard
+    return "dashboard";
+  };
+
+  const [activeTab, setActiveTab] = useState(getActiveTabFromPath(location.pathname));
+
+  // Update active tab when location changes
+  useEffect(() => {
+    setActiveTab(getActiveTabFromPath(location.pathname));
+  }, [location.pathname]);
 
   return (
     <div className="h-screen flex flex-col bg-background-main overflow-hidden">

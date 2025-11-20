@@ -10,7 +10,6 @@ export interface CreateTaskParams {
   estimation?: string;
   assigneeId?: string;
   sprintId?: string;
-  userStoryId?: string;
 }
 
 export default async function createTaskAdapter(
@@ -32,7 +31,6 @@ export default async function createTaskAdapter(
         estimation: params.estimation,
         assigneeId: params.assigneeId,
         sprintId: params.sprintId,
-        userStoryId: params.userStoryId,
       }),
     });
 
