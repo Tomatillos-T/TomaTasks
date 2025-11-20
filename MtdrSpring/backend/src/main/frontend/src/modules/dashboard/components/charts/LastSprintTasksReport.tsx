@@ -23,7 +23,9 @@ const LastSprintTasksReport: React.FC = () => {
           Error Loading Report
         </h3>
         <p className="text-text-secondary text-sm">
-          {error instanceof Error ? error.message : "Failed to load report data"}
+          {error instanceof Error
+            ? error.message
+            : "Failed to load report data"}
         </p>
       </div>
     );
@@ -74,20 +76,25 @@ const LastSprintTasksReport: React.FC = () => {
           <tbody>
             {data.map((task, index) => {
               const variance =
-                task.estimatedHours && task.actualHours
+                (task.estimatedHours && task.actualHours) ||
+                (task.actualHours === 0 && task.estimatedHours)
                   ? task.actualHours - task.estimatedHours
                   : null;
 
               const variancePercentage =
-                task.estimatedHours && task.actualHours && task.estimatedHours > 0
-                  ? ((variance! / task.estimatedHours) * 100).toFixed(0)
+                ((task.estimatedHours && task.actualHours) ||
+                  (task.actualHours === 0 && task.estimatedHours)) &&
+                task.estimatedHours > 0
+                  ? (variance! / task.estimatedHours) * 100
                   : null;
 
               return (
                 <tr
                   key={task.taskId}
                   className={`border-b border-background-contrast hover:bg-background-default transition-colors ${
-                    index % 2 === 0 ? "bg-background-paper" : "bg-background-default"
+                    index % 2 === 0
+                      ? "bg-background-paper"
+                      : "bg-background-default"
                   }`}
                 >
                   <td className="py-3 px-4">
@@ -114,15 +121,15 @@ const LastSprintTasksReport: React.FC = () => {
                     {variance !== null && variancePercentage !== null ? (
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          Math.abs(Number(variancePercentage)) <= 10
+                          variancePercentage <= 5
                             ? "bg-success-bg text-success-dark"
-                            : Math.abs(Number(variancePercentage)) <= 25
+                            : variancePercentage <= 25
                             ? "bg-warning-bg text-warning-dark"
                             : "bg-error-bg text-error-dark"
                         }`}
                       >
                         {variance > 0 ? "+" : ""}
-                        {variance}h ({variancePercentage}%)
+                        {variance}h ({variancePercentage.toFixed(1)}%)
                       </span>
                     ) : (
                       <span className="text-text-secondary text-sm">N/A</span>
