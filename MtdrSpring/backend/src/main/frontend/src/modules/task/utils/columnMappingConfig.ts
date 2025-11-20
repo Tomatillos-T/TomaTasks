@@ -8,7 +8,11 @@
  * Maps frontend Task model property names to backend DTO property names
  */
 export const COLUMN_MAPPING: Record<string, string> = {
-  estimation: "timeEstimate",
+  // Time and complexity estimations
+  timeEstimate: "timeEstimate", // Frontend: hours (number) -> Backend: hours (Integer)
+  estimation: "estimation", // Frontend: complexity (TaskEstimation) -> Backend: complexity (Estimation)
+  timeTaken: "timeTaken", // Actual time taken
+  priority: "priority", // Task priority
   assignee: "assigneeId",
   "assignee.name": "user.lastName", // Sort/filter by last name (more common convention)
   "assignee.id": "user.id",
@@ -20,11 +24,6 @@ export const COLUMN_MAPPING: Record<string, string> = {
   "sprint.id": "sprint.id",
   sprint_name: "sprint.description",
   sprint_id: "sprint.id",
-  userStory: "userStoryId",
-  "userStory.name": "userStory.name", // For filtering/sorting by user story name
-  "userStory.id": "userStory.id",
-  userStory_name: "userStory.name",
-  userStory_id: "userStory.id",
   // Other properties remain the same
   id: "id",
   name: "name",

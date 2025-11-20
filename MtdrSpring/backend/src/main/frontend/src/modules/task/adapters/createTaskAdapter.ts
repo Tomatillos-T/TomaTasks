@@ -6,9 +6,10 @@ export interface CreateTaskParams {
   name: string;
   description?: string;
   timeEstimate?: number;
+  priority?: string;
+  estimation?: string;
   assigneeId?: string;
   sprintId?: string;
-  userStoryId?: string;
 }
 
 export default async function createTaskAdapter(
@@ -26,9 +27,10 @@ export default async function createTaskAdapter(
         description: params.description || "",
         timeEstimate: params.timeEstimate || 0,
         status: "TODO",
+        priority: params.priority,
+        estimation: params.estimation,
         assigneeId: params.assigneeId,
         sprintId: params.sprintId,
-        userStoryId: params.userStoryId,
       }),
     });
 

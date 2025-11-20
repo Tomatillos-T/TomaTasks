@@ -4,13 +4,32 @@ import { columns } from "@/modules/task/components/Columns";
 import { DataTableAdvanced } from "@/components/DataTable/DataTableAdvanced";
 import type { FilterData } from "@/components/DataTable/types";
 import { TaskStatus } from "@/modules/task/models/taskStatus";
+import {
+  TaskPriority,
+  TaskEstimation,
+  priorityLabels,
+  estimationLabels,
+} from "@/modules/task/models/taskEnums";
 import Button from "@/components/Button";
 import { Plus } from "lucide-react";
 import CreateTaskModal from "@/modules/task/components/CreateTaskModal";
+import type Task from "@/modules/task/models/task";
 
 export default function Tasks() {
-  const { status, table, searchInput, setSearchInput, isRefetching } = useTasks();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditingTask(null);
+  };
+
+  const { status, table, searchInput, setSearchInput, isRefetching } = useTasks({
+    onEdit: handleEditTask,
+  });
 
   const filters: FilterData[] = useMemo(
     () => [
@@ -20,6 +39,22 @@ export default function Tasks() {
         data: Object.values(TaskStatus).map((status) => ({
           label: status,
           value: status,
+        })),
+      },
+      {
+        column: "priority",
+        title: "Prioridad",
+        data: Object.values(TaskPriority).map((priority) => ({
+          label: priorityLabels[priority],
+          value: priority,
+        })),
+      },
+      {
+        column: "estimation",
+        title: "Complejidad",
+        data: Object.values(TaskEstimation).map((estimation) => ({
+          label: estimationLabels[estimation],
+          value: estimation,
         })),
       },
     ],
@@ -52,6 +87,11 @@ export default function Tasks() {
       <CreateTaskModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
+      />
+      <CreateTaskModal
+        isOpen={!!editingTask}
+        onClose={handleCloseEditModal}
+        task={editingTask}
       />
     </div>
   );

@@ -1,15 +1,18 @@
 import { TaskStatus } from "@/modules/task/models/taskStatus";
+import { TaskPriority, TaskEstimation } from "@/modules/task/models/taskEnums";
 
 export default interface Task {
   id: string;
   name: string;
   description: string;
-  estimation: number;
+  timeEstimate: number;
   status: TaskStatus;
-  userStory: {
-    id: string | null;
-    name: string | null;
-  };
+
+  // New fields added
+  timeTaken?: number | null;
+  priority?: TaskPriority | null;
+  estimation?: TaskEstimation | null;
+
   sprint: {
     id: string | null;
     name: string | null;

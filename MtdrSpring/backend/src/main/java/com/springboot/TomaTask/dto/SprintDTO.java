@@ -13,7 +13,6 @@ public class SprintDTO {
     private LocalDate deliveryDate;
     private String projectId;
     private Set<TaskDTO> tasks;
-    private Set<UserStoryDTO> userStories;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -49,9 +48,6 @@ public class SprintDTO {
 
     public Set<TaskDTO> getTasks() { return tasks; }
     public void setTasks(Set<TaskDTO> tasks) { this.tasks = tasks; }
-
-    public Set<UserStoryDTO> getUserStories() { return userStories; }
-    public void setUserStories(Set<UserStoryDTO> userStories) { this.userStories = userStories; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

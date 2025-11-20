@@ -5,11 +5,9 @@ import com.springboot.TomaTask.mapper.TaskMapper;
 import com.springboot.TomaTask.model.Sprint;
 import com.springboot.TomaTask.model.Task;
 import com.springboot.TomaTask.model.User;
-import com.springboot.TomaTask.model.UserStory;
 import com.springboot.TomaTask.repository.SprintRepository;
 import com.springboot.TomaTask.repository.TaskRepository;
 import com.springboot.TomaTask.repository.UserRepository;
-import com.springboot.TomaTask.repository.UserStoryRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,16 +28,13 @@ import java.util.List;
 @Service
 public class TaskService {
     private final TaskRepository taskRepository;
-    private final UserStoryRepository userStoryRepository;
     private final UserRepository userRepository;
     private final SprintRepository sprintRepository;
 
     public TaskService(TaskRepository taskRepository,
-            UserStoryRepository userStoryRepository,
             SprintRepository sprintRepository,
             UserRepository userRepository) {
         this.taskRepository = taskRepository;
-        this.userStoryRepository = userStoryRepository;
         this.userRepository = userRepository;
         this.sprintRepository = sprintRepository;
     }
@@ -65,7 +60,6 @@ public class TaskService {
         if (request.getSearch() != null && !request.getSearch().isEmpty()) {
             String keyword = request.getSearch().toLowerCase();
             spec = spec.and((root, query, cb) -> {
-                Join<Task, UserStory> userStoryJoin = root.join("userStory", JoinType.LEFT);
                 Join<Task, Sprint> sprintJoin = root.join("sprint", JoinType.LEFT);
                 Join<Task, User> userJoin = root.join("user", JoinType.LEFT);
 
@@ -73,8 +67,8 @@ public class TaskService {
                         cb.like(cb.lower(root.get("name")), "%" + keyword + "%"),
                         cb.like(cb.lower(root.get("description")), "%" + keyword + "%"),
                         cb.equal(cb.lower(root.get("status")), keyword),
-                        cb.like(cb.lower(userStoryJoin.get("name")), "%" + keyword + "%"),
-                        cb.like(cb.lower(userStoryJoin.get("description")), "%" + keyword + "%"),
+                        cb.equal(cb.lower(root.get("priority")), keyword),
+                        cb.equal(cb.lower(root.get("estimation")), keyword),
                         cb.like(cb.lower(userJoin.get("email")), "%" + keyword + "%"),
                         cb.like(cb
                                 .lower(cb.concat(cb.concat(userJoin.get("firstName"), " "), userJoin.get("lastName"))),
@@ -96,9 +90,6 @@ public class TaskService {
                     List<String> filterValues = filter.getValue();
 
                     switch (value[0]) {
-                        case "userStory":
-                            Join<Task, UserStory> userStoryJoin = root.join("userStory", JoinType.LEFT);
-                            return userStoryJoin.get(value[1]).in(filterValues);
                         case "sprint":
                             Join<Task, Sprint> sprintJoin = root.join("sprint", JoinType.LEFT);
                             return sprintJoin.get(value[1]).in(filterValues);
@@ -127,10 +118,6 @@ public class TaskService {
         return sort;
     }
 
-    public List<Task> findByUserStoryId(String userStoryId) {
-        return taskRepository.findByUserStoryId(userStoryId);
-    }
-
     public TaskDTO getTaskById(String id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found with ID: " + id));
@@ -139,14 +126,6 @@ public class TaskService {
 
     public TaskDTO createTask(TaskDTO taskDTO) {
         Task task = TaskMapper.toEntity(taskDTO);
-
-        // Set UserStory
-        if (taskDTO.getUserStoryId() != null) {
-            UserStory userStory = userStoryRepository.findById(taskDTO.getUserStoryId())
-                    .orElseThrow(
-                            () -> new RuntimeException("UserStory not found with ID: " + taskDTO.getUserStoryId()));
-            task.setUserStory(userStory);
-        }
 
         // Set Sprint
         if (taskDTO.getSprintId() != null) {
@@ -174,17 +153,12 @@ public class TaskService {
         task.setDescription(taskDTO.getDescription());
         task.setTimeEstimate(taskDTO.getTimeEstimate());
         task.setStatus(taskDTO.getStatus());
+        task.setTimeTaken(taskDTO.getTimeTaken());
+        task.setPriority(taskDTO.getPriority());
+        task.setEstimation(taskDTO.getEstimation());
         task.setStartDate(taskDTO.getStartDate());
         task.setEndDate(taskDTO.getEndDate());
         task.setDeliveryDate(taskDTO.getDeliveryDate());
-
-        // Update UserStory
-        if (taskDTO.getUserStoryId() != null) {
-            UserStory userStory = userStoryRepository.findById(taskDTO.getUserStoryId())
-                    .orElseThrow(
-                            () -> new RuntimeException("UserStory not found with ID: " + taskDTO.getUserStoryId()));
-            task.setUserStory(userStory);
-        }
 
         // Update Sprint
         if (taskDTO.getSprintId() != null) {
@@ -212,10 +186,6 @@ public class TaskService {
 
     public List<TaskDTO> getTasksBySprintId(String sprintId) {
         return TaskMapper.toDTOList(taskRepository.findBySprintId(sprintId));
-    }
-
-    public List<TaskDTO> getTasksByUserStoryId(String userStoryId) {
-        return TaskMapper.toDTOList(taskRepository.findByUserStoryId(userStoryId));
     }
 
     public List<TaskDTO> getTasksByAssigneeId(String assigneeId) {

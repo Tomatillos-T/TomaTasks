@@ -251,9 +251,9 @@ export default function User() {
           </div>
         </div>
 
-        {submitStatus.type && (
-          <Alert type={submitStatus.type} message={submitStatus.message} />
-        )}
+            {submitStatus.type && (
+              <Alert type={submitStatus.type} message={submitStatus.message} />
+            )}
 
         <div className="grid grid-cols-1 gap-6">
           <Input
@@ -311,28 +311,28 @@ export default function User() {
           />
         </div>
 
-        <div className="space-y-2">
-          <Input
-            label="Telegram Token"
-            name="telegramToken"
-            value={telegramToken || "No se ha generado un token"}
-            disabled
-          />
-          <Button
-            type="button"
-            variant="primary"
-            onClick={handleGenerateTelegramToken}
-            disabled={isSubmitting}
-          >
-            Generar Token para Telegram
-          </Button>
-          {telegramToken && (
-            <p className="text-sm text-text-secondary">
-              Copia este token y envíalo al bot de Telegram para vincular tu
-              cuenta.
-            </p>
-          )}
-        </div>
+            <div className="space-y-2">
+              <Input
+                label="Telegram Token"
+                name="telegramToken"
+                value={telegramToken || "No se ha generado un token"}
+                disabled
+              />
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleGenerateTelegramToken}
+                disabled={isSubmitting}
+              >
+                Generar Token para Telegram
+              </Button>
+              {telegramToken && (
+                <p className="text-sm text-text-secondary">
+                  Copia este token y envíalo al bot de Telegram para vincular tu
+                  cuenta.
+                </p>
+              )}
+            </div>
 
         <div className="space-y-2 border-t pt-4">
           <h3 className="text-lg font-semibold text-text-primary">
@@ -401,7 +401,7 @@ export default function User() {
             </Button>
           )}
         </div>
-      </div>
+      </section>
 
       <Modal
         isOpen={isDeleteModalOpen}
@@ -430,6 +430,6 @@ export default function User() {
           undone.
         </p>
       </Modal>
-    </section>
+    </>
   );
 }

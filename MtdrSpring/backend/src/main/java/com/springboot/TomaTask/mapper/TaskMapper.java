@@ -26,6 +26,9 @@ public class TaskMapper {
         dto.setDescription(task.getDescription());
         dto.setTimeEstimate(task.getTimeEstimate());
         dto.setStatus(task.getStatus());
+        dto.setTimeTaken(task.getTimeTaken());
+        dto.setPriority(task.getPriority());
+        dto.setEstimation(task.getEstimation());
         dto.setStartDate(task.getStartDate());
         dto.setEndDate(task.getEndDate());
         dto.setDeliveryDate(task.getDeliveryDate());
@@ -33,11 +36,6 @@ public class TaskMapper {
         dto.setUpdatedAt(task.getUpdatedAt());
 
         // Set IDs for relationships
-        if (task.getUserStory() != null) {
-            dto.setUserStoryId(task.getUserStory().getId());
-            dto.setUserStoryName(task.getUserStory().getName());
-        }
-
         if (task.getSprint() != null) {
             dto.setSprintId(task.getSprint().getId());
             dto.setSprintName(task.getSprint().getDescription());
@@ -57,10 +55,6 @@ public class TaskMapper {
             if (task.getSprint() != null) {
                 dto.setSprint(SprintMapper.toDTOBasic(task.getSprint()));
             }
-
-            if (task.getUserStory() != null) {
-                dto.setUserStory(UserStoryMapper.toDTO(task.getUserStory()));
-            }
         }
 
         return dto;
@@ -76,6 +70,9 @@ public class TaskMapper {
         task.setDescription(dto.getDescription());
         task.setTimeEstimate(dto.getTimeEstimate());
         task.setStatus(dto.getStatus());
+        task.setTimeTaken(dto.getTimeTaken());
+        task.setPriority(dto.getPriority());
+        task.setEstimation(dto.getEstimation());
         task.setStartDate(dto.getStartDate());
         task.setEndDate(dto.getEndDate());
         task.setDeliveryDate(dto.getDeliveryDate());

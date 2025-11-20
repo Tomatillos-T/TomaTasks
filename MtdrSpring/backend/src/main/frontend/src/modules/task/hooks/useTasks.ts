@@ -16,6 +16,10 @@ import { ResponseStatus } from "@/models/responseStatus";
 import getTasksAdapter from "@/modules/task/adapters/getTasksAdapter";
 import deleteTaskAdapter from "@/modules/task/adapters/deleteTaskAdapter";
 
+interface useTasksParams {
+  onEdit?: (task: Task) => void;
+}
+
 interface useTasksResult {
   status: ResponseStatus;
   data: Task[];
@@ -28,7 +32,7 @@ interface useTasksResult {
   isRefetching: boolean;
 }
 
-export default function useTasks(): useTasksResult {
+export default function useTasks(params?: useTasksParams): useTasksResult {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<ResponseStatus>(ResponseStatus.PENDING);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -195,6 +199,7 @@ export default function useTasks(): useTasksResult {
     getCoreRowModel: getCoreRowModel(),
     meta: {
       removeRow: handleDelete,
+      onEdit: params?.onEdit,
     },
   });
 

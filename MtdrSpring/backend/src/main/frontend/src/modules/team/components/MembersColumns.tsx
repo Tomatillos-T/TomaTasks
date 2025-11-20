@@ -4,6 +4,7 @@ import Badge from "@/components/Badge";
 import { MoreHorizontal } from "lucide-react";
 import  Button  from "@/components/Button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/DropdownMenu";
+import { isAdminRole } from "@/utils/roleMapper";
 
 export const columns: ColumnDef<TeamMember>[] = [
   {
@@ -37,8 +38,8 @@ export const columns: ColumnDef<TeamMember>[] = [
     cell: ({ row }) => {
       const role = row.getValue("role") as string;
       return (
-        <Badge variant={role === "ROLE_ADMIN" ? "error" : "secondary"}>
-          {role === "ROLE_ADMIN" ? "Admin" : "Developer"}
+        <Badge variant={isAdminRole(role) ? "error" : "secondary"}>
+          {role}
         </Badge>
       );
     },

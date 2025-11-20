@@ -1,5 +1,6 @@
 import type GeneralResponse from "@/models/generalResponse";
 import type { User, UserRole } from "@/modules/users/models/user";
+import { mapRoleToBackend, mapRoleToFrontend } from "@/utils/roleMapper";
 
 export interface UpdateUserParams {
   id: string;
@@ -18,13 +19,18 @@ export default async function updateUserAdapter(
   try {
     const { id, ...body } = params;
 
+    // Map frontend role to backend format before sending
+    const backendBody = body.role
+      ? { ...body, role: mapRoleToBackend(body.role as string) }
+      : body;
+
     const response = await fetch(`/api/user/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("jwtToken") || ""}`,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(backendBody),
     });
 
     if (!response.ok) {
@@ -33,8 +39,14 @@ export default async function updateUserAdapter(
 
     const user: User = await response.json();
 
+    // Map backend role to frontend format in response
+    const mappedUser = {
+      ...user,
+      role: mapRoleToFrontend(user.role) as any,
+    };
+
     return {
-      data: user,
+      data: mappedUser,
       message: "Usuario actualizado exitosamente",
       status: 200,
     };

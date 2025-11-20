@@ -1,25 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Modal from "@/components/Modal";
 import Input from "@/components/Input";
 import Textarea from "@/components/TextArea";
 import Button from "@/components/Button";
 import Alert from "@/components/Alert";
 import InfiniteSelect from "@/components/InfiniteSelect";
+import Select from "@/components/Select";
 import createTaskAdapter from "@/modules/task/adapters/createTaskAdapter";
+import updateTaskAdapter from "@/modules/task/adapters/updateTaskAdapter";
 import { useQueryClient } from "@tanstack/react-query";
 import useInfiniteUsers from "@/modules/users/hooks/useInfiniteUsers";
 import useInfiniteSprints from "@/modules/sprint/hooks/useInfiniteSprints";
-import useInfiniteUserStories from "@/modules/userStory/hooks/useInfiniteUserStories";
+import type Task from "@/modules/task/models/task";
+import {
+  TaskPriority,
+  TaskEstimation,
+  priorityLabels,
+  estimationLabels,
+} from "@/modules/task/models/taskEnums";
+import { mapStatusToBackend } from "@/modules/task/utils/taskMapper";
 
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
+  task?: Task | null; // Optional task for edit mode
 }
 
 export default function CreateTaskModal({
   isOpen,
   onClose,
+  task = null,
 }: CreateTaskModalProps) {
+  const isEditMode = !!task;
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,9 +41,25 @@ export default function CreateTaskModal({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [timeEstimate, setTimeEstimate] = useState<number>(0);
+  const [timeTaken, setTimeTaken] = useState<number>(0);
+  const [priority, setPriority] = useState<TaskPriority | "">("");
+  const [estimation, setEstimation] = useState<TaskEstimation | "">("");
   const [assigneeId, setAssigneeId] = useState("");
   const [sprintId, setSprintId] = useState("");
-  const [userStoryId, setUserStoryId] = useState("");
+
+  // Populate form when task prop changes (edit mode)
+  useEffect(() => {
+    if (task) {
+      setName(task.name || "");
+      setDescription(task.description || "");
+      setTimeEstimate(task.timeEstimate || 0);
+      setTimeTaken(task.timeTaken || 0);
+      setPriority(task.priority || "");
+      setEstimation(task.estimation || "");
+      setAssigneeId(task.assignee?.id || "");
+      setSprintId(task.sprint?.id || "");
+    }
+  }, [task]);
 
   // Infinite query hooks
   const {
@@ -50,14 +78,6 @@ export default function CreateTaskModal({
     fetchNextPage: fetchNextPageSprints,
   } = useInfiniteSprints();
 
-  const {
-    userStories,
-    isLoading: isLoadingUserStories,
-    isFetchingNextPage: isFetchingNextPageUserStories,
-    hasNextPage: hasNextPageUserStories,
-    fetchNextPage: fetchNextPageUserStories,
-  } = useInfiniteUserStories();
-
   const handleSubmit = async () => {
     if (!name.trim()) {
       setError("El nombre de la tarea es requerido");
@@ -68,14 +88,23 @@ export default function CreateTaskModal({
     setError(null);
     setSuccess(null);
 
-    const result = await createTaskAdapter({
+    const taskData = {
       name,
       description,
       timeEstimate,
+      timeTaken,
+      priority: priority || undefined,
+      estimation: estimation || undefined,
       assigneeId: assigneeId || undefined,
       sprintId: sprintId || undefined,
-      userStoryId: userStoryId || undefined,
-    });
+    };
+
+    const result = isEditMode && task
+      ? await updateTaskAdapter(task.id, {
+          ...taskData,
+          status: mapStatusToBackend(task.status),
+        })
+      : await createTaskAdapter(taskData);
 
     setIsSubmitting(false);
 
@@ -98,9 +127,11 @@ export default function CreateTaskModal({
     setName("");
     setDescription("");
     setTimeEstimate(0);
+    setTimeTaken(0);
+    setPriority("");
+    setEstimation("");
     setAssigneeId("");
     setSprintId("");
-    setUserStoryId("");
     setError(null);
     setSuccess(null);
   };
@@ -114,7 +145,7 @@ export default function CreateTaskModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Crear Nueva Tarea"
+      title={isEditMode ? "Editar Tarea" : "Crear Nueva Tarea"}
       footer={
         <>
           <Button
@@ -130,7 +161,7 @@ export default function CreateTaskModal({
             loading={isSubmitting}
             disabled={isSubmitting || !name.trim()}
           >
-            Crear Tarea
+            {isEditMode ? "Guardar Cambios" : "Crear Tarea"}
           </Button>
         </>
       }
@@ -157,14 +188,53 @@ export default function CreateTaskModal({
           placeholder="Describe la tarea..."
         />
 
-        <Input
-          label="Estimación de tiempo (horas)"
-          type="number"
-          name="timeEstimate"
-          value={timeEstimate}
-          onChange={(e) => setTimeEstimate(Number(e.target.value))}
-          min={0}
-          placeholder="0"
+        <div className={isEditMode ? "grid grid-cols-2 gap-4" : ""}>
+          <Input
+            label="Estimación de tiempo (horas)"
+            type="number"
+            name="timeEstimate"
+            value={timeEstimate}
+            onChange={(e) => setTimeEstimate(Number(e.target.value))}
+            min={0}
+            placeholder="0"
+          />
+          {isEditMode && (
+            <Input
+              label="Tiempo invertido (horas)"
+              type="number"
+              name="timeTaken"
+              value={timeTaken}
+              onChange={(e) => setTimeTaken(Number(e.target.value))}
+              min={0}
+              placeholder="0"
+            />
+          )}
+        </div>
+
+        <Select
+          label="Prioridad"
+          value={priority}
+          onChange={(e) => setPriority(e.target.value as TaskPriority | "")}
+          options={[
+            { value: "", label: "Sin prioridad" },
+            ...Object.values(TaskPriority).map((p) => ({
+              value: p,
+              label: priorityLabels[p],
+            })),
+          ]}
+        />
+
+        <Select
+          label="Complejidad (T-shirt sizing)"
+          value={estimation}
+          onChange={(e) => setEstimation(e.target.value as TaskEstimation | "")}
+          options={[
+            { value: "", label: "Sin estimación de complejidad" },
+            ...Object.values(TaskEstimation).map((e) => ({
+              value: e,
+              label: estimationLabels[e],
+            })),
+          ]}
         />
 
         <InfiniteSelect
@@ -193,20 +263,6 @@ export default function CreateTaskModal({
           fetchNextPage={fetchNextPageSprints}
           isFetchingNextPage={isFetchingNextPageSprints}
           placeholder="Seleccione un sprint"
-        />
-
-        <InfiniteSelect
-          label="Historia de Usuario"
-          value={userStoryId}
-          onChange={setUserStoryId}
-          items={userStories}
-          getItemId={(story) => story.id}
-          getItemLabel={(story) => story.name}
-          isLoading={isLoadingUserStories}
-          hasNextPage={hasNextPageUserStories}
-          fetchNextPage={fetchNextPageUserStories}
-          isFetchingNextPage={isFetchingNextPageUserStories}
-          placeholder="Seleccione una historia de usuario"
         />
       </div>
     </Modal>

@@ -1,7 +1,13 @@
 import React, { memo } from "react";
-import { Clock, User } from "lucide-react";
+import { Clock, User, AlertCircle } from "lucide-react";
 import type Task from "@/modules/task/models/task";
 import { TaskStatus } from "@/modules/task/models/taskStatus";
+import {
+  priorityLabels,
+  priorityColors,
+  estimationLabels,
+  estimationColors,
+} from "@/modules/task/models/taskEnums";
 
 interface KanbanCardProps {
   task: Task;
@@ -22,10 +28,19 @@ const KanbanCard = memo(function KanbanCard({ task, onDragStart }: KanbanCardPro
       onDragStart={(e) => onDragStart(e, task.id, task.status)}
       className="bg-surface border border-border rounded-lg p-4 cursor-move hover:shadow-md transition-all duration-200 group active:opacity-50 active:scale-95"
     >
-      {/* Task Name */}
-      <h4 className="text-sm font-semibold text-text-primary mb-2 line-clamp-2">
-        {task.name}
-      </h4>
+      {/* Header: Task Name + Priority Badge */}
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <h4 className="text-sm font-semibold text-text-primary line-clamp-2 flex-1">
+          {task.name}
+        </h4>
+        {task.priority && (
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap ${priorityColors[task.priority].bg} ${priorityColors[task.priority].text}`}
+          >
+            {priorityLabels[task.priority]}
+          </span>
+        )}
+      </div>
 
       {/* Task Description */}
       {task.description && (
@@ -34,16 +49,16 @@ const KanbanCard = memo(function KanbanCard({ task, onDragStart }: KanbanCardPro
         </p>
       )}
 
-      {/* User Story Tag */}
-      {task.userStory?.name && (
-        <div className="mb-3">
-          <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-primary-main/10 text-primary-main">
-            {task.userStory.name}
+      {/* Tags: Complexity */}
+      {task.estimation && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${estimationColors[task.estimation].bg} ${estimationColors[task.estimation].text}`}>
+            {estimationLabels[task.estimation]}
           </span>
         </div>
       )}
 
-      {/* Footer: Assignee and Estimation */}
+      {/* Footer: Assignee and Time Information */}
       <div className="flex items-center justify-between text-xs text-text-secondary pt-3 border-t border-border">
         {/* Assignee */}
         <div className="flex items-center gap-1">
@@ -53,10 +68,25 @@ const KanbanCard = memo(function KanbanCard({ task, onDragStart }: KanbanCardPro
           </span>
         </div>
 
-        {/* Time Estimation */}
+        {/* Time Information */}
         <div className="flex items-center gap-1">
           <Clock className="w-3 h-3" />
-          <span>{task.estimation}h</span>
+          {task.timeTaken !== null && task.timeTaken !== undefined ? (
+            <span
+              className={
+                task.timeTaken > task.timeEstimate
+                  ? "text-red-600 font-semibold flex items-center gap-0.5"
+                  : ""
+              }
+            >
+              {task.timeTaken}/{task.timeEstimate}h
+              {task.timeTaken > task.timeEstimate && (
+                <AlertCircle className="w-3 h-3" />
+              )}
+            </span>
+          ) : (
+            <span>{task.timeEstimate}h</span>
+          )}
         </div>
       </div>
 

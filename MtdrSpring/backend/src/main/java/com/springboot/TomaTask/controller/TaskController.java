@@ -59,11 +59,6 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTasksBySprintId(sprintId));
     }
 
-    @GetMapping("/user-story/{userStoryId}")
-    public ResponseEntity<List<TaskDTO>> getTasksByUserStoryId(@PathVariable String userStoryId) {
-        return ResponseEntity.ok(taskService.getTasksByUserStoryId(userStoryId));
-    }
-
     @GetMapping("/assignee/{assigneeId}")
     public ResponseEntity<List<TaskDTO>> getTasksByAssigneeId(@PathVariable String assigneeId) {
         return ResponseEntity.ok(taskService.getTasksByAssigneeId(assigneeId));

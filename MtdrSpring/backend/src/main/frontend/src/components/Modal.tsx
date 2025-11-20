@@ -22,10 +22,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-background-paper rounded-2xl shadow-xl w-full max-w-lg mx-4 sm:mx-0 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-background-paper rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-background-contrast">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-background-contrast flex-shrink-0">
           {title && <h3 className="text-lg font-semibold text-text-primary">{title}</h3>}
           <button
             onClick={onClose}
@@ -36,10 +36,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer 
         </div>
 
         {/* Content */}
-        <div className="px-6 py-4">{children}</div>
+        <div className="px-6 py-4 overflow-y-auto flex-1">{children}</div>
 
         {/* Footer */}
-        {footer && <div className="px-6 py-4 border-t border-background-contrast flex justify-end gap-3">{footer}</div>}
+        {footer && <div className="px-6 py-4 border-t border-background-contrast flex justify-end gap-3 flex-shrink-0">{footer}</div>}
       </div>
     </div>
   );

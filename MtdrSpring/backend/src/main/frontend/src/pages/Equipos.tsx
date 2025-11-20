@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/Button";
 import Badge from "@/components/Badge";
@@ -144,8 +144,18 @@ export default function Equipos() {
       </div>
 
       {error && (
-        <div className="bg-error-light border border-error-main text-error-main px-4 py-3 rounded">
-          {error}
+        <div className="bg-error-bg border border-error-main rounded-lg p-8">
+          <div className="flex items-start gap-4">
+            <AlertCircle className="w-8 h-8 text-error-main flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="text-error-main font-semibold text-xl mb-3">
+                Error al cargar equipos
+              </h3>
+              <p className="text-text-secondary">
+                {error}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 

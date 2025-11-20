@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
+import KPIReports from "@/pages/KPIReports";
 import Layout from "@/components/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import RoleBasedRoute from "@/components/RoleBasedRoute";
@@ -11,11 +12,9 @@ import Proyectos from "@/pages/Proyectos";
 import Calendario from "@/pages/Calendario";
 import SprintForm from "@/modules/sprint/components/SprintForm";
 import ProjectForm from "@/modules/projects/components/ProjectForm";
-import UserStoryForm from "@/modules/userStory/components/UserStoryForm";
 import User from "@/pages/User";
 import Users from "@/pages/Users";
 import Tasks from "@/pages/task/Tasks";
-import GenerateDummyTasks from "@/pages/GenerateDummyTasks";
 import RedirectionRoute from "@/components/RedirectionRoute";
 import LoginRoute from "@/components/LoginRoute";
 import Equipo from "@/pages/Equipo";
@@ -39,6 +38,7 @@ export default function AppRouter() {
       >
         {/* Rutas accesibles para todos los usuarios autenticados */}
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/kpi-reports" element={<KPIReports />} />
         <Route path="/tareas" element={<Tasks />} />
         <Route path="/kanban" element={<Kanban />} />
         <Route path="/user" element={<User />} />
@@ -57,22 +57,6 @@ export default function AppRouter() {
           element={
             <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
               <Proyectos />
-            </RoleBasedRoute>
-          }
-        />
-        <Route
-          path="/calendario"
-          element={
-            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
-              <Calendario />
-            </RoleBasedRoute>
-          }
-        />
-        <Route
-          path="/palette"
-          element={
-            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
-              <TomaTaskMockup />
             </RoleBasedRoute>
           }
         />
@@ -100,15 +84,6 @@ export default function AppRouter() {
             </RoleBasedRoute>
           }
         />
-        <Route
-          path="/generate-dummy-tasks"
-          element={
-            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
-              <GenerateDummyTasks />
-            </RoleBasedRoute>
-          }
-        />
-
         <Route
           path="/usuarios"
           element={

@@ -4,6 +4,12 @@ import { TaskStatus } from "@/modules/task/models/taskStatus";
 import Badge, { type BadgeProps } from "@/components/Badge";
 import type { TaskTableMeta } from "@/modules/task/models/taskTableMeta";
 import { ColumnDropDownMenu } from "@/modules/task/components/ColumnDropDown";
+import {
+  priorityLabels,
+  priorityColors,
+  estimationLabels,
+  estimationColors,
+} from "@/modules/task/models/taskEnums";
 
 export const columns: ColumnDef<Task>[] = [
   {
@@ -11,8 +17,61 @@ export const columns: ColumnDef<Task>[] = [
     header: "Tarea",
   },
   {
-    accessorKey: "estimation",
+    accessorKey: "timeEstimate",
     header: "Estimación (hrs)",
+  },
+  {
+    accessorKey: "priority",
+    header: "Prioridad",
+    cell: ({ row }) => {
+      const priority = row.original.priority;
+      if (!priority) return <span className="text-text-secondary">-</span>;
+
+      const colors = priorityColors[priority];
+      return (
+        <span
+          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${colors.bg} ${colors.text}`}
+        >
+          {priorityLabels[priority]}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "estimation",
+    header: "Complejidad",
+    cell: ({ row }) => {
+      const estimation = row.original.estimation;
+      if (!estimation) return <span className="text-text-secondary">-</span>;
+
+      const colors = estimationColors[estimation];
+      return (
+        <span
+          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${colors.bg} ${colors.text}`}
+        >
+          {estimationLabels[estimation]}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "timeTaken",
+    header: "Tiempo Real (hrs)",
+    cell: ({ row }) => {
+      const timeTaken = row.original.timeTaken;
+      const timeEstimate = row.original.timeEstimate;
+
+      if (timeTaken === null || timeTaken === undefined) {
+        return <span className="text-gray-400">-</span>;
+      }
+
+      const isOverBudget = timeEstimate && timeTaken > timeEstimate;
+      return (
+        <span className={isOverBudget ? "text-red-600 font-semibold" : ""}>
+          {timeTaken}
+        </span>
+      );
+    },
   },
   {
     accessorKey: "assignee.name",
@@ -70,7 +129,9 @@ export const columns: ColumnDef<Task>[] = [
       const task = row.original;
       const meta = table.options.meta as TaskTableMeta;
 
-      return <ColumnDropDownMenu task={task} meta={meta} />;
+      return (
+        <ColumnDropDownMenu task={task} meta={meta} onEdit={meta?.onEdit} />
+      );
     },
   },
 ];

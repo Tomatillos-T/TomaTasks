@@ -1,17 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  BarChart3,
-  Calendar,
-  FileText,
-  Package,
-  Settings,
-  Users,
-  Menu,
-  X,
-  Kanban,
-} from "lucide-react";
-import { useUserContext } from "@/contexts/UserContext";
+import { BarChart3, FileText, Package, Settings, Users, Menu, X, Kanban, Pickaxe, TrendingUp } from "lucide-react";
 
 type SidebarProps = {
   activeTab: string;
@@ -28,6 +17,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { id: "dashboard", icon: BarChart3, label: "Dashboard", path: "/dashboard" },
+  { id: "kpi-reports", icon: TrendingUp, label: "KPI Reports", path: "/kpi-reports" },
   { id: "tasks", icon: FileText, label: "Tareas", path: "/tareas" },
   { id: "kanban", icon: Kanban, label: "Kanban", path: "/kanban" },
   {

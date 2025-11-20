@@ -1,5 +1,5 @@
 import React from "react";
-import { Bell, ChevronDown, Moon, Search, Sun } from "lucide-react";
+import { ChevronDown, Moon, Search, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useUserContext } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
@@ -61,11 +61,6 @@ const Navbar: React.FC = () => {
                 }`}
               />
             </div>
-          </button>
-
-          <button className="relative p-2 rounded-lg hover:bg-background-subtle transition-colors">
-            <Bell className="w-5 h-5 text-text-secondary" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-error-main rounded-full"></span>
           </button>
 
           {/* Perfil */}
