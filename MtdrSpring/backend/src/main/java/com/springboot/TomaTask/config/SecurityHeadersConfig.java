@@ -28,13 +28,14 @@ public class SecurityHeadersConfig implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         // Content Security Policy - prevents XSS and data injection attacks
-        // Adjusted for React app with inline scripts and external resources
+        // Strictest policy: removed 'unsafe-inline' and 'unsafe-eval' from script-src, restricted img-src
+        // Only 'unsafe-inline' remains in style-src (required by Tailwind CSS)
         httpResponse.setHeader("Content-Security-Policy",
                 "default-src 'self'; " +
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+                "script-src 'self'; " +
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
                 "font-src 'self' https://fonts.gstatic.com data:; " +
-                "img-src 'self' data: https:; " +
+                "img-src 'self' data: https://avatars.githubusercontent.com https://github.com; " +
                 "connect-src 'self' https://api.github.com; " +
                 "frame-ancestors 'none'; " +
                 "base-uri 'self'; " +
