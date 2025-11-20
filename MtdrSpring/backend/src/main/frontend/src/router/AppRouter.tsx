@@ -5,11 +5,9 @@ import KPIReports from "@/pages/KPIReports";
 import Layout from "@/components/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import RoleBasedRoute from "@/components/RoleBasedRoute";
-import TomaTaskMockup from "@/pages/TomaTaskMockUp";
 import Kanban from "@/pages/Kanban";
 import Equipos from "@/pages/Equipos";
 import Proyectos from "@/pages/Proyectos";
-import Calendario from "@/pages/Calendario";
 import SprintForm from "@/modules/sprint/components/SprintForm";
 import ProjectForm from "@/modules/projects/components/ProjectForm";
 import User from "@/pages/User";
@@ -47,7 +45,7 @@ export default function AppRouter() {
         <Route
           path="/equipos"
           element={
-            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+            <RoleBasedRoute allowedRoles={["Admin"]}>
               <Equipos />
             </RoleBasedRoute>
           }
@@ -55,7 +53,7 @@ export default function AppRouter() {
         <Route
           path="/proyectos"
           element={
-            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+            <RoleBasedRoute allowedRoles={["Admin"]}>
               <Proyectos />
             </RoleBasedRoute>
           }
@@ -63,7 +61,7 @@ export default function AppRouter() {
         <Route
           path="/projectForm"
           element={
-            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+            <RoleBasedRoute allowedRoles={["Admin"]}>
               <ProjectForm />
             </RoleBasedRoute>
           }
@@ -71,23 +69,15 @@ export default function AppRouter() {
         <Route
           path="/sprintForm"
           element={
-            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+            <RoleBasedRoute allowedRoles={["Admin"]}>
               <SprintForm />
-            </RoleBasedRoute>
-          }
-        />
-        <Route
-          path="/userStoryForm"
-          element={
-            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
-              <UserStoryForm />
             </RoleBasedRoute>
           }
         />
         <Route
           path="/usuarios"
           element={
-            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+            <RoleBasedRoute allowedRoles={["Admin"]}>
               <Users />
             </RoleBasedRoute>
           }
@@ -96,7 +86,7 @@ export default function AppRouter() {
         <Route
           path="/equipos/:id"
           element={
-            <RoleBasedRoute allowedRoles={["ROLE_ADMIN"]}>
+            <RoleBasedRoute allowedRoles={["Admin"]}>
               <Equipo />
             </RoleBasedRoute>
           }

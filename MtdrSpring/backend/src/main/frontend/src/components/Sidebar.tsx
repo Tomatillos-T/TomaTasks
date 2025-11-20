@@ -1,6 +1,17 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, FileText, Package, Settings, Users, Menu, X, Kanban, Pickaxe, TrendingUp } from "lucide-react";
+import {
+  BarChart3,
+  FileText,
+  Package,
+  Menu,
+  X,
+  Kanban,
+  Pickaxe,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import { useUserContext } from "@/contexts/UserContext";
 
 type SidebarProps = {
   activeTab: string;
@@ -17,42 +28,34 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { id: "dashboard", icon: BarChart3, label: "Dashboard", path: "/dashboard" },
-  { id: "kpi-reports", icon: TrendingUp, label: "KPI Reports", path: "/kpi-reports" },
+  {
+    id: "kpi-reports",
+    icon: TrendingUp,
+    label: "KPI Reports",
+    path: "/kpi-reports",
+  },
   { id: "tasks", icon: FileText, label: "Tareas", path: "/tareas" },
   { id: "kanban", icon: Kanban, label: "Kanban", path: "/kanban" },
   {
     id: "clients",
-    icon: Users,
+    icon: Pickaxe,
     label: "Equipos",
     path: "/equipos",
-    requiredRoles: ["ROLE_ADMIN"],
+    requiredRoles: ["Admin"],
   },
   {
     id: "inventory",
     icon: Package,
     label: "Proyectos",
     path: "/proyectos",
-    requiredRoles: ["ROLE_ADMIN"],
-  },
-  {
-    id: "calendar",
-    icon: Calendar,
-    label: "Calendario",
-    path: "/calendario",
-    requiredRoles: ["ROLE_ADMIN"],
+    requiredRoles: ["Admin"],
   },
   {
     id: "users",
-    icon: Calendar,
+    icon: Users,
     label: "Usuarios",
     path: "/usuarios",
-    requiredRoles: ["ROLE_ADMIN"],
-  },
-  {
-    id: "settings",
-    icon: Settings,
-    label: "Configuración",
-    path: "/configuracion",
+    requiredRoles: ["Admin"],
   },
 ];
 

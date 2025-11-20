@@ -28,8 +28,6 @@ export default function RoleBasedRoute({
   // Check if user has the required role
   const userRole = user?.role;
 
-  console.log("User role:", user);
-
   if (!userRole || !allowedRoles.includes(userRole)) {
     // User doesn't have permission, redirect to allowed page
     return <Navigate to={redirectTo} replace />;
