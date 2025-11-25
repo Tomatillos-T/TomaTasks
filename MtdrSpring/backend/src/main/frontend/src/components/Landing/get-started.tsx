@@ -4,7 +4,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import React, { useRef, useEffect } from 'react';
-import tomato from "../assets/tomato.svg";
+import tomato from "../../assets/tomato.svg";
 //import test from "../assets/react.svg";
 
 // Interfaz para los props
