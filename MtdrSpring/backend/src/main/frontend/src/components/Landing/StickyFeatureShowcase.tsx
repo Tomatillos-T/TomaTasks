@@ -47,6 +47,18 @@ const StickyFeatureShowcase: React.FC<StickyShowcaseProps> = ({
   const [stickyMode, setStickyMode] =
     useState<"sticky" | "fixed" | "bottom">("sticky");
 
+  // Detect resize ------------------------------------------------
+  useEffect(() => {
+    const onResize = () => {
+      const desktop = window.innerWidth >= breakpoint;
+      setIsDesktop(desktop);
+      if (!desktop) setActiveIndex(0);
+    };
+
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [breakpoint]);
+
   // Detect active feature via IntersectionObserver ---------------
   useEffect(() => {
     if (!isDesktop || !wrapperRef.current || !observerRef.current) return;
@@ -220,7 +232,6 @@ const StickyFeatureShowcase: React.FC<StickyShowcaseProps> = ({
                   muted
                   loop
                   playsInline
-                  className="w-full h-full border-0"
                   src={active.media.desktop.src}
                   aria-label={active.title}
                 /> /**/

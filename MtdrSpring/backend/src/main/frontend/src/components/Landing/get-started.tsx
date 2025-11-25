@@ -4,7 +4,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import React, { useRef, useEffect } from 'react';
-import tomato from "../../assets/tomato.svg";
+import tomato from "../assets/tomato.svg";
 //import test from "../assets/react.svg";
 
 // Interfaz para los props
@@ -233,8 +233,8 @@ const GetStarted = ({
                *   Con [p-4] amplías el área del hover.
                */
         <div className="relative inline-flex items-center justify-center group hover:cursor-pointer">
-            {/* Zona de detección invisible */}
-            <div className="absolute inset-0 -mx-140 -my-60"></div>
+            {/* Zona de detección invisible (No clickeable, pero activa el efecto CTA) */}
+            <div className="poiner-events-none cursor-default absolute inset-0 -mx-140 -my-60"></div>
   
             {/* Botón principal */}
                 <button
