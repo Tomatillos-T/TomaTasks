@@ -5,77 +5,84 @@ import Footer from "../components/Landing/Footer";
 import StickyFeatureShowcase from "../components/Landing/StickyFeatureShowcase";
 import type { StickyShowcaseProps } from "../components/Landing/StickyFeatureShowcase";
 import './Landing.css';
+
+// Demos
+import chatbot from "../assets/demos/chatbot.png";
+import kanban from "../assets/demos/kanban.png";
+import kpi from "../assets/demos/kpi.png";
+import projects from "../assets/demos/projects.png";
+
 // sass
 function Landing() {
   const showcaseData: StickyShowcaseProps = {
-    mainTitle: "Planea Proyectos, Crea Soluciones",
+    mainTitle: "Teamwork solutions for high-performing teams",
     breakpoint: 1024,
     features: [
       {
         id: "feature-1",
-        title: "AI Chat Bot",
-        description: "Utiliza el chatbot de Inteligencia Artificial generativa para escribir elementos, corregir errores y orgnizar tus ideas.",
+        title: "Organiza tus Proyectos",
+        description: "Con nuestra interfaz intuitiva y fácil de usar, pordrás organizar tus proyectos y gestionar cambios de acuerdo a tus necesidades.",
         media: {
           desktop: {
-            type: "video",
-            src: "../Demos/feature1.mp4",
-            alt: "Planning and tracking demonstration"
+            type: "image",
+            src: projects,
+            alt: "Demostración de Vista de Proyectos"
           },
           mobile: {
             type: "image",
-            src: "https://www.buenprovecho.hn/wp-content/uploads/2020/09/tomate-1024x680-1.jpg",
-            alt: "AI Chat Bot"
+            src: projects,
+            alt: "Organiza tus Proyectos"
           }
         },
       },
       {
         id: "feature-2",
-        title: "Kanban Board",
-        description: "Descripción larga de la feature.",
+        title: "Reportes de KPIs (Key Performance Indicators)",
+        description: "Gráficas que muestran el progreso del equpo de manera ordenada. Actúa a tiempo, revisa las métricas y conecta con tu equipo de desarrollo asegurando un ambiente sano y altamente productivo.",
         media: {
           desktop: {
-            type: "video",
-            src: "../Demos/feature2.mp4",
-            alt: "Kanban Board"
+            type: "image",
+            src: kpi,
+            alt: "KPI reports demonstration"
           },
           mobile: {
             type: "image",
-            src: "https://misremedios.com/wp-content/uploads/2016/03/tomate-rodajas-cortado-700x466.jpg",
-            alt: "Kanban Board"
+            src: kpi,
+            alt: "KPI Reports"
           }
         },
       },
       {
         id: "feature-3",
-        title: "KPIs",
-        description: "Descripción larga de la Feature.",
+        title: "Tablero Kanban",
+        description: "Utiliza el tablero Kanban para organizar la manera en que trabaja tu equipo de manera interactiva. Revisa la disponibilidad de los demás y visualiza los flujos de trabajo y la carga laboral.",
         media: {
           desktop: {
-            type: "video",
-            src: "../Demos/feature2.mp4",
-            alt: "KPIs"
+            type: "image",
+            src: kanban,
+            alt: "Kanban board demonstration"
           },
           mobile: {
             type: "image",
-            src: "https://misremedios.com/wp-content/uploads/2016/02/Tomates2-700x465.jpg",
-            alt: "Planning feature"
+            src: kanban,
+            alt: "Kanban Board"
           }
         },
       },
       {
         id: "feature-4",
-        title: "Feature 4",
-        description: "Connect and consolidate scattered docs and disconnected teammates in one, central source of truth. Connect and consolidate scattered docs and disconnected teammates in one, central source of truth.",
+        title: "Impulsa tus ideas con la IA",
+        description: "Nuestro capaz asistente de Inteligencia Artificial puede ayudarte con la solución de tareas de tu proyecto dando erspuestas con base al repositorio de GitHub.",
         media: {
           desktop: {
-            type: "video",
-            src: "../Demos/feature4.mp4",
-            alt: "Feature 4"
+            type: "image", // "image" | "video"
+            src: chatbot,
+            alt: "AI assistance"
           },
           mobile: {
             type: "image",
-            src: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmedia.ooreka.fr%2Fpublic%2Fimage%2Fplant%2F265%2FmainImage-source-10006168.jpg&f=1&nofb=1&ipt=ebafd0ffc6308bd796422b7e371b1c77237121c03424dbdb081b4e4bbf8ac667",
-            alt: "Knowledge scaling"
+            src: chatbot,
+            alt: "AI Assistant"
           }
         },
         colors: {
@@ -83,9 +90,9 @@ function Landing() {
           accent: "#585858ff"
         }
       }
-      // Puedes añadir más features aquí
     ]
   };
+
   return (
     <div className="min-h-screen flex flex-col bg-black overflow-hidden">
       {/* Adornos */}
@@ -255,7 +262,7 @@ function Landing() {
             <div className="mt-10 px-0 py-0 flex items-center justify-center gap-x-6">
               <GetStarted 
                 texto="Empezar ahora"
-                destino="/Login"
+                destino="/login"
                 tamaño="lg"
                 variante="particles"
                 mostrarAura={true}

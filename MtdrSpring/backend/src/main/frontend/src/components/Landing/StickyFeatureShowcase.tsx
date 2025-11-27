@@ -239,7 +239,7 @@ const StickyFeatureShowcase: React.FC<StickyShowcaseProps> = ({
                 <img
                   src={active.media.desktop.src}
                   alt={active.media.desktop.alt}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-fill"
                 />
               )}
             </div>
@@ -267,7 +267,7 @@ const StickyFeatureShowcase: React.FC<StickyShowcaseProps> = ({
             <img
               src={f.media.mobile.src}
               alt={f.media.mobile.alt}
-              className="w-full rounded-lg object-cover"
+              className="w-full rounded-lg object-fill"
             />
           </div>
         ))}
