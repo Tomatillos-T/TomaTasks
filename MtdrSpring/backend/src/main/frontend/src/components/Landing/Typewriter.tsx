@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 interface TypewriterProps {
     texts: string[];
     typingSpeed?: number;   // Milisegundos entre letras al escribir
-    deletingSpeed?: number; // Milisegundos entre etras al borrar
+    deletingSpeed?: number; // Milisegundos entre letras al borrar
     pauseTime?: number;     // Milisegundoss antes de borrar
     className?: string;     // Estilos adicionales (Tailwind)
     cursorClassName?: string; // Estilos del cursor
