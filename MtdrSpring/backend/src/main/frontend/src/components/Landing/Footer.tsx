@@ -34,7 +34,7 @@ const Footer: React.FC<FooterProps> = () => {
         {/* Logo */}
         <div className="flex justify-center py-10 md:py-9">
           <img
-            src="assets/tomato.svg"
+            src="../../assets/tomato.svg"
             alt="TomaTask"
             className="w-2/5 md:w-1/4 lg:w-[18%] xl:w-[15%] max-w-[200px]"
           />
