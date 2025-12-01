@@ -72,7 +72,7 @@ function Landing() {
       {
         id: "feature-4",
         title: "Impulsa tus ideas con la IA",
-        description: "Nuestro capaz asistente de Inteligencia Artificial puede ayudarte con la solución de tareas de tu proyecto dando erspuestas con base al repositorio de GitHub.",
+        description: "Nuestro capaz asistente de Inteligencia Artificial puede ayudarte con la solución de tareas de tu proyecto dando respuestas con base al repositorio de GitHub.",
         media: {
           desktop: {
             type: "image", // "image" | "video"
