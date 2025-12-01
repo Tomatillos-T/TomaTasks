@@ -38,7 +38,7 @@ function Landing() {
       {
         id: "feature-2",
         title: "Reportes de KPIs (Key Performance Indicators)",
-        description: "Gráficas que muestran el progreso del equpo de manera ordenada. Actúa a tiempo, revisa las métricas y conecta con tu equipo de desarrollo asegurando un ambiente sano y altamente productivo.",
+        description: "Gráficas que muestran el progreso del equipo de manera ordenada. Actúa a tiempo, revisa las métricas y conecta con tu equipo de desarrollo asegurando un ambiente sano y altamente productivo.",
         media: {
           desktop: {
             type: "image",
