@@ -234,7 +234,7 @@ const GetStarted = ({
                */
         <div className="relative inline-flex items-center justify-center group hover:cursor-pointer">
             {/* Zona de detección invisible (No clickeable, pero activa el efecto CTA) */}
-            <div className="pointer-events-none cursor-default absolute inset-0 -mx-140 -my-60"></div>
+            <div className="cursor-default absolute inset-0 -mx-140 -my-60"></div>
   
             {/* Botón principal */}
                 <button
