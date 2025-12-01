@@ -4,7 +4,7 @@ interface TypewriterProps {
     texts: string[];
     typingSpeed?: number;   // Milisegundos entre letras al escribir
     deletingSpeed?: number; // Milisegundos entre letras al borrar
-    pauseTime?: number;     // Milisegundoss antes de borrar
+    pauseTime?: number;     // Milisegundos antes de borrar
     className?: string;     // Estilos adicionales (Tailwind)
     cursorClassName?: string; // Estilos del cursor
 }
