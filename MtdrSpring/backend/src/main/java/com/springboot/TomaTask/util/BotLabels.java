@@ -12,7 +12,10 @@ public enum BotLabels {
 	UNDO("UNDO"),
 	DELETE("DELETE"),
 	MY_TODO_LIST("MY TODO LIST"),
-	DASH("-");
+	DASH("-"),
+	SPRINT_PREFIX("SPRINT:"),
+	NO_SPRINT("No Sprint"),
+	CANCEL("Cancel");
 
 	private String label;
 

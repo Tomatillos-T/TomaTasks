@@ -2,7 +2,7 @@ package com.springboot.TomaTask.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import org.telegram.telegrambots.longpolling.starter.AfterBotRegistration;
@@ -13,41 +13,50 @@ import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateC
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import org.telegram.telegrambots.meta.generics.TelegramClient;
-import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 
 import com.springboot.TomaTask.service.TaskService;
 import com.springboot.TomaTask.service.UserService;
+import com.springboot.TomaTask.service.SprintService;
+import com.springboot.TomaTask.service.OtpService;
+import com.springboot.TomaTask.service.BotSessionService;
 
 import com.springboot.TomaTask.util.BotActions;
 import com.springboot.TomaTask.config.BotProps;
 
 @Component
+@Profile("!test")
 public class TaskBotController implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskBotController.class);
-	private TaskService taskService;
-	private final UserService userService;
-	private final TelegramClient telegramClient;
 
+	private final TaskService taskService;
+	private final UserService userService;
+	private final SprintService sprintService;
+	private final OtpService otpService;
+	private final BotSessionService botSessionService;
+	private final TelegramClient telegramClient;
 	private final BotProps botProps;
 
-	@Value("${telegram.bot.token}")
-	private String telegramBotToken;
+	public TaskBotController(
+			BotProps botProps,
+			TaskService taskService,
+			UserService userService,
+			SprintService sprintService,
+			OtpService otpService,
+			BotSessionService botSessionService,
+			TelegramClient telegramClient) {
+		this.botProps = botProps;
+		this.taskService = taskService;
+		this.userService = userService;
+		this.sprintService = sprintService;
+		this.otpService = otpService;
+		this.botSessionService = botSessionService;
+		this.telegramClient = telegramClient;
+	}
 
 	@Override
 	public String getBotToken() {
-		if (telegramBotToken != null && !telegramBotToken.trim().isEmpty()) {
-			return telegramBotToken;
-		} else {
-			return botProps.getToken();
-		}
-	}
-
-	public TaskBotController(BotProps bp, TaskService tsvc, UserService usvc) {
-		this.botProps = bp;
-		telegramClient = new OkHttpTelegramClient(getBotToken());
-		taskService = tsvc;
-		this.userService = usvc;
+		return botProps.getToken();
 	}
 
 	@Override
@@ -66,18 +75,9 @@ public class TaskBotController implements SpringLongPollingBot, LongPollingSingl
 
 		logger.info("consume(): received message from chat {}: '{}'", chatId, messageTextFromTelegram);
 
-		BotActions actions = new BotActions(telegramClient, taskService, userService);
+		BotActions actions = new BotActions(telegramClient, taskService, userService, sprintService, otpService, botSessionService);
 		actions.setRequestText(messageTextFromTelegram);
 		actions.setChatId(chatId);
-		if (actions.getTaskService() == null) {
-			logger.info("todosvc error");
-			actions.setTaskService(taskService);
-		}
-
-		if (actions.getUserService() == null) {
-			logger.info("usersvc error");
-			actions.setUserService(userService);
-		}
 
 		// Controller-driven dispatch using BotActions predicates
 		// Priority: if a login pending state exists, let fnLogin handle the message
@@ -99,6 +99,12 @@ public class TaskBotController implements SpringLongPollingBot, LongPollingSingl
 			} else {
 				actions.fnLogin();
 			}
+			return;
+		}
+
+		// Handle sprint selection during task creation
+		if (actions.isAwaitingSprintSelection()) {
+			actions.fnSprintSelection();
 			return;
 		}
 

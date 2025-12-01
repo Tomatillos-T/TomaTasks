@@ -4,133 +4,130 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import com.springboot.TomaTask.model.Task;
 import com.springboot.TomaTask.dto.TaskDTO;
-import com.springboot.TomaTask.mapper.TaskMapper;
+import com.springboot.TomaTask.dto.SprintDTO;
 import com.springboot.TomaTask.service.TaskService;
 import com.springboot.TomaTask.service.UserService;
+import com.springboot.TomaTask.service.SprintService;
+import com.springboot.TomaTask.service.OtpService;
+import com.springboot.TomaTask.service.BotSessionService;
 import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.model.Task.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+ * Handles Telegram bot actions with database-backed session management.
+ * All state is stored in the database via BotSessionService for cloud compatibility.
+ */
 public class BotActions {
 
     private static final Logger logger = LoggerFactory.getLogger(BotActions.class);
 
-    enum LoginState {
-        AWAITING_EMAIL
-    }
+    public static final String LOGIN_STATE_AWAITING_EMAIL = "AWAITING_EMAIL";
+    public static final String LOGIN_STATE_AWAITING_OTP = "AWAITING_OTP";
+    public static final String TASK_STATE_AWAITING_SPRINT = "AWAITING_SPRINT_SELECTION";
+    public static final String TASK_STATE_AWAITING_NAME = "AWAITING_TASK_NAME";
 
-    // persist pending login/email/otp states across BotActions instances
-    private static final ConcurrentHashMap<Long, String> loginState = new ConcurrentHashMap<>();
-    // persist authenticated sessions across BotActions instances
-    private static final ConcurrentHashMap<Long, User> sessionByChat = new ConcurrentHashMap<>();
-    String requestText;
-    long chatId;
-    TelegramClient telegramClient;
+    private String requestText;
+    private long chatId;
+    private final TelegramClient telegramClient;
+    private final TaskService taskService;
+    private final UserService userService;
+    private final SprintService sprintService;
+    private final OtpService otpService;
+    private final BotSessionService sessionService;
 
-    UserService userService;
-    TaskService taskService;
-
-    public BotActions(TelegramClient tc, TaskService ts, UserService us) {
-        telegramClient = tc;
-        taskService = ts;
-        userService = us;
+    public BotActions(TelegramClient tc, TaskService ts, UserService us, SprintService ss,
+                      OtpService os, BotSessionService bss) {
+        this.telegramClient = tc;
+        this.taskService = ts;
+        this.userService = us;
+        this.sprintService = ss;
+        this.otpService = os;
+        this.sessionService = bss;
     }
 
     public void setRequestText(String cmd) {
-        requestText = cmd;
+        this.requestText = cmd;
     }
 
     public void setChatId(long chId) {
-        chatId = chId;
+        this.chatId = chId;
     }
 
-    public void setTelegramClient(TelegramClient tc) {
-        telegramClient = tc;
-    }
-
-    public void setTaskService(TaskService tsvc) {
-        taskService = tsvc;
-    }
-
-    public TaskService getTaskService() {
-        return taskService;
-    }
-
-    public void setUserService(UserService usvc) {
-        userService = usvc;
-    }
-
-    public UserService getUserService() {
-        return userService;
-    }
-
+    /**
+     * Handles the login flow including email entry and OTP validation.
+     */
     public void fnLogin() {
+        // Check if already logged in and trying to login again
         if ((requestText.equals(BotCommands.LOGIN_COMMAND.getCommand())
-                || requestText.equals(BotLabels.LOGIN.getLabel())) && sessionByChat.get(chatId) != null) {
-            BotHelper.sendMessageToTelegram(chatId, BotMessages.ALREADY_LOGGED_IN.getMessage(), telegramClient,
-                    null);
+                || requestText.equals(BotLabels.LOGIN.getLabel())) && sessionService.isAuthenticated(chatId)) {
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.ALREADY_LOGGED_IN.getMessage(), telegramClient, null);
             return;
         }
 
-        String pending = loginState.get(chatId);
-        logger.info("fnLogin called for chatId={} requestText='{}' pending='{}' sessionPresent={}", chatId,
-                requestText, pending, sessionByChat.containsKey(chatId));
-        if (pending != null) {
-            if (LoginState.AWAITING_EMAIL.name().equals(pending)) {
+        String loginState = sessionService.getLoginState(chatId);
+        String pendingEmail = sessionService.getPendingEmail(chatId);
+        logger.info("fnLogin called for chatId={} requestText='{}' loginState='{}' pendingEmail='{}'",
+                chatId, requestText, loginState, pendingEmail);
+
+        // Handle pending login states
+        if (loginState != null) {
+            if (LOGIN_STATE_AWAITING_EMAIL.equals(loginState)) {
+                // User is entering their email
                 String email = requestText.trim();
                 if (!email.contains("@") || !email.contains(".")) {
-                    BotHelper.sendMessageToTelegram(chatId, BotMessages.INVALID_EMAIL.getMessage(), telegramClient,
-                            null);
+                    BotHelper.sendMessageToTelegram(chatId, BotMessages.INVALID_EMAIL.getMessage(), telegramClient, null);
                     return;
                 } else if (!userService.emailExists(email)) {
-                    BotHelper.sendMessageToTelegram(chatId, BotMessages.EMAIL_NOT_FOUND.getMessage(), telegramClient,
-                            null);
+                    BotHelper.sendMessageToTelegram(chatId, BotMessages.EMAIL_NOT_FOUND.getMessage(), telegramClient, null);
                     return;
                 }
 
-                loginState.put(chatId, email);
-
-                // otpService.createAndSendOtp(email);
-                BotHelper.sendMessageToTelegram(chatId, BotMessages.OTP_MISSING.getMessage(), telegramClient,
-                        null);
+                // Email is valid - transition to awaiting OTP
+                sessionService.setLoginState(chatId, LOGIN_STATE_AWAITING_OTP, email);
+                logger.info("Email validated for {}, awaiting OTP from web application", email);
+                BotHelper.sendMessageToTelegram(chatId, BotMessages.OTP_PROMPT.getMessage(), telegramClient, null);
                 return;
             }
 
-            String email = pending;
-            String otp = requestText.trim();
-            // boolean ok = otpService.validateOtp(email, otp);
-            if ("142356".equals(otp)) {
-                User u = userService.findByEmail(email);
-                if (u == null) {
-                    BotHelper.sendMessageToTelegram(chatId, BotMessages.LOGIN_ERROR.getMessage(), telegramClient,
-                            null);
-                    return;
+            if (LOGIN_STATE_AWAITING_OTP.equals(loginState) && pendingEmail != null) {
+                // User is entering OTP
+                String otp = requestText.trim();
+
+                if (otpService.validateOtp(pendingEmail, otp)) {
+                    User user = userService.findByEmail(pendingEmail);
+                    if (user == null) {
+                        BotHelper.sendMessageToTelegram(chatId, BotMessages.LOGIN_ERROR.getMessage(), telegramClient, null);
+                        sessionService.clearLoginState(chatId);
+                        return;
+                    }
+                    sessionService.createAuthenticatedSession(chatId, user);
+                    logger.info("Created session for chat {} user={}", chatId, user.getEmail());
+                    BotHelper.sendMessageToTelegram(chatId, BotMessages.LOGIN_SUCCESS.getMessage(), telegramClient, null);
+                } else {
+                    BotHelper.sendMessageToTelegram(chatId, BotMessages.INVALID_OTP.getMessage(), telegramClient, null);
                 }
-                loginState.remove(chatId);
-                sessionByChat.put(chatId, u);
-                logger.info("Created session for chat {} user={}", chatId, u.getEmail());
-                BotHelper.sendMessageToTelegram(chatId, BotMessages.LOGIN_SUCCESS.getMessage(), telegramClient, null);
-            } else {
-                BotHelper.sendMessageToTelegram(chatId, BotMessages.INVALID_OTP.getMessage(),
-                        telegramClient, null);
+                return;
             }
+        }
+
+        // No pending state - this is a fresh login request or redirect
+        // Handle explicit /login command
+        if (requestText.equals(BotCommands.LOGIN_COMMAND.getCommand())
+                || requestText.equals(BotLabels.LOGIN.getLabel())) {
+            sessionService.setLoginState(chatId, LOGIN_STATE_AWAITING_EMAIL, null);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.LOGIN_PROMPT.getMessage(), telegramClient, null);
             return;
         }
 
-        if (!(requestText.equals(BotCommands.LOGIN_COMMAND.getCommand())
-                || requestText.equals(BotLabels.LOGIN.getLabel()))) {
-            BotHelper.sendMessageToTelegram(chatId, BotMessages.LOGIN_MISSING.getMessage(), telegramClient,
-                    null);
-            loginState.put(chatId, LoginState.AWAITING_EMAIL.name());
-            return;
-        }
+        // Redirect from other commands when not logged in
+        BotHelper.sendMessageToTelegram(chatId, BotMessages.LOGIN_MISSING.getMessage(), telegramClient, null);
+        sessionService.setLoginState(chatId, LOGIN_STATE_AWAITING_EMAIL, null);
     }
 
     public void fnLogout() {
@@ -138,19 +135,22 @@ public class BotActions {
                 || requestText.equals(BotLabels.LOGOUT.getLabel())))
             return;
 
-        if (sessionByChat.get(chatId) == null) {
+        if (!sessionService.isAuthenticated(chatId)) {
             BotHelper.sendMessageToTelegram(chatId, BotMessages.NOT_LOGGED_IN.getMessage(), telegramClient, null);
             return;
         }
 
+        sessionService.logout(chatId);
         BotHelper.sendMessageToTelegram(chatId, BotMessages.LOGOUT_SUCCESS.getMessage(), telegramClient, null);
-        sessionByChat.remove(chatId);
     }
 
     public void fnStart() {
         if (!(requestText.equals(BotCommands.START_COMMAND.getCommand())
                 || requestText.equals(BotLabels.INTRODUCTION.getLabel())))
             return;
+
+        // Clear any pending task creation state
+        sessionService.clearTaskCreationState(chatId);
 
         BotHelper.sendMessageToTelegram(chatId, BotMessages.HELLO_MYTODO_BOT.getMessage(), telegramClient,
                 ReplyKeyboardMarkup
@@ -164,17 +164,21 @@ public class BotActions {
     }
 
     public void fnDone() {
-        if (!(requestText.indexOf(BotLabels.DONE.getLabel()) != -1))
+        if (requestText.indexOf(BotLabels.DONE.getLabel()) == -1)
             return;
 
-        String done = requestText.substring(0, requestText.lastIndexOf(BotLabels.DASH.getLabel()));
+        String taskId = requestText.substring(0, requestText.lastIndexOf(BotLabels.DASH.getLabel()));
         try {
-            TaskDTO taskDto = taskService.getTaskById(done);
+            TaskDTO taskDto = taskService.getTaskById(taskId);
             taskDto.setStatus(Status.DONE);
-            taskService.updateTask(done, taskDto);
+            taskService.updateTask(taskId, taskDto);
             BotHelper.sendMessageToTelegram(chatId, BotMessages.ITEM_DONE.getMessage(), telegramClient);
+        } catch (RuntimeException e) {
+            logger.error("Task not found: {}", taskId, e);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.ERROR_TASK_NOT_FOUND.getMessage(), telegramClient);
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
+            logger.error("Error marking task as done: {}", e.getLocalizedMessage(), e);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.ERROR_TASK_UPDATE.getMessage(), telegramClient);
         }
     }
 
@@ -182,15 +186,18 @@ public class BotActions {
         if (requestText.indexOf(BotLabels.UNDO.getLabel()) == -1)
             return;
 
-        String undo = requestText.substring(0,
-                requestText.lastIndexOf(BotLabels.DASH.getLabel()));
+        String taskId = requestText.substring(0, requestText.lastIndexOf(BotLabels.DASH.getLabel()));
         try {
-            TaskDTO taskDto = taskService.getTaskById(undo);
+            TaskDTO taskDto = taskService.getTaskById(taskId);
             taskDto.setStatus(Status.IN_PROGRESS);
-            taskService.updateTask(undo, taskDto);
+            taskService.updateTask(taskId, taskDto);
             BotHelper.sendMessageToTelegram(chatId, BotMessages.ITEM_UNDONE.getMessage(), telegramClient);
+        } catch (RuntimeException e) {
+            logger.error("Task not found: {}", taskId, e);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.ERROR_TASK_NOT_FOUND.getMessage(), telegramClient);
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
+            logger.error("Error undoing task: {}", e.getLocalizedMessage(), e);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.ERROR_TASK_UPDATE.getMessage(), telegramClient);
         }
     }
 
@@ -198,22 +205,22 @@ public class BotActions {
         if (requestText.indexOf(BotLabels.DELETE.getLabel()) == -1)
             return;
 
-        String delete = requestText.substring(0,
-                requestText.lastIndexOf(BotLabels.DASH.getLabel()));
+        String taskId = requestText.substring(0, requestText.lastIndexOf(BotLabels.DASH.getLabel()));
         try {
-            taskService.deleteTask(delete);
+            taskService.deleteTask(taskId);
             BotHelper.sendMessageToTelegram(chatId, BotMessages.ITEM_DELETED.getMessage(), telegramClient);
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
+            logger.error("Error deleting task: {}", e.getLocalizedMessage(), e);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.ERROR_TASK_DELETE.getMessage(), telegramClient);
         }
     }
 
     public void fnHide() {
         if (requestText.equals(BotCommands.HIDE_COMMAND.getCommand())
                 || requestText.equals(BotLabels.HIDE_MAIN_SCREEN.getLabel())) {
+            sessionService.clearTaskCreationState(chatId);
             BotHelper.sendMessageToTelegram(chatId, BotMessages.BYE.getMessage(), telegramClient);
-        } else
-            return;
+        }
     }
 
     public void fnListAll() {
@@ -221,8 +228,17 @@ public class BotActions {
                 || requestText.equals(BotLabels.LIST_ALL_ITEMS.getLabel())
                 || requestText.equals(BotLabels.MY_TODO_LIST.getLabel())))
             return;
-        logger.info("todoSvc: " + taskService);
-        List<TaskDTO> allItems = taskService.getTasksByAssigneeId(sessionByChat.get(chatId).getID());
+
+        sessionService.clearTaskCreationState(chatId);
+
+        Optional<User> userOpt = sessionService.getAuthenticatedUser(chatId);
+        if (userOpt.isEmpty()) {
+            fnLogin();
+            return;
+        }
+
+        User currentUser = userOpt.get();
+        List<TaskDTO> allItems = taskService.getTasksByAssigneeId(currentUser.getId());
         ReplyKeyboardMarkup keyboardMarkup = ReplyKeyboardMarkup.builder()
                 .resizeKeyboard(true)
                 .oneTimeKeyboard(false)
@@ -231,7 +247,6 @@ public class BotActions {
 
         List<KeyboardRow> keyboard = new ArrayList<>();
 
-        // command back to main screen
         KeyboardRow mainScreenRowTop = new KeyboardRow();
         mainScreenRowTop.add(BotLabels.INTRODUCTION.getLabel());
         keyboard.add(mainScreenRowTop);
@@ -265,42 +280,159 @@ public class BotActions {
             keyboard.add(currentRow);
         }
 
-        // Logout row
         KeyboardRow logoutRow = new KeyboardRow();
         logoutRow.add(BotLabels.LOGOUT.getLabel());
         keyboard.add(logoutRow);
 
         keyboardMarkup.setKeyboard(keyboard);
 
-        BotHelper.sendMessageToTelegram(chatId, BotLabels.MY_TODO_LIST.getLabel(), telegramClient, keyboardMarkup);//
+        BotHelper.sendMessageToTelegram(chatId, BotLabels.MY_TODO_LIST.getLabel(), telegramClient, keyboardMarkup);
     }
 
+    /**
+     * Initiates the add item flow with sprint selection.
+     */
     public void fnAddItem() {
         if (!(requestText.contains(BotCommands.ADD_ITEM.getCommand())
                 || requestText.contains(BotLabels.ADD_NEW_ITEM.getLabel())))
             return;
 
-        logger.info("Adding item by BotHelper");
-        BotHelper.sendMessageToTelegram(chatId, BotMessages.TYPE_NEW_TODO_ITEM.getMessage(), telegramClient);
+        logger.info("Starting add item flow for chat {}", chatId);
+
+        if (!sessionService.isAuthenticated(chatId)) {
+            fnLogin();
+            return;
+        }
+
+        List<SprintDTO> sprints = new ArrayList<>();
+        try {
+            sprints = sprintService.getAllSprints();
+        } catch (Exception e) {
+            logger.warn("Could not fetch sprints: {}", e.getMessage());
+        }
+
+        if (sprints.isEmpty()) {
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.NO_SPRINTS_AVAILABLE.getMessage(), telegramClient, null);
+            sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_NAME, null);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.TYPE_NEW_TODO_ITEM.getMessage(), telegramClient);
+        } else {
+            sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_SPRINT, null);
+            showSprintSelectionKeyboard(sprints);
+        }
     }
 
-    public void fnElse() {
-        if (sessionByChat.get(chatId) == null)
+    private void showSprintSelectionKeyboard(List<SprintDTO> sprints) {
+        ReplyKeyboardMarkup keyboardMarkup = ReplyKeyboardMarkup.builder()
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(true)
+                .selective(true)
+                .build();
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+
+        for (SprintDTO sprint : sprints) {
+            KeyboardRow row = new KeyboardRow();
+            row.add(BotLabels.SPRINT_PREFIX.getLabel() + sprint.getId() + BotLabels.DASH.getLabel()
+                    + sprint.getDescription());
+            keyboard.add(row);
+        }
+
+        KeyboardRow noSprintRow = new KeyboardRow();
+        noSprintRow.add(BotLabels.NO_SPRINT.getLabel());
+        keyboard.add(noSprintRow);
+
+        KeyboardRow cancelRow = new KeyboardRow();
+        cancelRow.add(BotLabels.CANCEL.getLabel());
+        keyboard.add(cancelRow);
+
+        keyboardMarkup.setKeyboard(keyboard);
+
+        BotHelper.sendMessageToTelegram(chatId, BotMessages.SELECT_SPRINT.getMessage(), telegramClient, keyboardMarkup);
+    }
+
+    /**
+     * Handles sprint selection during task creation.
+     */
+    public void fnSprintSelection() {
+        String taskState = sessionService.getTaskCreationState(chatId);
+        if (!TASK_STATE_AWAITING_SPRINT.equals(taskState))
             return;
 
-        Task newItem = new Task();
-        newItem.setName(requestText);
-        newItem.setStatus(Status.IN_PROGRESS);
-        newItem.setUser(sessionByChat.get(chatId));
-        newItem.setTimeEstimate(2);
-        taskService.createTask(TaskMapper.toDTO(newItem));
+        if (requestText.equals(BotLabels.CANCEL.getLabel())) {
+            sessionService.clearTaskCreationState(chatId);
+            fnStart();
+            return;
+        }
 
-        BotHelper.sendMessageToTelegram(chatId, BotMessages.NEW_ITEM_ADDED.getMessage(), telegramClient, null);
+        if (requestText.equals(BotLabels.NO_SPRINT.getLabel())) {
+            sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_NAME, null);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.SPRINT_SELECTED.getMessage(), telegramClient, null);
+            return;
+        }
+
+        if (requestText.startsWith(BotLabels.SPRINT_PREFIX.getLabel())) {
+            String afterPrefix = requestText.substring(BotLabels.SPRINT_PREFIX.getLabel().length());
+            int dashIndex = afterPrefix.indexOf(BotLabels.DASH.getLabel());
+            if (dashIndex > 0) {
+                String sprintId = afterPrefix.substring(0, dashIndex);
+                sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_NAME, sprintId);
+                BotHelper.sendMessageToTelegram(chatId, BotMessages.SPRINT_SELECTED.getMessage(), telegramClient, null);
+                return;
+            }
+        }
+
+        // Invalid selection - show keyboard again
+        try {
+            List<SprintDTO> sprints = sprintService.getAllSprints();
+            showSprintSelectionKeyboard(sprints);
+        } catch (Exception e) {
+            logger.error("Error fetching sprints: {}", e.getMessage());
+            sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_NAME, null);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.TYPE_NEW_TODO_ITEM.getMessage(), telegramClient);
+        }
     }
 
-    // --- Predicate helpers so the controller can decide which fn to call ---
+    /**
+     * Creates a new task with the selected sprint (or no sprint).
+     */
+    public void fnElse() {
+        Optional<User> userOpt = sessionService.getAuthenticatedUser(chatId);
+        if (userOpt.isEmpty())
+            return;
+
+        User currentUser = userOpt.get();
+        String taskState = sessionService.getTaskCreationState(chatId);
+
+        if (!TASK_STATE_AWAITING_NAME.equals(taskState)) {
+            sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_NAME, null);
+        }
+
+        try {
+            TaskDTO newTaskDto = new TaskDTO();
+            newTaskDto.setName(requestText);
+            newTaskDto.setStatus(Status.IN_PROGRESS);
+            newTaskDto.setAssigneeId(currentUser.getId());
+            newTaskDto.setTimeEstimate(2);
+
+            String selectedSprintId = sessionService.getSelectedSprintId(chatId);
+            if (selectedSprintId != null) {
+                newTaskDto.setSprintId(selectedSprintId);
+            }
+
+            taskService.createTask(newTaskDto);
+            sessionService.clearTaskCreationState(chatId);
+
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.NEW_ITEM_ADDED.getMessage(), telegramClient, null);
+        } catch (Exception e) {
+            logger.error("Error creating task: {}", e.getLocalizedMessage(), e);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.ERROR_TASK_CREATE.getMessage(), telegramClient, null);
+        }
+    }
+
+    // --- Predicate helpers for controller dispatch ---
+
     public boolean hasPendingLogin() {
-        return loginState.get(chatId) != null;
+        return sessionService.hasPendingLogin(chatId);
     }
 
     public boolean isLoginCommand() {
@@ -330,15 +462,15 @@ public class BotActions {
     }
 
     public boolean containsDone() {
-        return requestText != null && requestText.indexOf(BotLabels.DONE.getLabel()) != -1;
+        return requestText != null && requestText.contains(BotLabels.DONE.getLabel());
     }
 
     public boolean containsUndo() {
-        return requestText != null && requestText.indexOf(BotLabels.UNDO.getLabel()) != -1;
+        return requestText != null && requestText.contains(BotLabels.UNDO.getLabel());
     }
 
     public boolean containsDelete() {
-        return requestText != null && requestText.indexOf(BotLabels.DELETE.getLabel()) != -1;
+        return requestText != null && requestText.contains(BotLabels.DELETE.getLabel());
     }
 
     public boolean isHideCommand() {
@@ -347,6 +479,10 @@ public class BotActions {
     }
 
     public boolean hasSession() {
-        return sessionByChat.get(chatId) != null;
+        return sessionService.isAuthenticated(chatId);
+    }
+
+    public boolean isAwaitingSprintSelection() {
+        return TASK_STATE_AWAITING_SPRINT.equals(sessionService.getTaskCreationState(chatId));
     }
 }
