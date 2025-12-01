@@ -8,7 +8,7 @@ import tomato from "../../assets/tomato.svg";
 //import test from "../assets/react.svg";
 
 // Interfaz para los props
-/* Prop: Datos que pasan de un coponente
+/* Prop: Datos que pasan de un componente
  *       padre a un componente hijo.
  */
 interface GetStartedProps {
