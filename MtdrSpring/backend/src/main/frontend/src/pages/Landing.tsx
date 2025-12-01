@@ -21,7 +21,7 @@ function Landing() {
       {
         id: "feature-1",
         title: "Organiza tus Proyectos",
-        description: "Con nuestra interfaz intuitiva y fácil de usar, pordrás organizar tus proyectos y gestionar cambios de acuerdo a tus necesidades.",
+        description: "Con nuestra interfaz intuitiva y fácil de usar, podrás organizar tus proyectos y gestionar cambios de acuerdo a tus necesidades.",
         media: {
           desktop: {
             type: "image",
