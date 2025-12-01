@@ -1,7 +1,7 @@
 // src/components/Footer.tsx
 // npm install @fortawesome/react-fontawesome @fortawesome/free-brands-svg-icons @fortawesome/free-solid-svg-icons
-import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFacebook,
   faTwitter,
@@ -10,9 +10,10 @@ import {
   faYoutube,
   faPinterest,
   faTelegram,
-} from '@fortawesome/free-brands-svg-icons';
-import { faHome, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
+} from "@fortawesome/free-brands-svg-icons";
+import { faHome, faPhone, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import type { IconDefinition } from "@fortawesome/fontawesome-common-types";
+import tomato from "../../assets/tomato.svg";
 
 // No recibe props, pero se deja interfaz por si luego lo extiendes
 interface FooterProps {}
@@ -32,12 +33,13 @@ const Footer: React.FC<FooterProps> = () => {
     <footer className="bg-black text-white">
       <div className="container mx-auto px-4">
         {/* Logo */}
-        <div className="flex justify-center py-10 md:py-9">
+        <div className="flex justify-center py-10 md:py-9 gap-2 items-center">
           <img
-            src="../../assets/tomato.svg"
+            src={tomato}
             alt="TomaTask"
-            className="w-2/5 md:w-1/4 lg:w-[18%] xl:w-[15%] max-w-[200px]"
+            className="w-2/5 md:w-1/4 lg:w-[18%] xl:w-[15%] max-w-[30px]"
           />
+          <h2 className="text-xl">TomaTask</h2>
         </div>
 
         {/* Contenido */}
@@ -78,13 +80,15 @@ const Footer: React.FC<FooterProps> = () => {
               <p className="flex items-center gap-2 hover:text-gray-300">
                 <FontAwesomeIcon icon={faPhone} className="text-lg" />
                 <a href="tel:9946948000">
-                  +52 1 639 117 5750 (<span className="text-xs">General Enquiry</span>)
+                  +52 1 639 117 5750 (
+                  <span className="text-xs">General Enquiry</span>)
                 </a>
               </p>
               <p className="flex items-center gap-2 hover:text-gray-300">
                 <FontAwesomeIcon icon={faPhone} className="text-lg" />
                 <a href="tel:9946947000">
-                  +52 1 81 1603 0190 (<span className="text-xs">Technical Support: TomaTask</span>)
+                  +52 1 81 1603 0190 (
+                  <span className="text-xs">Technical Support: TomaTask</span>)
                 </a>
               </p>
             </div>
@@ -104,8 +108,10 @@ const Footer: React.FC<FooterProps> = () => {
               <div>
                 <strong className="text-gray-300 block">Our Company</strong>
                 <address className="not-italic mt-1 leading-relaxed">
-                  Garza Sada, Paseo Tecnológico<br />
-                  Monterrey, Nuevo León (México)<br />
+                  Garza Sada, Paseo Tecnológico
+                  <br />
+                  Monterrey, Nuevo León (México)
+                  <br />
                   General Helpline No: +52 1 921 222 3320
                 </address>
               </div>

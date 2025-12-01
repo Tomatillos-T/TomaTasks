@@ -31,10 +31,10 @@ public class OAuthCallbackController {
             gitHubOAuthService.linkGitHubAccount(userId, code);
 
             // Redirect to frontend with success message
-            return new RedirectView("http://localhost:3000/user?github=success");
+            return new RedirectView("/user?github=success");
         } catch (Exception e) {
             // Redirect to frontend with error message
-            return new RedirectView("http://localhost:3000/user?github=error&message=" + e.getMessage());
+            return new RedirectView("/user?github=error&message=" + e.getMessage());
         }
     }
 }
