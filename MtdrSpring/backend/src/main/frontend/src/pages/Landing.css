@@ -1,0 +1,9 @@
+/* React prioriza este archivo CSS */
+
+:root{ /* Para las fuentes usar Tailwind y para el color .css */
+    --color-primario: #FFFFFF;
+}
+
+h1 { /* Ejemplo de clase con variables */
+    color: var(--color-primario);
+}
