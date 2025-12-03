@@ -37,34 +37,106 @@ export default function User() {
   }, [user]);
 
   useEffect(() => {
+    // Check if this page is opened in a popup (window.opener exists)
+    const isPopup = window.opener && window.opener !== window;
+
     // Check for GitHub OAuth callback status
     const params = new URLSearchParams(window.location.search);
     const githubStatus = params.get("github");
 
-    if (githubStatus === "success") {
-      setSubmitStatus({
-        type: "success",
-        message: "GitHub account connected successfully!",
-      });
-      // Refresh user data
-      if (formData?.id) {
-        HttpClient.get<UserType>(`/api/user/${formData.id}`, { auth: true })
-          .then(updatedUser => {
-            setUser(updatedUser);
-            setFormData(updatedUser);
+    if (githubStatus) {
+      if (isPopup) {
+        // If in popup, notify parent window and close
+        if (githubStatus === "success") {
+          window.opener.postMessage({
+            type: "github-oauth-success",
+            message: "GitHub account connected successfully!"
+          }, window.location.origin);
+        } else if (githubStatus === "error") {
+          const errorMessage = params.get("message") || "Failed to connect GitHub account. Please try again.";
+          window.opener.postMessage({
+            type: "github-oauth-error",
+            message: errorMessage
+          }, window.location.origin);
+        }
+
+        // Close popup after sending message
+        setTimeout(() => {
+          window.close();
+        }, 500);
+      } else {
+        // If in main window (not popup), handle normally
+        if (githubStatus === "success") {
+          setSubmitStatus({
+            type: "success",
+            message: "GitHub account connected successfully!",
           });
+          // Refresh user data
+          if (formData?.id) {
+            HttpClient.get<UserType>(`/api/user/${formData.id}`, { auth: true })
+              .then(updatedUser => {
+                setUser(updatedUser);
+                setFormData(updatedUser);
+              });
+          }
+        } else if (githubStatus === "error") {
+          setSubmitStatus({
+            type: "error",
+            message: params.get("message") || "Failed to connect GitHub account. Please try again.",
+          });
+        }
+        // Clean URL
+        window.history.replaceState({}, "", "/user");
       }
-      // Clean URL
-      window.history.replaceState({}, "", "/user");
-    } else if (githubStatus === "error") {
-      setSubmitStatus({
-        type: "error",
-        message: "Failed to connect GitHub account. Please try again.",
-      });
-      // Clean URL
-      window.history.replaceState({}, "", "/user");
     }
-  }, []);
+
+    // Listen for messages from OAuth popup window (when this is the parent)
+    const handleOAuthMessage = (event: MessageEvent) => {
+      // Security: Validate message origin
+      if (event.origin !== window.location.origin) {
+        console.warn('Received message from unauthorized origin:', event.origin);
+        return;
+      }
+
+      // Handle OAuth success message
+      if (event.data.type === 'github-oauth-success') {
+        setSubmitStatus({
+          type: "success",
+          message: event.data.message || "GitHub account connected successfully!",
+        });
+        setIsConnectingGithub(false);
+
+        // Refresh user data
+        if (formData?.id) {
+          HttpClient.get<UserType>(`/api/user/${formData.id}`, { auth: true })
+            .then(updatedUser => {
+              setUser(updatedUser);
+              setFormData(updatedUser);
+            })
+            .catch(error => {
+              console.error('Failed to refresh user data:', error);
+            });
+        }
+      }
+
+      // Handle OAuth error message
+      else if (event.data.type === 'github-oauth-error') {
+        setSubmitStatus({
+          type: "error",
+          message: event.data.message || "Failed to connect GitHub account. Please try again.",
+        });
+        setIsConnectingGithub(false);
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('message', handleOAuthMessage);
+
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener('message', handleOAuthMessage);
+    };
+  }, [formData?.id, setUser]);
 
   if (!isAuthenticated) {
     return (
