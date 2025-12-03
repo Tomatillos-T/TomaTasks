@@ -1,5 +1,5 @@
 import { AlertCircle, RefreshCw } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import KanbanColumn from "@/modules/task/components/KanbanColumn";
 import useKanban from "@/modules/task/hooks/useKanban";
 import Alert from "@/components/Alert";
@@ -17,6 +17,10 @@ import {
   priorityLabels,
   estimationLabels,
 } from "@/modules/task/models/taskEnums";
+import type Task from "@/modules/task/models/task";
+import TaskDetailModal from "@/modules/task/components/TaskDetailModal";
+import CreateTaskModal from "@/modules/task/components/CreateTaskModal";
+import TaskCompletionModal from "@/modules/task/components/TaskCompletionModal";
 
 interface KanbanFilterProps {
   title: string;
@@ -160,6 +164,12 @@ export default function KanbanBoard() {
     handleDragStart,
     handleDragOver,
     handleDrop,
+    deleteTask,
+    isDeleting,
+    pendingCompletion,
+    confirmTaskCompletion,
+    cancelTaskCompletion,
+    isCompletingTask,
     selectedPriorities,
     setSelectedPriorities,
     selectedEstimations,
@@ -171,6 +181,38 @@ export default function KanbanBoard() {
   const { sprints } = useSprints();
   const [filterView, setFilterView] = useState(false);
   const [hasRendered, setHasRendered] = useState(false);
+
+  // Task detail modal state
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // Edit modal state
+  const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Handle task card click
+  const handleTaskClick = useCallback((task: Task) => {
+    setSelectedTask(task);
+    setIsDetailModalOpen(true);
+  }, []);
+
+  // Handle edit button click from detail modal
+  const handleEditClick = useCallback((task: Task) => {
+    setTaskToEdit(task);
+    setIsEditModalOpen(true);
+  }, []);
+
+  // Handle closing detail modal
+  const handleCloseDetailModal = useCallback(() => {
+    setIsDetailModalOpen(false);
+    setSelectedTask(null);
+  }, []);
+
+  // Handle closing edit modal
+  const handleCloseEditModal = useCallback(() => {
+    setIsEditModalOpen(false);
+    setTaskToEdit(null);
+  }, []);
 
   // Track if component has rendered at least once
   useEffect(() => {
@@ -376,13 +418,14 @@ export default function KanbanBoard() {
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
+            onTaskClick={handleTaskClick}
           />
         ))}
       </div>
 
       {/* Empty State */}
       {!isLoading && columns.every((col) => col.tasks.length === 0) && (
-        <div className="text-center py-12 bg-background-paper rounded-lg border border-border mt-4 flex-shrink-0">
+        <div className="text-center py-12 bg-background-paper rounded-lg border border-background-contrast mt-4 flex-shrink-0">
           <AlertCircle className="w-16 h-16 text-text-secondary mx-auto mb-4 opacity-50" />
           <p className="text-lg font-medium text-text-primary">
             No hay tareas disponibles
@@ -392,6 +435,32 @@ export default function KanbanBoard() {
           </p>
         </div>
       )}
+
+      {/* Task Detail Modal */}
+      <TaskDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={handleCloseDetailModal}
+        task={selectedTask}
+        onEdit={handleEditClick}
+        onDelete={deleteTask}
+        isDeleting={isDeleting}
+      />
+
+      {/* Edit Task Modal */}
+      <CreateTaskModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        task={taskToEdit}
+      />
+
+      {/* Task Completion Modal */}
+      <TaskCompletionModal
+        isOpen={pendingCompletion !== null}
+        onClose={cancelTaskCompletion}
+        task={pendingCompletion?.task ?? null}
+        onConfirm={confirmTaskCompletion}
+        isSubmitting={isCompletingTask}
+      />
     </div>
   );
 }

@@ -88,10 +88,10 @@ const HoursByDeveloperChart: React.FC = () => {
       </h2>
       <ResponsiveContainer width="100%" height={400}>
         <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--background-contrast)" />
           <XAxis
             dataKey="name"
-            tick={{ fill: "#666", fontSize: 12 }}
+            tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
             angle={0}
             textAnchor="end"
             height={50}
@@ -101,16 +101,16 @@ const HoursByDeveloperChart: React.FC = () => {
               value: "Horas Trabajadas",
               angle: -90,
               position: "insideLeft",
-              style: { fill: "#666" },
+              style: { fill: "var(--text-secondary)" },
             }}
-            tick={{ fill: "#666", fontSize: 12 }}
+            tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
           />
           <Tooltip
             content={<CustomChartTooltip labelKey="fullName" />}
             wrapperStyle={{
               outline: "none",
             }}
-            cursor={{ fill: "rgba(59, 130, 246, 0.1)" }}
+            cursor={{ fill: "var(--primary-main)", opacity: 0.1 }}
           />
           <Legend />
           {data.map((developer, index) => (

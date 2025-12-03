@@ -84,7 +84,7 @@ export const UserColumnDropDown: React.FC<{
             </a>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={handleDelete} className="text-red-600">
+          <DropdownMenuItem onSelect={handleDelete} className="text-error-main">
             Eliminar
           </DropdownMenuItem>
         </DropdownMenuContent>

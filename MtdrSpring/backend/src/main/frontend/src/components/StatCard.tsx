@@ -27,7 +27,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon: Icon, s
       <span
         className={`text-sm font-semibold px-2 py-1 rounded-full ${
           change === 0
-            ? "bg-gray-100 text-gray-600"
+            ? "bg-background-subtle text-text-secondary"
             : change > 0
             ? "bg-[var(--success-bg)] text-[var(--success-dark)]"
             : "bg-[var(--error-bg)] text-[var(--error-dark)]"

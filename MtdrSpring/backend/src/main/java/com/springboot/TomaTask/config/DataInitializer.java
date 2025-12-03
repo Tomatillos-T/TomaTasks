@@ -17,7 +17,10 @@ import com.springboot.TomaTask.model.Task.Estimation;
 import com.springboot.TomaTask.model.User.UserRole;
 import com.springboot.TomaTask.repository.*;
 
+import org.springframework.context.annotation.Profile;
+
 @Configuration
+@Profile("!test")
 public class DataInitializer {
 
         private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);

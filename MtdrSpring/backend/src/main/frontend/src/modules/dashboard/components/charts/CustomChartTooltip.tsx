@@ -30,16 +30,16 @@ const CustomChartTooltip: React.FC<CustomChartTooltipProps> = ({
   return (
     <div
       style={{
-        backgroundColor: "rgba(255, 255, 255, 0.95)",
+        backgroundColor: "var(--background-paper)",
         backdropFilter: "blur(10px)",
-        border: "1px solid rgba(204, 204, 204, 0.5)",
+        border: "1px solid var(--background-contrast)",
         borderRadius: "12px",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
         padding: "12px",
       }}
     >
       {displayLabel && (
-        <p style={{ fontWeight: 600, marginBottom: "8px", color: "#333" }}>
+        <p style={{ fontWeight: 600, marginBottom: "8px", color: "var(--text-primary)" }}>
           {displayLabel}
         </p>
       )}
@@ -47,7 +47,7 @@ const CustomChartTooltip: React.FC<CustomChartTooltipProps> = ({
         <p
           key={`item-${index}`}
           style={{
-            color: entry.color || "#666",
+            color: entry.color || "var(--text-secondary)",
             fontWeight: 500,
             marginBottom: index < payload.length - 1 ? "4px" : "0",
           }}

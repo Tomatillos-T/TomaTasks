@@ -20,7 +20,6 @@ export interface User {
   teamId?: string;
   createdAt: string;
   updatedAt: string;
-  telegramToken?: string;
   githubId?: string;
   githubUsername?: string;
 }

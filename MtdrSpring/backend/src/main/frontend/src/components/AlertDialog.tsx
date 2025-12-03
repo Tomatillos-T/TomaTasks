@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import type { HTMLAttributes, ReactNode } from "react";
+import type { HTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 import clsx from "clsx";
 
 interface AlertDialogProps {
@@ -40,7 +40,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in"
+        className="fixed inset-0 bg-background-overlay backdrop-blur-sm animate-in fade-in"
         onClick={() => onOpenChange(false)}
       />
       {/* Content container */}
@@ -146,7 +146,7 @@ export const AlertDialogFooter: React.FC<AlertDialogFooterProps> = ({
   );
 };
 
-interface AlertDialogActionProps extends HTMLAttributes<HTMLButtonElement> {
+interface AlertDialogActionProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "destructive";
 }
 
@@ -175,7 +175,7 @@ export const AlertDialogAction: React.FC<AlertDialogActionProps> = ({
   );
 };
 
-type AlertDialogCancelProps = HTMLAttributes<HTMLButtonElement>;
+type AlertDialogCancelProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const AlertDialogCancel: React.FC<AlertDialogCancelProps> = ({
   className = "",

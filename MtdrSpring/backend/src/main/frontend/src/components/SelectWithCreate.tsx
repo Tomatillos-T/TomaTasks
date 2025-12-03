@@ -30,7 +30,7 @@ export default function SelectWithCreate({
     return (
       <div className="flex flex-col">
         <label className="text-sm font-medium text-text-primary mb-1">
-          {label} {required && <span className="text-red-500">*</span>}
+          {label} {required && <span className="text-error-main">*</span>}
         </label>
         <div className="px-3 py-2 rounded-lg border border-background-contrast bg-background-paper text-text-secondary flex items-center gap-2">
           <div className="animate-spin h-4 w-4 border-2 border-primary-main border-t-transparent rounded-full"></div>
@@ -43,7 +43,7 @@ export default function SelectWithCreate({
   return (
     <div className="flex flex-col">
       <label className="text-sm font-medium text-text-primary mb-1">
-        {label} {required && <span className="text-red-500">*</span>}
+        {label} {required && <span className="text-error-main">*</span>}
       </label>
       <div className="flex gap-2 items-stretch">
         <select

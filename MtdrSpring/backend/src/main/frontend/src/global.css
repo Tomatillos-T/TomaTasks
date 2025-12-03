@@ -45,6 +45,8 @@
     --background-paper: #f8fafc;
     --background-subtle: #f1f5f9;
     --background-contrast: #e2e8f0;
+    --background-overlay: rgba(0, 0, 0, 0.5);
+    --background-overlay-heavy: rgba(0, 0, 0, 0.75);
 
     --text-primary: #0f172a;
     --text-secondary: #334155;
@@ -134,6 +136,8 @@
     --background-paper: #131b2e; /* Tarjetas con contraste */
     --background-subtle: #1e293b; /* Secciones elevadas */
     --background-contrast: #334155; /* Bordes visibles */
+    --background-overlay: rgba(0, 0, 0, 0.6);
+    --background-overlay-heavy: rgba(0, 0, 0, 0.8);
 
     /* Texto - Alto contraste */
     --text-primary: #f1f5f9; /* Casi blanco para legibilidad */
@@ -216,6 +220,8 @@
   --color-background-paper: var(--background-paper);
   --color-background-subtle: var(--background-subtle);
   --color-background-contrast: var(--background-contrast);
+  --color-background-overlay: var(--background-overlay);
+  --color-background-overlay-heavy: var(--background-overlay-heavy);
 
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);

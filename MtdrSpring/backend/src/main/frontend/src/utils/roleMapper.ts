@@ -38,10 +38,3 @@ export function mapRoleToBackend(frontendRole: string): string {
 export function isAdminRole(role: string): boolean {
   return role === "Admin";
 }
-
-/**
- * Check if a role is Developer
- */
-export function isDeveloperRole(role: string): boolean {
-  return role === "Developer";
-}

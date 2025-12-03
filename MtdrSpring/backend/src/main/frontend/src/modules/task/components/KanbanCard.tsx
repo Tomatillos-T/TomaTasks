@@ -12,9 +12,12 @@ import {
 interface KanbanCardProps {
   task: Task;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, taskId: string, fromStatus: TaskStatus) => void;
+  onClick: (task: Task) => void;
 }
 
-const KanbanCard = memo(function KanbanCard({ task, onDragStart }: KanbanCardProps) {
+const KanbanCard = memo(function KanbanCard({ task, onDragStart, onClick }: KanbanCardProps) {
+  const isDraggingRef = React.useRef(false);
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("es-MX", {
       month: "short",
@@ -22,11 +25,33 @@ const KanbanCard = memo(function KanbanCard({ task, onDragStart }: KanbanCardPro
     });
   };
 
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    isDraggingRef.current = true;
+    onDragStart(e, task.id, task.status);
+  };
+
+  const handleDragEnd = () => {
+    // Reset dragging state after a short delay to prevent click from firing
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 100);
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only trigger click if not dragging
+    if (!isDraggingRef.current) {
+      e.stopPropagation();
+      onClick(task);
+    }
+  };
+
   return (
     <div
       draggable
-      onDragStart={(e) => onDragStart(e, task.id, task.status)}
-      className="bg-surface border border-border rounded-lg p-4 cursor-move hover:shadow-md transition-all duration-200 group active:opacity-50 active:scale-95"
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onClick={handleClick}
+      className="bg-background-paper border border-background-contrast rounded-lg p-4 cursor-pointer hover:shadow-md transition-all duration-200 group active:opacity-50 active:scale-95"
     >
       {/* Header: Task Name + Priority Badge */}
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -59,7 +84,7 @@ const KanbanCard = memo(function KanbanCard({ task, onDragStart }: KanbanCardPro
       )}
 
       {/* Footer: Assignee and Time Information */}
-      <div className="flex items-center justify-between text-xs text-text-secondary pt-3 border-t border-border">
+      <div className="flex items-center justify-between text-xs text-text-secondary pt-3 border-t border-background-contrast">
         {/* Assignee */}
         <div className="flex items-center gap-1">
           <User className="w-3 h-3" />
@@ -75,7 +100,7 @@ const KanbanCard = memo(function KanbanCard({ task, onDragStart }: KanbanCardPro
             <span
               className={
                 task.timeTaken > task.timeEstimate
-                  ? "text-red-600 font-semibold flex items-center gap-0.5"
+                  ? "text-error-main font-semibold flex items-center gap-0.5"
                   : ""
               }
             >

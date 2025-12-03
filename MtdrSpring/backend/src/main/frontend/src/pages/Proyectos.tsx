@@ -1,6 +1,7 @@
 // projects/components/Proyectos.tsx
 import { useState, useEffect } from "react";
 import { Plus, Calendar, DollarSign, Clock, Search, Filter, MoreVertical, CheckCircle, AlertCircle, Circle } from "lucide-react";
+// Theme-aware status colors using CSS variables
 import Button from "../components/Button";
 import Modal from "../components/Modal";
 import Alert from "../components/Alert";
@@ -12,8 +13,6 @@ import { getProjects } from "../modules/projects/services/projectService";
 export default function Proyectos() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [projects, setProjects] = useState<Project[]>([])
-  const [searchTerm] = useState("")
-  const [filterStatus] = useState<"all" | string>("all")
 
   // Cargar proyectos desde el backend
   const fetchProjects = async () => {
@@ -29,32 +28,27 @@ export default function Proyectos() {
     fetchProjects()
   }, [])
 
+  // Theme-aware status mapping using CSS variables
   const getStatusInfo = (status: string) => {
     const statusMap: Record<string, any> = {
-      "planning": { label: "Planificación", color: "bg-blue-500", textColor: "text-blue-700", bgColor: "bg-blue-100", icon: Circle },
-      "in-progress": { label: "En Progreso", color: "bg-yellow-500", textColor: "text-yellow-700", bgColor: "bg-yellow-100", icon: Clock },
-      "completed": { label: "Completado", color: "bg-green-500", textColor: "text-green-700", bgColor: "bg-green-100", icon: CheckCircle },
-      "on-hold": { label: "En Pausa", color: "bg-gray-500", textColor: "text-gray-700", bgColor: "bg-gray-100", icon: AlertCircle }
+      "planning": { label: "Planificación", color: "bg-pending-main", textColor: "text-pending-dark", bgColor: "bg-pending-bg", icon: Circle },
+      "in-progress": { label: "En Progreso", color: "bg-inProgress-main", textColor: "text-inProgress-dark", bgColor: "bg-inProgress-bg", icon: Clock },
+      "completed": { label: "Completado", color: "bg-done-main", textColor: "text-done-dark", bgColor: "bg-done-bg", icon: CheckCircle },
+      "on-hold": { label: "En Pausa", color: "bg-todo-main", textColor: "text-todo-dark", bgColor: "bg-todo-bg", icon: AlertCircle }
     }
     return statusMap[status] || statusMap["planning"]
   }
 
+  // Theme-aware priority border colors
   const getPriorityColor = (priority?: string) => {
     const colors: Record<string, string> = {
-      "critical": "border-red-500",
-      "high": "border-orange-500",
-      "medium": "border-yellow-500",
-      "low": "border-blue-500"
+      "critical": "border-error-main",
+      "high": "border-warning-main",
+      "medium": "border-inProgress-main",
+      "low": "border-info-main"
     }
     return priority ? colors[priority] || colors["medium"] : colors["medium"]
   }
-
-  const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (project.description?.toLowerCase().includes(searchTerm.toLowerCase()))
-    const matchesFilter = filterStatus === "all" || project.status === filterStatus
-    return matchesSearch && matchesFilter
-  })
 
   // Estadísticas
   const totalBudget = projects.reduce((sum, p) => sum + parseFloat((p as any).budget?.replace(/[$,]/g, '') || "0"), 0)
@@ -100,7 +94,7 @@ export default function Proyectos() {
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredProjects.map(project => {
+        {projects.map(project => {
           const statusInfo = getStatusInfo(project.status || "")
           const StatusIcon = statusInfo.icon
 
@@ -140,7 +134,7 @@ export default function Proyectos() {
       </div>
 
       {/* Empty State */}
-      {filteredProjects.length === 0 && (
+      {projects.length === 0 && (
         <div className="text-center py-12">
           <div className="text-text-secondary mb-4">
             <Search className="w-16 h-16 mx-auto mb-4 opacity-50" />
