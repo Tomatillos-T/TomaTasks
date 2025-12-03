@@ -21,7 +21,6 @@ public class BotSessionService {
 
     private static final Logger logger = LoggerFactory.getLogger(BotSessionService.class);
     private static final int SESSION_EXPIRY_HOURS = 24;
-    private static final int LOGIN_STATE_EXPIRY_MINUTES = 10;
 
     private final BotSessionRepository sessionRepository;
 
@@ -150,10 +149,9 @@ public class BotSessionService {
      * Sets the task creation state for a chat.
      */
     @Transactional
-    public void setTaskCreationState(Long chatId, String state, String sprintId) {
+    public void setTaskCreationState(Long chatId, String state) {
         BotSession session = getOrCreateSession(chatId);
         session.setTaskCreationState(state);
-        session.setSelectedSprintId(sprintId);
         sessionRepository.save(session);
     }
 
@@ -165,6 +163,96 @@ public class BotSessionService {
         return sessionRepository.findByChatId(chatId)
                 .map(BotSession::getTaskCreationState)
                 .orElse(null);
+    }
+
+    /**
+     * Sets the pending task name.
+     */
+    @Transactional
+    public void setPendingTaskName(Long chatId, String taskName) {
+        BotSession session = getOrCreateSession(chatId);
+        session.setPendingTaskName(taskName);
+        sessionRepository.save(session);
+    }
+
+    /**
+     * Gets the pending task name.
+     */
+    @Transactional(readOnly = true)
+    public String getPendingTaskName(Long chatId) {
+        return sessionRepository.findByChatId(chatId)
+                .map(BotSession::getPendingTaskName)
+                .orElse(null);
+    }
+
+    /**
+     * Sets the selected status.
+     */
+    @Transactional
+    public void setSelectedStatus(Long chatId, String status) {
+        BotSession session = getOrCreateSession(chatId);
+        session.setSelectedStatus(status);
+        sessionRepository.save(session);
+    }
+
+    /**
+     * Gets the selected status.
+     */
+    @Transactional(readOnly = true)
+    public String getSelectedStatus(Long chatId) {
+        return sessionRepository.findByChatId(chatId)
+                .map(BotSession::getSelectedStatus)
+                .orElse(null);
+    }
+
+    /**
+     * Sets the selected priority.
+     */
+    @Transactional
+    public void setSelectedPriority(Long chatId, String priority) {
+        BotSession session = getOrCreateSession(chatId);
+        session.setSelectedPriority(priority);
+        sessionRepository.save(session);
+    }
+
+    /**
+     * Gets the selected priority.
+     */
+    @Transactional(readOnly = true)
+    public String getSelectedPriority(Long chatId) {
+        return sessionRepository.findByChatId(chatId)
+                .map(BotSession::getSelectedPriority)
+                .orElse(null);
+    }
+
+    /**
+     * Sets the selected estimation.
+     */
+    @Transactional
+    public void setSelectedEstimation(Long chatId, String estimation) {
+        BotSession session = getOrCreateSession(chatId);
+        session.setSelectedEstimation(estimation);
+        sessionRepository.save(session);
+    }
+
+    /**
+     * Gets the selected estimation.
+     */
+    @Transactional(readOnly = true)
+    public String getSelectedEstimation(Long chatId) {
+        return sessionRepository.findByChatId(chatId)
+                .map(BotSession::getSelectedEstimation)
+                .orElse(null);
+    }
+
+    /**
+     * Sets the selected sprint ID.
+     */
+    @Transactional
+    public void setSelectedSprintId(Long chatId, String sprintId) {
+        BotSession session = getOrCreateSession(chatId);
+        session.setSelectedSprintId(sprintId);
+        sessionRepository.save(session);
     }
 
     /**
@@ -186,6 +274,27 @@ public class BotSessionService {
             session.clearTaskCreationState();
             sessionRepository.save(session);
         });
+    }
+
+    /**
+     * Sets the task index mapping for a chat.
+     * The mapping is a JSON string like: {"1":"uuid1","2":"uuid2",...}
+     */
+    @Transactional
+    public void setTaskIndexMapping(Long chatId, String mapping) {
+        BotSession session = getOrCreateSession(chatId);
+        session.setTaskIndexMapping(mapping);
+        sessionRepository.save(session);
+    }
+
+    /**
+     * Gets the task index mapping for a chat.
+     */
+    @Transactional(readOnly = true)
+    public String getTaskIndexMapping(Long chatId) {
+        return sessionRepository.findByChatId(chatId)
+                .map(BotSession::getTaskIndexMapping)
+                .orElse(null);
     }
 
     /**

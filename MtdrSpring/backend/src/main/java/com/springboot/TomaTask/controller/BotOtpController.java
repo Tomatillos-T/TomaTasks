@@ -1,12 +1,16 @@
 package com.springboot.TomaTask.controller;
 
+import com.springboot.TomaTask.model.BotOtp;
 import com.springboot.TomaTask.service.OtpService;
 import com.springboot.TomaTask.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * REST controller for Telegram Bot OTP operations.
@@ -48,6 +52,31 @@ public class BotOtpController {
                 "otp", otp,
                 "message", "Enter this code in the Telegram bot to complete login",
                 "expiresInMinutes", 5
+        ));
+    }
+
+    /**
+     * Gets the current valid OTP for the given email address, if one exists.
+     *
+     * @param email the user's email address
+     * @return the OTP info if a valid OTP exists
+     */
+    @GetMapping("/current")
+    public ResponseEntity<?> getCurrentOtp(@RequestParam String email) {
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
+        }
+
+        Optional<BotOtp> otpOpt = otpService.getValidOtp(email);
+        if (otpOpt.isEmpty()) {
+            return ResponseEntity.ok(Map.of("hasOtp", false));
+        }
+
+        BotOtp botOtp = otpOpt.get();
+        return ResponseEntity.ok(Map.of(
+                "hasOtp", true,
+                "otp", botOtp.getOtp(),
+                "expiresAt", botOtp.getExpiresAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         ));
     }
 

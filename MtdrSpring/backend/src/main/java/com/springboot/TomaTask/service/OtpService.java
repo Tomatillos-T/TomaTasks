@@ -96,6 +96,33 @@ public class OtpService {
     }
 
     /**
+     * Gets the current valid OTP for the given email, if one exists.
+     *
+     * @param email the user's email address
+     * @return Optional containing OTP info if a valid OTP exists
+     */
+    @Transactional(readOnly = true)
+    public Optional<BotOtp> getValidOtp(String email) {
+        if (email == null) {
+            return Optional.empty();
+        }
+
+        String normalizedEmail = email.toLowerCase();
+        Optional<BotOtp> botOtpOpt = otpRepository.findByEmailIgnoreCase(normalizedEmail);
+
+        if (botOtpOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        BotOtp botOtp = botOtpOpt.get();
+        if (botOtp.isExpired()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(botOtp);
+    }
+
+    /**
      * Clears the OTP for a given email.
      *
      * @param email the user's email address

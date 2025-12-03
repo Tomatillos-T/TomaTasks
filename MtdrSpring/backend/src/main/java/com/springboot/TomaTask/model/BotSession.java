@@ -47,6 +47,37 @@ public class BotSession {
     @Column(name = "selected_sprint_id", length = 36)
     private String selectedSprintId;
 
+    /**
+     * Pending task name during task creation flow.
+     */
+    @Column(name = "pending_task_name", length = 255)
+    private String pendingTaskName;
+
+    /**
+     * Selected task status during task creation flow.
+     */
+    @Column(name = "selected_status", length = 20)
+    private String selectedStatus;
+
+    /**
+     * Selected task priority during task creation flow.
+     */
+    @Column(name = "selected_priority", length = 20)
+    private String selectedPriority;
+
+    /**
+     * Selected task estimation during task creation flow.
+     */
+    @Column(name = "selected_estimation", length = 10)
+    private String selectedEstimation;
+
+    /**
+     * JSON mapping of task index (1, 2, 3...) to task ID for the current todo list view.
+     * This allows displaying user-friendly indices instead of UUIDs in the keyboard.
+     */
+    @Column(name = "task_index_mapping", length = 4000)
+    private String taskIndexMapping;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -118,6 +149,46 @@ public class BotSession {
         this.selectedSprintId = selectedSprintId;
     }
 
+    public String getPendingTaskName() {
+        return pendingTaskName;
+    }
+
+    public void setPendingTaskName(String pendingTaskName) {
+        this.pendingTaskName = pendingTaskName;
+    }
+
+    public String getSelectedStatus() {
+        return selectedStatus;
+    }
+
+    public void setSelectedStatus(String selectedStatus) {
+        this.selectedStatus = selectedStatus;
+    }
+
+    public String getSelectedPriority() {
+        return selectedPriority;
+    }
+
+    public void setSelectedPriority(String selectedPriority) {
+        this.selectedPriority = selectedPriority;
+    }
+
+    public String getSelectedEstimation() {
+        return selectedEstimation;
+    }
+
+    public void setSelectedEstimation(String selectedEstimation) {
+        this.selectedEstimation = selectedEstimation;
+    }
+
+    public String getTaskIndexMapping() {
+        return taskIndexMapping;
+    }
+
+    public void setTaskIndexMapping(String taskIndexMapping) {
+        this.taskIndexMapping = taskIndexMapping;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -162,6 +233,11 @@ public class BotSession {
     public void clearTaskCreationState() {
         this.taskCreationState = null;
         this.selectedSprintId = null;
+        this.pendingTaskName = null;
+        this.selectedStatus = null;
+        this.selectedPriority = null;
+        this.selectedEstimation = null;
+        // Note: taskIndexMapping is NOT cleared here as it's used for todo list operations
     }
 
     /**
@@ -173,5 +249,10 @@ public class BotSession {
         this.pendingEmail = null;
         this.taskCreationState = null;
         this.selectedSprintId = null;
+        this.pendingTaskName = null;
+        this.selectedStatus = null;
+        this.selectedPriority = null;
+        this.selectedEstimation = null;
+        this.taskIndexMapping = null;
     }
 }

@@ -112,6 +112,10 @@ export default function CreateTaskModal({
       setSuccess(result.message);
       // Invalidate tasks query to refetch
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      // Also invalidate kanban queries if editing
+      if (isEditMode) {
+        queryClient.invalidateQueries({ queryKey: ["kanban-tasks"] });
+      }
       // Reset form
       resetForm();
       // Close modal after short delay

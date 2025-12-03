@@ -2,6 +2,7 @@ package com.springboot.TomaTask.mapper;
 
 import com.springboot.TomaTask.dto.TaskDTO;
 import com.springboot.TomaTask.model.Task;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.List;
@@ -35,15 +36,21 @@ public class TaskMapper {
         dto.setCreatedAt(task.getCreatedAt());
         dto.setUpdatedAt(task.getUpdatedAt());
 
-        // Set IDs for relationships
+        // Set IDs for relationships - safely handle lazy proxies
         if (task.getSprint() != null) {
             dto.setSprintId(task.getSprint().getId());
-            dto.setSprintName(task.getSprint().getDescription());
+            // Only access description if proxy is initialized to avoid LazyInitializationException
+            if (Hibernate.isInitialized(task.getSprint())) {
+                dto.setSprintName(task.getSprint().getDescription());
+            }
         }
 
         if (task.getUser() != null) {
             dto.setAssigneeId(task.getUser().getId());
-            dto.setAssigneeName(task.getUser().getName());
+            // Only access name if proxy is initialized to avoid LazyInitializationException
+            if (Hibernate.isInitialized(task.getUser())) {
+                dto.setAssigneeName(task.getUser().getName());
+            }
         }
 
         // Include nested objects if requested

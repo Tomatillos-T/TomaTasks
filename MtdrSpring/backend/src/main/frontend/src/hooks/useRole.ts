@@ -3,6 +3,7 @@ import { useMemo } from "react";
 
 /**
  * Hook to manage role-based access control
+ * Note: Roles are mapped to frontend format (Admin, Developer) via roleMapper
  */
 export const useRole = () => {
   const { user } = useUserContext();
@@ -16,8 +17,9 @@ export const useRole = () => {
     return roleArray.includes(userRole);
   };
 
-  const isAdmin = useMemo(() => hasRole("ROLE_ADMIN"), [userRole]);
-  const isDeveloper = useMemo(() => hasRole("ROLE_DEVELOPER"), [userRole]);
+  // Use frontend format roles (mapped from ROLE_ADMIN -> Admin, ROLE_DEVELOPER -> Developer)
+  const isAdmin = useMemo(() => hasRole("Admin"), [userRole]);
+  const isDeveloper = useMemo(() => hasRole("Developer"), [userRole]);
 
   return {
     userRole,

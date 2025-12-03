@@ -67,10 +67,10 @@ const TotalHoursBySprintChart: React.FC = () => {
       </h2>
       <ResponsiveContainer width="100%" height={400}>
         <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--background-contrast)" />
           <XAxis
             dataKey="name"
-            tick={{ fill: "#666", fontSize: 12 }}
+            tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
             angle={0}
             textAnchor="middle"
             height={40}
@@ -80,19 +80,19 @@ const TotalHoursBySprintChart: React.FC = () => {
               value: "Hours",
               angle: -90,
               position: "insideLeft",
-              style: { fill: "#666" },
+              style: { fill: "var(--text-secondary)" },
             }}
-            tick={{ fill: "#666", fontSize: 12 }}
+            tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
           />
           <Tooltip
             content={<CustomChartTooltip labelKey="fullName" />}
             wrapperStyle={{
               outline: "none",
             }}
-            cursor={{ fill: "rgba(155, 135, 245, 0.1)" }}
+            cursor={{ fill: "var(--primary-main)", opacity: 0.1 }}
           />
           <Legend />
-          <Bar dataKey="Hours Invested" fill="#9b87f5" radius={[8, 8, 0, 0]}>
+          <Bar dataKey="Hours Invested" fill="var(--primary-main)" radius={[8, 8, 0, 0]}>
             <LabelList
               dataKey="Hours Invested"
               position="top"

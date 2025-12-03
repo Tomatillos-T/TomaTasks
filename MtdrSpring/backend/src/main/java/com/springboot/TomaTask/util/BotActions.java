@@ -29,8 +29,13 @@ public class BotActions {
 
     public static final String LOGIN_STATE_AWAITING_EMAIL = "AWAITING_EMAIL";
     public static final String LOGIN_STATE_AWAITING_OTP = "AWAITING_OTP";
-    public static final String TASK_STATE_AWAITING_SPRINT = "AWAITING_SPRINT_SELECTION";
+
+    // Task creation flow states (in order)
     public static final String TASK_STATE_AWAITING_NAME = "AWAITING_TASK_NAME";
+    public static final String TASK_STATE_AWAITING_STATUS = "AWAITING_STATUS";
+    public static final String TASK_STATE_AWAITING_PRIORITY = "AWAITING_PRIORITY";
+    public static final String TASK_STATE_AWAITING_ESTIMATION = "AWAITING_ESTIMATION";
+    public static final String TASK_STATE_AWAITING_SPRINT = "AWAITING_SPRINT";
 
     private String requestText;
     private long chatId;
@@ -96,6 +101,16 @@ public class BotActions {
             }
 
             if (LOGIN_STATE_AWAITING_OTP.equals(loginState) && pendingEmail != null) {
+                // Check if user wants to restart login flow
+                if (requestText.equals(BotCommands.LOGIN_COMMAND.getCommand())
+                        || requestText.equals(BotLabels.LOGIN.getLabel())) {
+                    // User typed /login - restart the login flow
+                    sessionService.clearLoginState(chatId);
+                    sessionService.setLoginState(chatId, LOGIN_STATE_AWAITING_EMAIL, null);
+                    BotHelper.sendMessageToTelegram(chatId, BotMessages.LOGIN_PROMPT.getMessage(), telegramClient, null);
+                    return;
+                }
+
                 // User is entering OTP
                 String otp = requestText.trim();
 
@@ -125,9 +140,13 @@ public class BotActions {
             return;
         }
 
-        // Redirect from other commands when not logged in
-        BotHelper.sendMessageToTelegram(chatId, BotMessages.LOGIN_MISSING.getMessage(), telegramClient, null);
-        sessionService.setLoginState(chatId, LOGIN_STATE_AWAITING_EMAIL, null);
+        // Redirect from other commands when not logged in - show login prompt with button
+        BotHelper.sendMessageToTelegram(chatId, BotMessages.NOT_LOGGED_IN.getMessage(), telegramClient,
+                ReplyKeyboardMarkup
+                        .builder()
+                        .keyboardRow(new KeyboardRow(BotLabels.LOGIN.getLabel()))
+                        .keyboardRow(new KeyboardRow(BotLabels.INTRODUCTION.getLabel()))
+                        .build());
     }
 
     public void fnLogout() {
@@ -149,25 +168,69 @@ public class BotActions {
                 || requestText.equals(BotLabels.INTRODUCTION.getLabel())))
             return;
 
-        // Clear any pending task creation state
+        // Clear any pending states (login and task creation)
+        sessionService.clearLoginState(chatId);
         sessionService.clearTaskCreationState(chatId);
 
-        BotHelper.sendMessageToTelegram(chatId, BotMessages.HELLO_MYTODO_BOT.getMessage(), telegramClient,
-                ReplyKeyboardMarkup
-                        .builder()
-                        .keyboardRow(
-                                new KeyboardRow(BotLabels.LIST_ALL_ITEMS.getLabel(),
-                                        BotLabels.ADD_NEW_ITEM.getLabel()))
-                        .keyboardRow(new KeyboardRow(BotLabels.INTRODUCTION.getLabel(),
-                                BotLabels.HIDE_MAIN_SCREEN.getLabel()))
-                        .build());
+        // Show different options based on authentication status
+        if (sessionService.isAuthenticated(chatId)) {
+            // Authenticated user - show full menu
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.HELLO_MYTODO_BOT.getMessage(), telegramClient,
+                    ReplyKeyboardMarkup
+                            .builder()
+                            .keyboardRow(
+                                    new KeyboardRow(BotLabels.LIST_ALL_ITEMS.getLabel(),
+                                            BotLabels.ADD_NEW_ITEM.getLabel()))
+                            .keyboardRow(new KeyboardRow(BotLabels.INTRODUCTION.getLabel(),
+                                    BotLabels.HIDE_MAIN_SCREEN.getLabel()))
+                            .build());
+        } else {
+            // Not authenticated - show welcome with login option
+            // Do NOT auto-set awaiting email state - let user explicitly click Login
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.HELLO_MYTODO_BOT.getMessage(), telegramClient,
+                    ReplyKeyboardMarkup
+                            .builder()
+                            .keyboardRow(new KeyboardRow(BotLabels.LOGIN.getLabel()))
+                            .keyboardRow(new KeyboardRow(BotLabels.INTRODUCTION.getLabel()))
+                            .build());
+        }
+    }
+
+    /**
+     * Resolves a task index (from keyboard button) to the actual task ID using the stored mapping.
+     */
+    private String resolveTaskIdFromIndex(String indexStr) {
+        String mapping = sessionService.getTaskIndexMapping(chatId);
+        if (mapping == null || mapping.isEmpty()) {
+            return null;
+        }
+        // Parse JSON mapping: {"1":"uuid1","2":"uuid2",...}
+        String searchKey = "\"" + indexStr + "\":\"";
+        int keyStart = mapping.indexOf(searchKey);
+        if (keyStart == -1) {
+            return null;
+        }
+        int valueStart = keyStart + searchKey.length();
+        int valueEnd = mapping.indexOf("\"", valueStart);
+        if (valueEnd == -1) {
+            return null;
+        }
+        return mapping.substring(valueStart, valueEnd);
     }
 
     public void fnDone() {
         if (requestText.indexOf(BotLabels.DONE.getLabel()) == -1)
             return;
 
-        String taskId = requestText.substring(0, requestText.lastIndexOf(BotLabels.DASH.getLabel()));
+        String indexStr = requestText.substring(0, requestText.lastIndexOf(BotLabels.DASH.getLabel()));
+        String taskId = resolveTaskIdFromIndex(indexStr);
+
+        if (taskId == null) {
+            logger.error("Could not resolve task index: {}", indexStr);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.ERROR_TASK_NOT_FOUND.getMessage(), telegramClient);
+            return;
+        }
+
         try {
             TaskDTO taskDto = taskService.getTaskById(taskId);
             taskDto.setStatus(Status.DONE);
@@ -186,7 +249,15 @@ public class BotActions {
         if (requestText.indexOf(BotLabels.UNDO.getLabel()) == -1)
             return;
 
-        String taskId = requestText.substring(0, requestText.lastIndexOf(BotLabels.DASH.getLabel()));
+        String indexStr = requestText.substring(0, requestText.lastIndexOf(BotLabels.DASH.getLabel()));
+        String taskId = resolveTaskIdFromIndex(indexStr);
+
+        if (taskId == null) {
+            logger.error("Could not resolve task index: {}", indexStr);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.ERROR_TASK_NOT_FOUND.getMessage(), telegramClient);
+            return;
+        }
+
         try {
             TaskDTO taskDto = taskService.getTaskById(taskId);
             taskDto.setStatus(Status.IN_PROGRESS);
@@ -205,7 +276,15 @@ public class BotActions {
         if (requestText.indexOf(BotLabels.DELETE.getLabel()) == -1)
             return;
 
-        String taskId = requestText.substring(0, requestText.lastIndexOf(BotLabels.DASH.getLabel()));
+        String indexStr = requestText.substring(0, requestText.lastIndexOf(BotLabels.DASH.getLabel()));
+        String taskId = resolveTaskIdFromIndex(indexStr);
+
+        if (taskId == null) {
+            logger.error("Could not resolve task index: {}", indexStr);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.ERROR_TASK_NOT_FOUND.getMessage(), telegramClient);
+            return;
+        }
+
         try {
             taskService.deleteTask(taskId);
             BotHelper.sendMessageToTelegram(chatId, BotMessages.ITEM_DELETED.getMessage(), telegramClient);
@@ -262,23 +341,42 @@ public class BotActions {
         List<TaskDTO> activeItems = allItems.stream().filter(item -> item.getStatus() != Status.DONE)
                 .collect(Collectors.toList());
 
-        for (TaskDTO item : activeItems) {
-            KeyboardRow currentRow = new KeyboardRow();
-            currentRow.add(item.getName());
-            currentRow.add(item.getId() + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
-            keyboard.add(currentRow);
-        }
-
         List<TaskDTO> doneItems = allItems.stream().filter(item -> item.getStatus() == Status.DONE)
                 .collect(Collectors.toList());
 
-        for (TaskDTO item : doneItems) {
+        // Build index-to-taskId mapping
+        Map<Integer, String> indexToTaskId = new HashMap<>();
+        int index = 1;
+
+        for (TaskDTO item : activeItems) {
+            indexToTaskId.put(index, item.getId());
             KeyboardRow currentRow = new KeyboardRow();
             currentRow.add(item.getName());
-            currentRow.add(item.getId() + BotLabels.DASH.getLabel() + BotLabels.UNDO.getLabel());
-            currentRow.add(item.getId() + BotLabels.DASH.getLabel() + BotLabels.DELETE.getLabel());
+            currentRow.add(index + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
             keyboard.add(currentRow);
+            index++;
         }
+
+        for (TaskDTO item : doneItems) {
+            indexToTaskId.put(index, item.getId());
+            KeyboardRow currentRow = new KeyboardRow();
+            currentRow.add(item.getName());
+            currentRow.add(index + BotLabels.DASH.getLabel() + BotLabels.UNDO.getLabel());
+            currentRow.add(index + BotLabels.DASH.getLabel() + BotLabels.DELETE.getLabel());
+            keyboard.add(currentRow);
+            index++;
+        }
+
+        // Store the mapping as JSON in the session
+        StringBuilder mappingJson = new StringBuilder("{");
+        boolean first = true;
+        for (Map.Entry<Integer, String> entry : indexToTaskId.entrySet()) {
+            if (!first) mappingJson.append(",");
+            mappingJson.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\"");
+            first = false;
+        }
+        mappingJson.append("}");
+        sessionService.setTaskIndexMapping(chatId, mappingJson.toString());
 
         KeyboardRow logoutRow = new KeyboardRow();
         logoutRow.add(BotLabels.LOGOUT.getLabel());
@@ -290,7 +388,7 @@ public class BotActions {
     }
 
     /**
-     * Initiates the add item flow with sprint selection.
+     * Initiates the add item flow - starts with asking for task name.
      */
     public void fnAddItem() {
         if (!(requestText.contains(BotCommands.ADD_ITEM.getCommand())
@@ -304,20 +402,253 @@ public class BotActions {
             return;
         }
 
-        List<SprintDTO> sprints = new ArrayList<>();
-        try {
-            sprints = sprintService.getAllSprints();
-        } catch (Exception e) {
-            logger.warn("Could not fetch sprints: {}", e.getMessage());
+        // Clear any previous task creation state and start fresh
+        sessionService.clearTaskCreationState(chatId);
+        sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_NAME);
+        BotHelper.sendMessageToTelegram(chatId, BotMessages.ENTER_TASK_NAME.getMessage(), telegramClient);
+    }
+
+    /**
+     * Handles task name input.
+     */
+    public void fnTaskNameInput() {
+        String taskState = sessionService.getTaskCreationState(chatId);
+        if (!TASK_STATE_AWAITING_NAME.equals(taskState))
+            return;
+
+        if (requestText.equals(BotLabels.CANCEL.getLabel())) {
+            sessionService.clearTaskCreationState(chatId);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.TASK_CREATION_CANCELLED.getMessage(), telegramClient);
+            return;
         }
 
-        if (sprints.isEmpty()) {
-            BotHelper.sendMessageToTelegram(chatId, BotMessages.NO_SPRINTS_AVAILABLE.getMessage(), telegramClient, null);
-            sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_NAME, null);
-            BotHelper.sendMessageToTelegram(chatId, BotMessages.TYPE_NEW_TODO_ITEM.getMessage(), telegramClient);
+        // Save task name and move to status selection
+        sessionService.setPendingTaskName(chatId, requestText);
+        sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_STATUS);
+        showStatusKeyboard();
+    }
+
+    private void showStatusKeyboard() {
+        ReplyKeyboardMarkup keyboardMarkup = ReplyKeyboardMarkup.builder()
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(true)
+                .selective(true)
+                .build();
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(BotLabels.STATUS_TODO.getLabel());
+        row1.add(BotLabels.STATUS_IN_PROGRESS.getLabel());
+        keyboard.add(row1);
+
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(BotLabels.STATUS_PENDING.getLabel());
+        row2.add(BotLabels.STATUS_TESTING.getLabel());
+        keyboard.add(row2);
+
+        KeyboardRow cancelRow = new KeyboardRow();
+        cancelRow.add(BotLabels.CANCEL.getLabel());
+        keyboard.add(cancelRow);
+
+        keyboardMarkup.setKeyboard(keyboard);
+        BotHelper.sendMessageToTelegram(chatId, BotMessages.SELECT_STATUS.getMessage(), telegramClient, keyboardMarkup);
+    }
+
+    /**
+     * Handles status selection.
+     */
+    public void fnStatusSelection() {
+        String taskState = sessionService.getTaskCreationState(chatId);
+        if (!TASK_STATE_AWAITING_STATUS.equals(taskState))
+            return;
+
+        if (requestText.equals(BotLabels.CANCEL.getLabel())) {
+            sessionService.clearTaskCreationState(chatId);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.TASK_CREATION_CANCELLED.getMessage(), telegramClient);
+            return;
+        }
+
+        // Map label to Status enum
+        String status = null;
+        if (requestText.equals(BotLabels.STATUS_TODO.getLabel())) {
+            status = "TODO";
+        } else if (requestText.equals(BotLabels.STATUS_IN_PROGRESS.getLabel())) {
+            status = "IN_PROGRESS";
+        } else if (requestText.equals(BotLabels.STATUS_PENDING.getLabel())) {
+            status = "PENDING";
+        } else if (requestText.equals(BotLabels.STATUS_TESTING.getLabel())) {
+            status = "TESTING";
+        }
+
+        if (status == null) {
+            // Invalid selection - show keyboard again
+            showStatusKeyboard();
+            return;
+        }
+
+        sessionService.setSelectedStatus(chatId, status);
+        sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_PRIORITY);
+        showPriorityKeyboard();
+    }
+
+    private void showPriorityKeyboard() {
+        ReplyKeyboardMarkup keyboardMarkup = ReplyKeyboardMarkup.builder()
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(true)
+                .selective(true)
+                .build();
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(BotLabels.PRIORITY_LOW.getLabel());
+        row1.add(BotLabels.PRIORITY_MODERATE.getLabel());
+        keyboard.add(row1);
+
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(BotLabels.PRIORITY_HIGH.getLabel());
+        row2.add(BotLabels.PRIORITY_URGENT.getLabel());
+        keyboard.add(row2);
+
+        KeyboardRow cancelRow = new KeyboardRow();
+        cancelRow.add(BotLabels.CANCEL.getLabel());
+        keyboard.add(cancelRow);
+
+        keyboardMarkup.setKeyboard(keyboard);
+        BotHelper.sendMessageToTelegram(chatId, BotMessages.SELECT_PRIORITY.getMessage(), telegramClient, keyboardMarkup);
+    }
+
+    /**
+     * Handles priority selection.
+     */
+    public void fnPrioritySelection() {
+        String taskState = sessionService.getTaskCreationState(chatId);
+        if (!TASK_STATE_AWAITING_PRIORITY.equals(taskState))
+            return;
+
+        if (requestText.equals(BotLabels.CANCEL.getLabel())) {
+            sessionService.clearTaskCreationState(chatId);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.TASK_CREATION_CANCELLED.getMessage(), telegramClient);
+            return;
+        }
+
+        // Map label to Priority enum
+        String priority = null;
+        if (requestText.equals(BotLabels.PRIORITY_LOW.getLabel())) {
+            priority = "LOW";
+        } else if (requestText.equals(BotLabels.PRIORITY_MODERATE.getLabel())) {
+            priority = "MODERATE";
+        } else if (requestText.equals(BotLabels.PRIORITY_HIGH.getLabel())) {
+            priority = "HIGH";
+        } else if (requestText.equals(BotLabels.PRIORITY_URGENT.getLabel())) {
+            priority = "URGENT";
+        }
+
+        if (priority == null) {
+            // Invalid selection - show keyboard again
+            showPriorityKeyboard();
+            return;
+        }
+
+        sessionService.setSelectedPriority(chatId, priority);
+        sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_ESTIMATION);
+        showEstimationKeyboard();
+    }
+
+    private void showEstimationKeyboard() {
+        ReplyKeyboardMarkup keyboardMarkup = ReplyKeyboardMarkup.builder()
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(true)
+                .selective(true)
+                .build();
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(BotLabels.ESTIMATION_XS.getLabel());
+        row1.add(BotLabels.ESTIMATION_S.getLabel());
+        row1.add(BotLabels.ESTIMATION_M.getLabel());
+        keyboard.add(row1);
+
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(BotLabels.ESTIMATION_L.getLabel());
+        row2.add(BotLabels.ESTIMATION_XL.getLabel());
+        row2.add(BotLabels.ESTIMATION_XXL.getLabel());
+        keyboard.add(row2);
+
+        KeyboardRow cancelRow = new KeyboardRow();
+        cancelRow.add(BotLabels.CANCEL.getLabel());
+        keyboard.add(cancelRow);
+
+        keyboardMarkup.setKeyboard(keyboard);
+        BotHelper.sendMessageToTelegram(chatId, BotMessages.SELECT_ESTIMATION.getMessage(), telegramClient, keyboardMarkup);
+    }
+
+    /**
+     * Handles estimation selection.
+     */
+    public void fnEstimationSelection() {
+        String taskState = sessionService.getTaskCreationState(chatId);
+        if (!TASK_STATE_AWAITING_ESTIMATION.equals(taskState))
+            return;
+
+        if (requestText.equals(BotLabels.CANCEL.getLabel())) {
+            sessionService.clearTaskCreationState(chatId);
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.TASK_CREATION_CANCELLED.getMessage(), telegramClient);
+            return;
+        }
+
+        // Map label to Estimation enum
+        String estimation = null;
+        if (requestText.equals(BotLabels.ESTIMATION_XS.getLabel())) {
+            estimation = "XS";
+        } else if (requestText.equals(BotLabels.ESTIMATION_S.getLabel())) {
+            estimation = "S";
+        } else if (requestText.equals(BotLabels.ESTIMATION_M.getLabel())) {
+            estimation = "M";
+        } else if (requestText.equals(BotLabels.ESTIMATION_L.getLabel())) {
+            estimation = "L";
+        } else if (requestText.equals(BotLabels.ESTIMATION_XL.getLabel())) {
+            estimation = "XL";
+        } else if (requestText.equals(BotLabels.ESTIMATION_XXL.getLabel())) {
+            estimation = "XXL";
+        }
+
+        if (estimation == null) {
+            // Invalid selection - show keyboard again
+            showEstimationKeyboard();
+            return;
+        }
+
+        sessionService.setSelectedEstimation(chatId, estimation);
+        sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_SPRINT);
+
+        // Show only ongoing sprints
+        List<SprintDTO> ongoingSprints = getOngoingSprints();
+        if (ongoingSprints.isEmpty()) {
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.NO_SPRINTS_AVAILABLE.getMessage(), telegramClient);
+            // Create task without sprint
+            createTask(null);
         } else {
-            sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_SPRINT, null);
-            showSprintSelectionKeyboard(sprints);
+            showSprintSelectionKeyboard(ongoingSprints);
+        }
+    }
+
+    private List<SprintDTO> getOngoingSprints() {
+        try {
+            List<SprintDTO> allSprints = sprintService.getAllSprints();
+            // Filter only "ongoing" or "in progress" sprints
+            return allSprints.stream()
+                    .filter(s -> s.getStatus() != null &&
+                            (s.getStatus().equalsIgnoreCase("ongoing") ||
+                             s.getStatus().equalsIgnoreCase("in_progress") ||
+                             s.getStatus().equalsIgnoreCase("active") ||
+                             s.getStatus().equalsIgnoreCase("in progress")))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.warn("Could not fetch sprints: {}", e.getMessage());
+            return new ArrayList<>();
         }
     }
 
@@ -346,7 +677,6 @@ public class BotActions {
         keyboard.add(cancelRow);
 
         keyboardMarkup.setKeyboard(keyboard);
-
         BotHelper.sendMessageToTelegram(chatId, BotMessages.SELECT_SPRINT.getMessage(), telegramClient, keyboardMarkup);
     }
 
@@ -360,13 +690,12 @@ public class BotActions {
 
         if (requestText.equals(BotLabels.CANCEL.getLabel())) {
             sessionService.clearTaskCreationState(chatId);
-            fnStart();
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.TASK_CREATION_CANCELLED.getMessage(), telegramClient);
             return;
         }
 
         if (requestText.equals(BotLabels.NO_SPRINT.getLabel())) {
-            sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_NAME, null);
-            BotHelper.sendMessageToTelegram(chatId, BotMessages.SPRINT_SELECTED.getMessage(), telegramClient, null);
+            createTask(null);
             return;
         }
 
@@ -375,58 +704,83 @@ public class BotActions {
             int dashIndex = afterPrefix.indexOf(BotLabels.DASH.getLabel());
             if (dashIndex > 0) {
                 String sprintId = afterPrefix.substring(0, dashIndex);
-                sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_NAME, sprintId);
-                BotHelper.sendMessageToTelegram(chatId, BotMessages.SPRINT_SELECTED.getMessage(), telegramClient, null);
+                createTask(sprintId);
                 return;
             }
         }
 
         // Invalid selection - show keyboard again
-        try {
-            List<SprintDTO> sprints = sprintService.getAllSprints();
-            showSprintSelectionKeyboard(sprints);
-        } catch (Exception e) {
-            logger.error("Error fetching sprints: {}", e.getMessage());
-            sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_NAME, null);
-            BotHelper.sendMessageToTelegram(chatId, BotMessages.TYPE_NEW_TODO_ITEM.getMessage(), telegramClient);
+        List<SprintDTO> ongoingSprints = getOngoingSprints();
+        if (ongoingSprints.isEmpty()) {
+            createTask(null);
+        } else {
+            showSprintSelectionKeyboard(ongoingSprints);
         }
     }
 
     /**
-     * Creates a new task with the selected sprint (or no sprint).
+     * Creates the task with all collected data.
      */
-    public void fnElse() {
+    private void createTask(String sprintId) {
         Optional<User> userOpt = sessionService.getAuthenticatedUser(chatId);
-        if (userOpt.isEmpty())
+        if (userOpt.isEmpty()) {
+            sessionService.clearTaskCreationState(chatId);
+            fnLogin();
             return;
+        }
 
         User currentUser = userOpt.get();
-        String taskState = sessionService.getTaskCreationState(chatId);
-
-        if (!TASK_STATE_AWAITING_NAME.equals(taskState)) {
-            sessionService.setTaskCreationState(chatId, TASK_STATE_AWAITING_NAME, null);
-        }
 
         try {
             TaskDTO newTaskDto = new TaskDTO();
-            newTaskDto.setName(requestText);
-            newTaskDto.setStatus(Status.IN_PROGRESS);
+            newTaskDto.setName(sessionService.getPendingTaskName(chatId));
             newTaskDto.setAssigneeId(currentUser.getId());
-            newTaskDto.setTimeEstimate(2);
 
-            String selectedSprintId = sessionService.getSelectedSprintId(chatId);
-            if (selectedSprintId != null) {
-                newTaskDto.setSprintId(selectedSprintId);
+            // Set status
+            String statusStr = sessionService.getSelectedStatus(chatId);
+            if (statusStr != null) {
+                newTaskDto.setStatus(Status.valueOf(statusStr));
+            } else {
+                newTaskDto.setStatus(Status.TODO);
+            }
+
+            // Set priority
+            String priorityStr = sessionService.getSelectedPriority(chatId);
+            if (priorityStr != null) {
+                newTaskDto.setPriority(com.springboot.TomaTask.model.Task.Priority.valueOf(priorityStr));
+            }
+
+            // Set estimation
+            String estimationStr = sessionService.getSelectedEstimation(chatId);
+            if (estimationStr != null) {
+                newTaskDto.setEstimation(com.springboot.TomaTask.model.Task.Estimation.valueOf(estimationStr));
+            }
+
+            // Set sprint if provided
+            if (sprintId != null) {
+                newTaskDto.setSprintId(sprintId);
             }
 
             taskService.createTask(newTaskDto);
             sessionService.clearTaskCreationState(chatId);
 
-            BotHelper.sendMessageToTelegram(chatId, BotMessages.NEW_ITEM_ADDED.getMessage(), telegramClient, null);
+            // Use the overload without keyboard parameter to remove the keyboard
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.NEW_ITEM_ADDED.getMessage(), telegramClient);
         } catch (Exception e) {
             logger.error("Error creating task: {}", e.getLocalizedMessage(), e);
-            BotHelper.sendMessageToTelegram(chatId, BotMessages.ERROR_TASK_CREATE.getMessage(), telegramClient, null);
+            sessionService.clearTaskCreationState(chatId);
+            // Use the overload without keyboard parameter to remove the keyboard
+            BotHelper.sendMessageToTelegram(chatId, BotMessages.ERROR_TASK_CREATE.getMessage(), telegramClient);
         }
+    }
+
+    /**
+     * Handles any other text input when authenticated (fallback).
+     */
+    public void fnElse() {
+        // This should no longer be used for task creation
+        // Task creation now goes through the explicit flow
+        BotHelper.sendMessageToTelegram(chatId, BotMessages.TYPE_NEW_TODO_ITEM.getMessage(), telegramClient, null);
     }
 
     // --- Predicate helpers for controller dispatch ---
@@ -482,7 +836,34 @@ public class BotActions {
         return sessionService.isAuthenticated(chatId);
     }
 
+    public boolean isAwaitingTaskName() {
+        return TASK_STATE_AWAITING_NAME.equals(sessionService.getTaskCreationState(chatId));
+    }
+
+    public boolean isAwaitingStatus() {
+        return TASK_STATE_AWAITING_STATUS.equals(sessionService.getTaskCreationState(chatId));
+    }
+
+    public boolean isAwaitingPriority() {
+        return TASK_STATE_AWAITING_PRIORITY.equals(sessionService.getTaskCreationState(chatId));
+    }
+
+    public boolean isAwaitingEstimation() {
+        return TASK_STATE_AWAITING_ESTIMATION.equals(sessionService.getTaskCreationState(chatId));
+    }
+
     public boolean isAwaitingSprintSelection() {
         return TASK_STATE_AWAITING_SPRINT.equals(sessionService.getTaskCreationState(chatId));
+    }
+
+    public boolean isInTaskCreationFlow() {
+        String state = sessionService.getTaskCreationState(chatId);
+        return state != null && (
+                TASK_STATE_AWAITING_NAME.equals(state) ||
+                TASK_STATE_AWAITING_STATUS.equals(state) ||
+                TASK_STATE_AWAITING_PRIORITY.equals(state) ||
+                TASK_STATE_AWAITING_ESTIMATION.equals(state) ||
+                TASK_STATE_AWAITING_SPRINT.equals(state)
+        );
     }
 }

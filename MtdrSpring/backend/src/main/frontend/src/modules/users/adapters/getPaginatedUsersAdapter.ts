@@ -7,6 +7,7 @@ import {
   mapFiltersToBackend,
   mapSortingToBackend,
 } from "@/modules/users/utils/columnMapper";
+import { mapRoleToFrontend } from "@/utils/roleMapper";
 
 export default async function getPaginatedUsersAdapter({
   page,
@@ -50,9 +51,15 @@ export default async function getPaginatedUsersAdapter({
 
     console.log("📦 Parsed response:", response);
 
+    // Map backend role format (ROLE_ADMIN) to frontend format (Admin)
+    const mappedUsers = response.content.map((user) => ({
+      ...user,
+      role: mapRoleToFrontend(user.role) as User["role"],
+    }));
+
     return {
       data: {
-        items: response.content,
+        items: mappedUsers,
         total: response.totalElements,
       },
       message: "Users fetched successfully",

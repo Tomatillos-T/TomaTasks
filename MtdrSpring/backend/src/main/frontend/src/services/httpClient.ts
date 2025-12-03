@@ -1,4 +1,5 @@
 // services/httpClient.ts
+import { authEvents } from "@/utils/authEvents";
 
 // In production (served by Spring Boot), no base URL needed (same origin)
 // In development, Vite proxy handles /api requests to localhost:8080
@@ -66,7 +67,17 @@ static async request<T>(
     const errorData = await response.json().catch(() => ({}));
     const errorMessage = errorData.message || `Error en la solicitud: ${response.status}`;
 
-    // Lanzar el error sin redirigir
+    // Handle authentication errors - invalidate session and redirect to login
+    if (response.status === 401 || response.status === 403) {
+      // Only invalidate if this was an authenticated request
+      if (auth) {
+        const reason = response.status === 401
+          ? 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.'
+          : 'No tienes permisos para acceder a este recurso.';
+        authEvents.invalidateSession(reason);
+      }
+    }
+
     throw {
       message: errorMessage,
       status: response.status,

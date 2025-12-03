@@ -31,7 +31,6 @@ export interface User {
   role: string;
   enabled: boolean;
   username: string;
-  telegramToken: string | null;
   githubId?: string;
   githubUsername?: string;
 }

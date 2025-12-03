@@ -19,8 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -171,36 +169,5 @@ public class UserService {
 
         User updatedUser = userRepository.save(existingUser);
         return UserMapper.toDTO(updatedUser);
-    }
-
-    @Transactional
-    public User generateTelegramToken(String userId) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("User not found with ID: " + userId);
-        }
-
-        User user = userOpt.get();
-        SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[32];
-        random.nextBytes(bytes);
-        String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-
-        user.setTelegramToken(token);
-        return userRepository.save(user);
-    }
-
-    @Transactional
-    public User validateTelegramToken(String token, String chatId) {
-        Optional<User> userOpt = userRepository.findByTelegramToken(token);
-
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("Invalid Telegram token");
-        }
-
-        User user = userOpt.get();
-        user.setTelegramToken(null);
-
-        return userRepository.save(user);
     }
 }

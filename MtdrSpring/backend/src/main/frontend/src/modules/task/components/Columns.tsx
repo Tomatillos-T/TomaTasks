@@ -62,12 +62,12 @@ export const columns: ColumnDef<Task>[] = [
       const timeEstimate = row.original.timeEstimate;
 
       if (timeTaken === null || timeTaken === undefined) {
-        return <span className="text-gray-400">-</span>;
+        return <span className="text-text-secondary">-</span>;
       }
 
       const isOverBudget = timeEstimate && timeTaken > timeEstimate;
       return (
-        <span className={isOverBudget ? "text-red-600 font-semibold" : ""}>
+        <span className={isOverBudget ? "text-error-main font-semibold" : ""}>
           {timeTaken}
         </span>
       );

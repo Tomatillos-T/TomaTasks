@@ -1,5 +1,4 @@
 import { Routes, Route } from "react-router-dom";
-import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
 import KPIReports from "@/pages/KPIReports";
 import Layout from "@/components/Layout";
@@ -22,7 +21,6 @@ import Equipo from "@/pages/Equipo";
 export default function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
       <Route path="/login" element={<LoginRoute />} />
 
       {/* Rutas protegidas del dashboard con sidebar fijo */}

@@ -80,35 +80,20 @@ public class TaskBotController implements SpringLongPollingBot, LongPollingSingl
 		actions.setChatId(chatId);
 
 		// Controller-driven dispatch using BotActions predicates
-		// Priority: if a login pending state exists, let fnLogin handle the message
-		if (actions.hasPendingLogin() || actions.isLoginCommand()) {
-			actions.fnLogin();
+
+		// Start / introduction - check FIRST so /start always works (clears pending states)
+		if (actions.isStartCommand()) {
+			actions.fnStart();
 			return;
 		}
 
-		// Logout handled first if explicit
+		// Logout handled early if explicit
 		if (actions.isLogoutCommand()) {
 			actions.fnLogout();
 			return;
 		}
 
-		// Start / introduction
-		if (actions.isStartCommand()) {
-			if (actions.hasSession()) {
-				actions.fnStart();
-			} else {
-				actions.fnLogin();
-			}
-			return;
-		}
-
-		// Handle sprint selection during task creation
-		if (actions.isAwaitingSprintSelection()) {
-			actions.fnSprintSelection();
-			return;
-		}
-
-		// List items
+		// List items - check BEFORE pending login so /todolist always works
 		if (actions.isListCommand()) {
 			if (actions.hasSession()) {
 				actions.fnListAll();
@@ -118,13 +103,51 @@ public class TaskBotController implements SpringLongPollingBot, LongPollingSingl
 			return;
 		}
 
-		// Add item flow
+		// Add item flow - check BEFORE pending login so /additem always works
 		if (actions.isAddCommand()) {
 			if (actions.hasSession()) {
 				actions.fnAddItem();
 			} else {
 				actions.fnLogin();
 			}
+			return;
+		}
+
+		// Hide command - check before login flow
+		if (actions.isHideCommand()) {
+			actions.fnHide();
+			return;
+		}
+
+		// Handle pending login states or explicit login command
+		if (actions.hasPendingLogin() || actions.isLoginCommand()) {
+			actions.fnLogin();
+			return;
+		}
+
+		// Handle task creation flow states (in order of flow)
+		if (actions.isAwaitingTaskName()) {
+			actions.fnTaskNameInput();
+			return;
+		}
+
+		if (actions.isAwaitingStatus()) {
+			actions.fnStatusSelection();
+			return;
+		}
+
+		if (actions.isAwaitingPriority()) {
+			actions.fnPrioritySelection();
+			return;
+		}
+
+		if (actions.isAwaitingEstimation()) {
+			actions.fnEstimationSelection();
+			return;
+		}
+
+		if (actions.isAwaitingSprintSelection()) {
+			actions.fnSprintSelection();
 			return;
 		}
 
@@ -153,12 +176,6 @@ public class TaskBotController implements SpringLongPollingBot, LongPollingSingl
 			} else {
 				actions.fnLogin();
 			}
-			return;
-		}
-
-		// Hide
-		if (actions.isHideCommand()) {
-			actions.fnHide();
 			return;
 		}
 

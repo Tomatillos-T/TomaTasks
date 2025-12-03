@@ -33,10 +33,19 @@ public enum BotMessages {
 	ERROR_TASK_UPDATE("An error occurred while updating the task. Please try again."),
 	ERROR_TASK_DELETE("An error occurred while deleting the task. Please try again."),
 	ERROR_TASK_CREATE("An error occurred while creating the task. Please try again."),
-	// Sprint selection messages
-	SELECT_SPRINT("Please select a sprint for your new task:"),
-	NO_SPRINTS_AVAILABLE("No active sprints available. The task will be created without a sprint assignment."),
-	SPRINT_SELECTED("Sprint selected! Now type the task name:");
+	// Task creation flow messages
+	ENTER_TASK_NAME("📝 Escribe el nombre de la tarea:"),
+	SELECT_STATUS("📊 Selecciona el estado de la tarea:"),
+	SELECT_PRIORITY("⚡ Selecciona la prioridad de la tarea:"),
+	SELECT_ESTIMATION("📐 Selecciona la estimación de la tarea:"),
+	SELECT_SPRINT("🏃 Selecciona el sprint para tu tarea (solo sprints activos):"),
+	NO_SPRINTS_AVAILABLE("⚠️ No hay sprints activos disponibles. La tarea se creará sin sprint asignado."),
+	TASK_NAME_SAVED("✅ Nombre guardado. Ahora selecciona el estado:"),
+	STATUS_SELECTED("✅ Estado seleccionado. Ahora selecciona la prioridad:"),
+	PRIORITY_SELECTED("✅ Prioridad seleccionada. Ahora selecciona la estimación:"),
+	ESTIMATION_SELECTED("✅ Estimación seleccionada. Ahora selecciona el sprint:"),
+	SPRINT_SELECTED("✅ Sprint seleccionado. Creando tarea..."),
+	TASK_CREATION_CANCELLED("❌ Creación de tarea cancelada.");
 
 	private String message;
 
