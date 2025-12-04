@@ -1,5 +1,6 @@
 package com.springboot.TomaTask.service;
 
+import com.springboot.TomaTask.dto.IndexBranchResponseDTO;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -9,6 +10,7 @@ import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -349,6 +351,116 @@ public class RepositoryService {
                 String diffText = out.toString().trim();
                 return diffText.isEmpty() ? "(No changes detected)" : diffText;
             }
+        }
+    }
+
+    /**
+     * Index a specific branch from a GitHub repository
+     * Clones the repository using GitHub token, switches to branch, and indexes all commits
+     *
+     * @param githubToken GitHub personal access token for authentication
+     * @param owner Repository owner (username or organization)
+     * @param repo Repository name
+     * @param branch Branch name to index
+     * @return IndexBranchResponseDTO with status and statistics
+     */
+    public IndexBranchResponseDTO indexBranch(String githubToken, String owner, String repo, String branch) {
+        try {
+            // Construct GitHub repository URL
+            String repoUrl = "https://github.com/" + owner + "/" + repo + ".git";
+
+            // Create temporary directory for this repository
+            String tempRepoPath = repoPath + "_" + owner + "_" + repo;
+            File repoDir = new File(tempRepoPath);
+
+            Git tempGit;
+
+            // Clone or update repository with GitHub token authentication
+            if (repoDir.exists()) {
+                logger.info("Opening existing repository at: {}", tempRepoPath);
+                tempGit = Git.open(repoDir);
+
+                // Pull latest changes with authentication
+                tempGit.pull()
+                    .setRemoteBranchName(branch)
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(githubToken, ""))
+                    .call();
+
+                logger.info("Repository updated from remote: {}", repoUrl);
+            } else {
+                logger.info("Cloning repository: {}", repoUrl);
+
+                // Clone with authentication
+                tempGit = Git.cloneRepository()
+                    .setURI(repoUrl)
+                    .setDirectory(repoDir)
+                    .setBranch(branch)
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(githubToken, ""))
+                    .call();
+
+                logger.info("Repository cloned successfully");
+            }
+
+            // Checkout the specified branch
+            tempGit.checkout().setName(branch).call();
+            logger.info("Switched to branch: {}", branch);
+
+            // Get all commits from this branch
+            Iterable<RevCommit> commits = tempGit.log().all().call();
+
+            int totalCommits = 0;
+            List<String> commitIds = new ArrayList<>();
+
+            for (RevCommit commit : commits) {
+                String commitId = commit.getName();
+                commitIds.add(commitId);
+
+                // Cache commit metadata
+                vectorStore.cacheCommit(
+                    commitId,
+                    commit.getFullMessage(),
+                    commit.getAuthorIdent().getName(),
+                    commit.getCommitTime(),
+                    null
+                );
+
+                totalCommits++;
+            }
+
+            logger.info("Indexed {} commits from branch '{}' of repository {}/{}",
+                totalCommits, branch, owner, repo);
+
+            // Start async processing of commits to generate embeddings
+            processCommitsAsync(commitIds);
+
+            // Set the current git instance to this repository for subsequent operations
+            this.git = tempGit;
+
+            // Create response
+            IndexBranchResponseDTO response = new IndexBranchResponseDTO(
+                "success",
+                totalCommits,
+                "Branch '" + branch + "' indexed successfully. Processing " + totalCommits + " commits in background."
+            );
+            response.setRepositoryUrl(repoUrl);
+            response.setBranch(branch);
+
+            return response;
+
+        } catch (GitAPIException e) {
+            logger.error("Git error while indexing branch: {}", e.getMessage(), e);
+            return new IndexBranchResponseDTO(
+                "error",
+                0,
+                "Git error: " + e.getMessage()
+            );
+        } catch (IOException e) {
+            logger.error("IO error while indexing branch: {}", e.getMessage(), e);
+            return new IndexBranchResponseDTO(
+                "error",
+                0,
+                "IO error: " + e.getMessage()
+            );
         }
     }
 

@@ -75,7 +75,7 @@ public class BotOtpController {
         BotOtp botOtp = otpOpt.get();
         return ResponseEntity.ok(Map.of(
                 "hasOtp", true,
-                "otp", botOtp.getOtp(),
+                "otp", botOtp.getOtpCode(),
                 "expiresAt", botOtp.getExpiresAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         ));
     }
