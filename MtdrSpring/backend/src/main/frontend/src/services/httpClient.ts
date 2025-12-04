@@ -3,7 +3,6 @@ import { authEvents } from "@/utils/authEvents";
 
 // In production (served by Spring Boot), no base URL needed (same origin)
 // In development, Vite proxy handles /api requests to localhost:8080
-const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL || "";
 
 interface HttpOptions extends RequestInit {
   /** Indica si se debe incluir el token JWT automáticamente */
@@ -58,7 +57,7 @@ static async request<T>(
 ): Promise<T> {
   const { auth = false, headers, ...rest } = options;
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${endpoint}`, {
     ...rest,
     headers: this.getHeaders(auth, headers),
   });
@@ -84,11 +83,27 @@ static async request<T>(
     } as HttpError;
   }
 
-  if (response.status === 204) return {} as T;
+    const response = await fetch(`${endpoint}`, {
+      ...rest,
+      headers: this.getHeaders(auth, headers),
+    });
 
-  return response.json();
-}
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage =
+        errorData.message || `Error en la solicitud: ${response.status}`;
 
+      // Lanzar el error sin redirigir
+      throw {
+        message: errorMessage,
+        status: response.status,
+      } as HttpError;
+    }
+
+    if (response.status === 204) return {} as T;
+
+    return response.json();
+  }
 
   /**
    * Atajo para solicitudes GET

@@ -86,6 +86,9 @@ spec:
                   name: github-oauth-secret
                   key: client_secret
                   optional: true
+            # CORS Configuration
+            - name: cors.allowed.origins
+              value: "http://163.192.133.86"
             - name: GITHUB_REDIRECT_URI
               value: "http://163.192.133.86/api/oauth/callback/github"
             - name: GOOGLE_API_KEY

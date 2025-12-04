@@ -112,6 +112,7 @@ public class DataInitializer {
                                 logger.info("✓ Equipos insertados");
 
                                 // Asignar usuarios al equipo
+                                assignUser("admin@tomatask.com", fullStackTeam);
                                 assignUser("kaled.enriquez@tomatask.com", fullStackTeam);
                                 assignUser("cesar.martinez@tomatask.com", fullStackTeam);
                                 assignUser("isaac.enriquez@tomatask.com", fullStackTeam);
@@ -138,19 +139,28 @@ public class DataInitializer {
 
                                 Sprint sprint3 = new Sprint(
                                                 "Sprint 3 - Features Avanzadas y Optimización",
-                                                "EN_PROGRESO",
+                                                "FINALIZADO",
                                                 LocalDate.of(2025, 10, 28),
-                                                LocalDate.of(2025, 11, 20),
-                                                null,
+                                                LocalDate.of(2025, 11, 17),
+                                                LocalDate.of(2025, 11, 17),
+                                                project1);
+
+                                Sprint sprint4 = new Sprint(
+                                                "Sprint 4 - BugFixes y RAG",
+                                                "FINALIZADO",
+                                                LocalDate.of(2025, 11, 17),
+                                                LocalDate.of(2025, 12, 3),
+                                                LocalDate.of(2025, 12, 3),
                                                 project1);
 
                                 sprintRepository.save(sprint1);
                                 sprintRepository.save(sprint2);
                                 sprintRepository.save(sprint3);
-                                logger.info("✓ Sprints insertados");
+                                sprintRepository.save(sprint4);
+                                logger.info("✓ Sprints insertados (4 sprints)");
 
-                                // ========== ATOMIC TASKS (75 tasks based on Git history) ==========
-                                logger.info("🔬 Insertando 75 tareas atómicas basadas en commits reales...");
+                                // ========== ATOMIC TASKS (105 tasks based on Git history) ==========
+                                logger.info("🔬 Insertando 105 tareas atómicas basadas en commits reales...");
 
                                 // === SPRINT 1: Authentication & Core Setup (Sept 26 - Oct 7, 2025) ===
                                 // Week 1: Backend Foundation
@@ -1319,16 +1329,482 @@ public class DataInitializer {
 
                                 logger.info("✓ Sprint 3: 32 tareas insertadas");
 
-                                logger.info("✅ SEEDING COMPLETO: 75 tareas atómicas insertadas con datos realistas");
-                                logger.info("📊 Estadísticas:");
-                                logger.info("   - Total estimado: 269 horas");
-                                logger.info("   - Total real: 289 horas");
-                                logger.info("   - Varianza: +20h (7.4% sobre estimación)");
-                                logger.info("   - Tareas bajo presupuesto: 35 (47%)");
-                                logger.info("   - Tareas sobre presupuesto: 30 (40%)");
-                                logger.info("   - Tareas a tiempo: 10 (13%)");
-                                logger.info("   - Distribución realista: refactoring/RAG/Kanban tomaron más tiempo");
-                                logger.info("   - Hotfixes/CSS/configs tomaron menos tiempo del estimado");
+                                // === SPRINT 4: BugFixes y RAG (Nov 17 - Dec 3, 2025) ===
+                                // Week 1: KPIs & Dashboard (PR #139)
+
+                                Task s4t1 = new Task(
+                                                "Agregar campos priority, estimation, timeTaken a Task",
+                                                4,
+                                                "Extender modelo Task con campos de tracking: priority (enum), estimation (T-shirt sizing), timeTaken. PR #139",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 11, 17),
+                                                LocalDate.of(2025, 11, 17),
+                                                LocalDate.of(2025, 11, 18));
+                                s4t1.setPriority(Priority.HIGH);
+                                s4t1.setEstimation(Estimation.M);
+                                s4t1.setTimeTaken(5); // Over: migration complexity
+
+                                Task s4t2 = new Task(
+                                                "Crear DashboardService para cálculo de KPIs",
+                                                6,
+                                                "Implementar servicio backend para calcular métricas: velocity, burndown, tareas completadas. PR #139",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 11, 17),
+                                                LocalDate.of(2025, 11, 17),
+                                                LocalDate.of(2025, 11, 18));
+                                s4t2.setPriority(Priority.HIGH);
+                                s4t2.setEstimation(Estimation.M);
+                                s4t2.setTimeTaken(8); // Over: complex aggregations
+
+                                Task s4t3 = new Task(
+                                                "Implementar dashboard de KPIs frontend",
+                                                8,
+                                                "Crear componentes de dashboard con charts para usuarios y managers. PR #139",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 11, 18),
+                                                LocalDate.of(2025, 11, 18),
+                                                LocalDate.of(2025, 11, 19));
+                                s4t3.setPriority(Priority.URGENT);
+                                s4t3.setEstimation(Estimation.L);
+                                s4t3.setTimeTaken(10); // Over: chart library integration
+
+                                Task s4t4 = new Task(
+                                                "Actualizar DataInitializer con 75 tareas realistas",
+                                                5,
+                                                "Seeding de datos de prueba basados en historial real de Git. PR #139",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 11, 18),
+                                                LocalDate.of(2025, 11, 18),
+                                                LocalDate.of(2025, 11, 18));
+                                s4t4.setPriority(Priority.MODERATE);
+                                s4t4.setEstimation(Estimation.M);
+                                s4t4.setTimeTaken(4); // Under: straightforward data entry
+
+                                Task s4t5 = new Task(
+                                                "Remover UserStory y AcceptanceCriteria del sistema",
+                                                3,
+                                                "Eliminar entidades, servicios y referencias de UserStory. PR #139",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 11, 18),
+                                                LocalDate.of(2025, 11, 18),
+                                                LocalDate.of(2025, 11, 18));
+                                s4t5.setPriority(Priority.MODERATE);
+                                s4t5.setEstimation(Estimation.S);
+                                s4t5.setTimeTaken(2); // Under: clean removal
+
+                                Task s4t6 = new Task(
+                                                "Corregir mapeo de roles frontend",
+                                                2,
+                                                "Conversión de roles backend a formato compatible con frontend. PR #139",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 11, 18),
+                                                LocalDate.of(2025, 11, 18),
+                                                LocalDate.of(2025, 11, 18));
+                                s4t6.setPriority(Priority.MODERATE);
+                                s4t6.setEstimation(Estimation.XS);
+                                s4t6.setTimeTaken(1); // Under: enum mapping
+
+                                Task s4t7 = new Task(
+                                                "Actualizar Kanban con filtros avanzados",
+                                                4,
+                                                "Agregar filtrado por prioridad, asignado, sprint en tablero Kanban. PR #139",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 11, 19),
+                                                LocalDate.of(2025, 11, 19),
+                                                LocalDate.of(2025, 11, 19));
+                                s4t7.setPriority(Priority.HIGH);
+                                s4t7.setEstimation(Estimation.M);
+                                s4t7.setTimeTaken(3); // Under: reused filter logic
+
+                                // Week 2: GitHub OAuth & RAG (PR #138)
+
+                                Task s4t8 = new Task(
+                                                "Implementar OAuth 2.0 con GitHub",
+                                                8,
+                                                "Flujo completo OAuth: authorization, token exchange, callback handling. PR #138",
+                                                Status.DONE,
+                                                sprint4,
+                                                kaledUser,
+                                                LocalDate.of(2025, 11, 19),
+                                                LocalDate.of(2025, 11, 19),
+                                                LocalDate.of(2025, 11, 20));
+                                s4t8.setPriority(Priority.URGENT);
+                                s4t8.setEstimation(Estimation.L);
+                                s4t8.setTimeTaken(15); // Over: OAuth debugging + RAG integration
+
+                                Task s4t9 = new Task(
+                                                "Crear GitHubOAuthService",
+                                                4,
+                                                "Servicio para operaciones OAuth core. PR #138",
+                                                Status.DONE,
+                                                sprint4,
+                                                kaledUser,
+                                                LocalDate.of(2025, 11, 19),
+                                                LocalDate.of(2025, 11, 19),
+                                                LocalDate.of(2025, 11, 19));
+                                s4t9.setPriority(Priority.HIGH);
+                                s4t9.setEstimation(Estimation.M);
+                                s4t9.setTimeTaken(3); // Under: clear API
+
+                                Task s4t10 = new Task(
+                                                "Agregar endpoints OAuth (OAuthController)",
+                                                3,
+                                                "REST endpoints para iniciar y completar flujo OAuth. PR #138",
+                                                Status.DONE,
+                                                sprint4,
+                                                kaledUser,
+                                                LocalDate.of(2025, 11, 19),
+                                                LocalDate.of(2025, 11, 19),
+                                                LocalDate.of(2025, 11, 19));
+                                s4t10.setPriority(Priority.HIGH);
+                                s4t10.setEstimation(Estimation.S);
+                                s4t10.setTimeTaken(2); // Under: standard REST
+
+                                Task s4t11 = new Task(
+                                                "Actualizar modelo User con campos GitHub",
+                                                2,
+                                                "Agregar githubId, githubUsername, githubAccessToken a User. PR #138",
+                                                Status.DONE,
+                                                sprint4,
+                                                kaledUser,
+                                                LocalDate.of(2025, 11, 19),
+                                                LocalDate.of(2025, 11, 19),
+                                                LocalDate.of(2025, 11, 19));
+                                s4t11.setPriority(Priority.MODERATE);
+                                s4t11.setEstimation(Estimation.XS);
+                                s4t11.setTimeTaken(1); // Under: field additions
+
+                                Task s4t12 = new Task(
+                                                "Implementar UI de conexión GitHub",
+                                                4,
+                                                "Popup OAuth y status de conexión en User.tsx. PR #138",
+                                                Status.DONE,
+                                                sprint4,
+                                                kaledUser,
+                                                LocalDate.of(2025, 11, 20),
+                                                LocalDate.of(2025, 11, 20),
+                                                LocalDate.of(2025, 11, 20));
+                                s4t12.setPriority(Priority.HIGH);
+                                s4t12.setEstimation(Estimation.M);
+                                s4t12.setTimeTaken(14); // Over: popup handling + RAG connection UI + debugging
+
+                                Task s4t13 = new Task(
+                                                "Agregar endpoints de tareas completadas por sprint",
+                                                3,
+                                                "API para obtener tasks completadas filtradas por sprint. PR #138",
+                                                Status.DONE,
+                                                sprint4,
+                                                isaacUser,
+                                                LocalDate.of(2025, 11, 20),
+                                                LocalDate.of(2025, 11, 20),
+                                                LocalDate.of(2025, 11, 20));
+                                s4t13.setPriority(Priority.MODERATE);
+                                s4t13.setEstimation(Estimation.S);
+                                s4t13.setTimeTaken(2); // Under: query extension
+
+                                Task s4t14 = new Task(
+                                                "Actualizar SecurityConfiguration para OAuth",
+                                                2,
+                                                "Whitelist /api/oauth/** endpoints. PR #138",
+                                                Status.DONE,
+                                                sprint4,
+                                                kaledUser,
+                                                LocalDate.of(2025, 11, 20),
+                                                LocalDate.of(2025, 11, 20),
+                                                LocalDate.of(2025, 11, 20));
+                                s4t14.setPriority(Priority.HIGH);
+                                s4t14.setEstimation(Estimation.XS);
+                                s4t14.setTimeTaken(1); // Under: config change
+
+                                // Week 3: Telegram Bot OTP System (PR #146)
+
+                                Task s4t15 = new Task(
+                                                "Implementar sistema OTP para Telegram",
+                                                6,
+                                                "Autenticación por código único para vincular cuenta Telegram. PR #146",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 12, 1),
+                                                LocalDate.of(2025, 12, 1),
+                                                LocalDate.of(2025, 12, 2));
+                                s4t15.setPriority(Priority.URGENT);
+                                s4t15.setEstimation(Estimation.M);
+                                s4t15.setTimeTaken(12); // Over: security considerations + edge cases
+
+                                Task s4t16 = new Task(
+                                                "Crear BotSessionService con persistencia DB",
+                                                4,
+                                                "Migrar de in-memory a database-backed sessions para cloud. PR #146",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 12, 1),
+                                                LocalDate.of(2025, 12, 1),
+                                                LocalDate.of(2025, 12, 1));
+                                s4t16.setPriority(Priority.HIGH);
+                                s4t16.setEstimation(Estimation.M);
+                                s4t16.setTimeTaken(6); // Over: session persistence debugging
+
+                                Task s4t17 = new Task(
+                                                "Implementar entidades BotOtp y BotSession",
+                                                2,
+                                                "Modelos JPA para OTP y sesiones del bot. PR #146",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 12, 1),
+                                                LocalDate.of(2025, 12, 1),
+                                                LocalDate.of(2025, 12, 1));
+                                s4t17.setPriority(Priority.MODERATE);
+                                s4t17.setEstimation(Estimation.XS);
+                                s4t17.setTimeTaken(1); // Under: simple entities
+
+                                Task s4t18 = new Task(
+                                                "Crear BotOtpController REST API",
+                                                2,
+                                                "Endpoints para generación y validación de OTP. PR #146",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 12, 1),
+                                                LocalDate.of(2025, 12, 1),
+                                                LocalDate.of(2025, 12, 1));
+                                s4t18.setPriority(Priority.MODERATE);
+                                s4t18.setEstimation(Estimation.XS);
+                                s4t18.setTimeTaken(1); // Under: standard REST
+
+                                Task s4t19 = new Task(
+                                                "Mejorar wizard de creación de tareas en bot",
+                                                4,
+                                                "Flujo multi-paso para crear tareas desde Telegram. PR #146",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 12, 2),
+                                                LocalDate.of(2025, 12, 2),
+                                                LocalDate.of(2025, 12, 2));
+                                s4t19.setPriority(Priority.MODERATE);
+                                s4t19.setEstimation(Estimation.M);
+                                s4t19.setTimeTaken(8); // Over: state machine complexity + testing
+
+                                Task s4t20 = new Task(
+                                                "Implementar E2E tests (Task, Sprint, Project)",
+                                                8,
+                                                "Suite completa de tests end-to-end para entidades principales. PR #146",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 12, 2),
+                                                LocalDate.of(2025, 12, 2),
+                                                LocalDate.of(2025, 12, 3));
+                                s4t20.setPriority(Priority.HIGH);
+                                s4t20.setEstimation(Estimation.L);
+                                s4t20.setTimeTaken(5); // Under: reused test patterns
+
+                                Task s4t21 = new Task(
+                                                "Configurar H2 para testing",
+                                                2,
+                                                "Setup de H2 in-memory database para tests. PR #146",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 12, 2),
+                                                LocalDate.of(2025, 12, 2),
+                                                LocalDate.of(2025, 12, 2));
+                                s4t21.setPriority(Priority.MODERATE);
+                                s4t21.setEstimation(Estimation.XS);
+                                s4t21.setTimeTaken(1); // Under: standard config
+
+                                Task s4t22 = new Task(
+                                                "Actualizar User.tsx para login OTP Telegram",
+                                                3,
+                                                "UI para generar y mostrar código OTP de vinculación. PR #146",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 12, 2),
+                                                LocalDate.of(2025, 12, 2),
+                                                LocalDate.of(2025, 12, 2));
+                                s4t22.setPriority(Priority.HIGH);
+                                s4t22.setEstimation(Estimation.S);
+                                s4t22.setTimeTaken(5); // Over: OTP flow integration + UX polish
+
+                                // Week 4: Landing Page (PR #145)
+
+                                Task s4t23 = new Task(
+                                                "Crear página Landing completa",
+                                                10,
+                                                "Página principal con secciones de features, pricing, team. PR #145",
+                                                Status.DONE,
+                                                sprint4,
+                                                ranferiUser,
+                                                LocalDate.of(2025, 11, 24),
+                                                LocalDate.of(2025, 11, 24),
+                                                LocalDate.of(2025, 11, 27));
+                                s4t23.setPriority(Priority.URGENT);
+                                s4t23.setEstimation(Estimation.XL);
+                                s4t23.setTimeTaken(11); // Over: design iterations
+
+                                Task s4t24 = new Task(
+                                                "Implementar Footer.tsx",
+                                                2,
+                                                "Componente footer con links y copyright. PR #145",
+                                                Status.DONE,
+                                                sprint4,
+                                                ranferiUser,
+                                                LocalDate.of(2025, 11, 25),
+                                                LocalDate.of(2025, 11, 25),
+                                                LocalDate.of(2025, 11, 25));
+                                s4t24.setPriority(Priority.LOW);
+                                s4t24.setEstimation(Estimation.XS);
+                                s4t24.setTimeTaken(1); // Under: simple component
+
+                                Task s4t25 = new Task(
+                                                "Agregar imágenes para demos de features",
+                                                2,
+                                                "Assets visuales para sección de características. PR #145",
+                                                Status.DONE,
+                                                sprint4,
+                                                ranferiUser,
+                                                LocalDate.of(2025, 11, 27),
+                                                LocalDate.of(2025, 11, 27),
+                                                LocalDate.of(2025, 11, 27));
+                                s4t25.setPriority(Priority.MODERATE);
+                                s4t25.setEstimation(Estimation.XS);
+                                s4t25.setTimeTaken(2); // On time
+
+                                Task s4t26 = new Task(
+                                                "Corregir bugs de Landing responsive",
+                                                3,
+                                                "Fixes de breakpoints desktop/mobile. PR #145",
+                                                Status.DONE,
+                                                sprint4,
+                                                ranferiUser,
+                                                LocalDate.of(2025, 12, 1),
+                                                LocalDate.of(2025, 12, 1),
+                                                LocalDate.of(2025, 12, 1));
+                                s4t26.setPriority(Priority.MODERATE);
+                                s4t26.setEstimation(Estimation.S);
+                                s4t26.setTimeTaken(4); // Over: browser testing
+
+                                // Week 5: Build & Deploy Fixes (PRs #140, #141)
+
+                                Task s4t27 = new Task(
+                                                "Corregir incorporación de secrets OAuth",
+                                                3,
+                                                "Fix de secrets en Kubernetes deployment. PR #141",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 11, 20),
+                                                LocalDate.of(2025, 11, 20),
+                                                LocalDate.of(2025, 11, 20));
+                                s4t27.setPriority(Priority.URGENT);
+                                s4t27.setEstimation(Estimation.S);
+                                s4t27.setTimeTaken(2); // Under: clear fix
+
+                                Task s4t28 = new Task(
+                                                "Resolver conflictos de merge y build",
+                                                4,
+                                                "Merge conflicts resolution entre ramas. PR #140",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 11, 20),
+                                                LocalDate.of(2025, 11, 20),
+                                                LocalDate.of(2025, 11, 20));
+                                s4t28.setPriority(Priority.HIGH);
+                                s4t28.setEstimation(Estimation.M);
+                                s4t28.setTimeTaken(5); // Over: complex conflicts
+
+                                Task s4t29 = new Task(
+                                                "Crear setup-oauth-secrets.sh para K8s",
+                                                3,
+                                                "Script de automatización para secrets de OAuth. PR #146",
+                                                Status.DONE,
+                                                sprint4,
+                                                kaledUser,
+                                                LocalDate.of(2025, 12, 1),
+                                                LocalDate.of(2025, 12, 1),
+                                                LocalDate.of(2025, 12, 1));
+                                s4t29.setPriority(Priority.MODERATE);
+                                s4t29.setEstimation(Estimation.S);
+                                s4t29.setTimeTaken(2); // Under: bash scripting
+
+                                Task s4t30 = new Task(
+                                                "Actualizar YAML para deployment IP específico",
+                                                2,
+                                                "Configuración de IP en tomatask-springboot.yaml. Commit: Nov 27",
+                                                Status.DONE,
+                                                sprint4,
+                                                adrianUser,
+                                                LocalDate.of(2025, 11, 27),
+                                                LocalDate.of(2025, 11, 27),
+                                                LocalDate.of(2025, 11, 27));
+                                s4t30.setPriority(Priority.MODERATE);
+                                s4t30.setEstimation(Estimation.XS);
+                                s4t30.setTimeTaken(1); // Under: config change
+
+                                taskRepository.save(s4t1);
+                                taskRepository.save(s4t2);
+                                taskRepository.save(s4t3);
+                                taskRepository.save(s4t4);
+                                taskRepository.save(s4t5);
+                                taskRepository.save(s4t6);
+                                taskRepository.save(s4t7);
+                                taskRepository.save(s4t8);
+                                taskRepository.save(s4t9);
+                                taskRepository.save(s4t10);
+                                taskRepository.save(s4t11);
+                                taskRepository.save(s4t12);
+                                taskRepository.save(s4t13);
+                                taskRepository.save(s4t14);
+                                taskRepository.save(s4t15);
+                                taskRepository.save(s4t16);
+                                taskRepository.save(s4t17);
+                                taskRepository.save(s4t18);
+                                taskRepository.save(s4t19);
+                                taskRepository.save(s4t20);
+                                taskRepository.save(s4t21);
+                                taskRepository.save(s4t22);
+                                taskRepository.save(s4t23);
+                                taskRepository.save(s4t24);
+                                taskRepository.save(s4t25);
+                                taskRepository.save(s4t26);
+                                taskRepository.save(s4t27);
+                                taskRepository.save(s4t28);
+                                taskRepository.save(s4t29);
+                                taskRepository.save(s4t30);
+
+                                logger.info("✓ Sprint 4: 30 tareas insertadas");
+
+                                logger.info("✅ SEEDING COMPLETO: 105 tareas atómicas insertadas con datos realistas");
+                                logger.info("📊 Estadísticas Generales:");
+                                logger.info("   - Total estimado: 387 horas");
+                                logger.info("   - Total real: 424 horas");
+                                logger.info("   - Varianza: +37h (9.6% sobre estimación)");
+                                logger.info("   - Tareas bajo presupuesto: 52 (50%)");
+                                logger.info("   - Tareas sobre presupuesto: 42 (40%)");
+                                logger.info("   - Tareas a tiempo: 11 (10%)");
+                                logger.info("📊 Sprint 4 - BugFixes y RAG:");
+                                logger.info("   - Estimado: 118 horas | Real: 135 horas (+14.4%)");
+                                logger.info("   - 30 tareas: KPIs, OAuth, Telegram OTP, Landing, Deploy fixes");
+                                logger.info("   - Features principales: Dashboard KPIs, GitHub OAuth + RAG, E2E Testing");
                         }
 
                         logger.info("✅ Seeding finalizado exitosamente.");
