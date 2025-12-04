@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,9 +38,11 @@ public class OAuthController {
     }
 
     /**
-     * Link GitHub account to user (alternative endpoint for frontend code submission)
+     * Link GitHub account to user (alternative endpoint for frontend code
+     * submission)
      * POST /api/auth/github/{userId}/link
-     * Note: The actual OAuth callback is handled by OAuthCallbackController at /api/oauth/callback/github
+     * Note: The actual OAuth callback is handled by OAuthCallbackController at
+     * /api/oauth/callback/github
      */
     @PostMapping("/{userId}/link")
     public ResponseEntity<?> linkGitHubAccount(

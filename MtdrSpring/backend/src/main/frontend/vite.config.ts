@@ -10,7 +10,6 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
         changeOrigin: true,
         secure: false,
       },
@@ -24,6 +23,6 @@ export default defineConfig({
   build: {
     // Minimize information disclosure in production builds
     sourcemap: false, // Disable source maps in production
-    minify: 'esbuild', // Use esbuild for minification (faster, already included)
+    minify: "esbuild", // Use esbuild for minification (faster, already included)
   },
 });

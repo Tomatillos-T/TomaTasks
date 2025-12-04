@@ -44,8 +44,6 @@ interface ApiError {
 }
 
 export default function SprintForm() {
-  const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL;
-
   const [formData, setFormData] = useState<SprintFormData>({
     description: "",
     status: "planned",
@@ -84,7 +82,7 @@ export default function SprintForm() {
   const fetchProjects = async () => {
     setIsLoadingProjects(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/projects`);
+      const response = await fetch(`/api/projects`);
       if (!response.ok)
         throw new Error(`Error al obtener proyectos: ${response.status}`);
       const data = await response.json();
@@ -167,7 +165,7 @@ export default function SprintForm() {
 
       console.log("Payload to submit:", payload);
 
-      const response = await fetch(`${API_BASE_URL}/api/sprints`, {
+      const response = await fetch(`$/api/sprints`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -210,7 +208,7 @@ export default function SprintForm() {
     try {
       const payload = { ...projectFormData };
 
-      const response = await fetch(`${API_BASE_URL}/api/projects`, {
+      const response = await fetch(`/api/projects`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
