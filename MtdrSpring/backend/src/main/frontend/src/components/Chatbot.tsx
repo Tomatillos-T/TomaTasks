@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, forwardRef } from "react";
 import { HttpClient } from "@/services/httpClient";
-import { Check, RefreshCw, Database, AlertCircle } from "lucide-react";
+import { Check, RefreshCw, Database, AlertCircle, GitBranch, Github } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface ChatBubbleProps {
@@ -20,6 +20,26 @@ interface Stats {
   totalEmbeddings: number;
   totalCommits: number;
   processedCommits: number;
+}
+
+// NEW: GitHub Repository interface
+// Note: Properties match the JSON keys from backend (snake_case from GitHub API)
+interface GitHubRepo {
+  name: string;
+  full_name: string;        // GitHub API uses snake_case
+  owner: string;
+  private: boolean;
+  default_branch: string;   // GitHub API uses snake_case
+  html_url: string;         // GitHub API uses snake_case
+  description?: string;
+  language?: string;
+  stargazers_count?: number; // GitHub API uses snake_case
+}
+
+// NEW: GitHub Branch interface
+interface GitHubBranch {
+  name: string;
+  sha: string;
 }
 
 function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
@@ -134,7 +154,7 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          className="flex-grow min-w-[200px] px-3 sm:px-4 py-2.5 sm:py-3 border border-background-contrast rounded-xl 
+          className="flex-grow min-w-[200px] px-3 sm:px-4 py-2.5 sm:py-3 border border-background-contrast rounded-xl
                    focus:outline-none focus:ring-2 focus:ring-primary-main
                    bg-background-paper text-text-primary placeholder:text-text-secondary
                    text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed
@@ -146,8 +166,8 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
         <button
           onClick={handleSendMessage}
           disabled={disabled || input.trim() === ""}
-          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-main text-primary-contrast rounded-xl 
-                   hover:bg-primary-dark text-sm sm:text-base font-medium whitespace-nowrap 
+          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-main text-primary-contrast rounded-xl
+                   hover:bg-primary-dark text-sm sm:text-base font-medium whitespace-nowrap
                    transition-colors disabled:opacity-50 disabled:cursor-not-allowed
                    shadow-sm hover:shadow-md"
         >
@@ -173,16 +193,298 @@ function Chatbot() {
   const inputFieldRef = useRef<HTMLInputElement | null>(null);
   const commitListRef = useRef<HTMLDivElement | null>(null);
 
+  // NEW: GitHub integration state
+  const [githubRepos, setGithubRepos] = useState<GitHubRepo[]>([]);
+  const [githubBranches, setGithubBranches] = useState<GitHubBranch[]>([]);
+  const [selectedRepo, setSelectedRepo] = useState<string>("");
+  const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const [isLoadingRepos, setIsLoadingRepos] = useState(false);
+  const [isLoadingBranches, setIsLoadingBranches] = useState(false);
+  const [isIndexingBranch, setIsIndexingBranch] = useState(false);
+  const [githubError, setGithubError] = useState<string>("");
+
   useEffect(() => {
     loadCommits(true);
     loadStats();
+    loadGitHubRepos(); // NEW: Load user's GitHub repositories on mount
     inputFieldRef.current?.focus();
   }, []);
+
+  // BUG FIX 1 & 3: Reload commits and stats when selectedBranch changes
+  useEffect(() => {
+    if (selectedBranch) {
+      // Reset pagination state
+      setCommitOffset(0);
+      setHasMoreCommits(true);
+      setSelectedCommits([]); // Clear selected commits when branch changes
+
+      // Reload commits for the new branch
+      loadCommits(true);
+
+      // Reload stats for the new branch
+      loadStats();
+    }
+  }, [selectedBranch]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
+  };
+
+  // NEW: Load user's GitHub repositories
+  const loadGitHubRepos = async () => {
+    setIsLoadingRepos(true);
+    setGithubError("");
+
+    try {
+      // Client-side JWT validation: Check if token exists before making request
+      const token = localStorage.getItem("jwtToken");
+      if (!token) {
+        setGithubError("Not authenticated. Please log in.");
+        return;
+      }
+
+      // Get user ID from context or localStorage
+      const userStr = localStorage.getItem("user");
+      if (!userStr) {
+        setGithubError("User information not found");
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const userId = user.id;
+
+      const repos = await HttpClient.get<GitHubRepo[]>(
+        `/api/rag/github/repos?userId=${userId}`,
+        { auth: true }
+      );
+
+      setGithubRepos(repos);
+
+      // If no repos, check if user has linked GitHub
+      if (repos.length === 0) {
+        setGithubError("No repositories found. Please link your GitHub account.");
+      }
+    } catch (error: any) {
+      console.error("Error loading GitHub repos:", error);
+
+      // Handle 401 UNAUTHORIZED (expired JWT)
+      if (error?.response?.status === 401) {
+        setGithubError("Session expired. Please log in again.");
+        // Trigger re-authentication (optional, based on your auth flow)
+        // You could call authEvents.invalidateSession() here if available
+      }
+      // Handle 403 FORBIDDEN (missing JWT)
+      else if (error?.response?.status === 403) {
+        setGithubError("Access denied. Please log in.");
+      }
+      // Handle 400 BAD REQUEST (GitHub not linked)
+      else if (error?.response?.status === 400) {
+        setGithubError(
+          error?.response?.data?.error || "GitHub account not linked. Please link your account in settings."
+        );
+      } else {
+        setGithubError(
+          error?.response?.data?.error ||
+            error?.message ||
+            "Failed to load repositories"
+        );
+      }
+    } finally {
+      setIsLoadingRepos(false);
+    }
+  };
+
+  // NEW: Load branches for selected repository
+  const loadGitHubBranches = async (repoFullName: string) => {
+    setIsLoadingBranches(true);
+    setGithubError("");
+
+    try {
+      // Client-side JWT validation
+      const token = localStorage.getItem("jwtToken");
+      if (!token) {
+        setGithubError("Not authenticated. Please log in.");
+        return;
+      }
+
+      const userStr = localStorage.getItem("user");
+      if (!userStr) {
+        setGithubError("User information not found");
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const userId = user.id;
+
+      // Parse owner and repo from fullName (e.g., "user/repo")
+      const parts = repoFullName.split("/");
+      if (parts.length !== 2 || !parts[0] || !parts[1]) {
+        setGithubError("Invalid repository format. Expected 'owner/repo'");
+        return;
+      }
+
+      const [owner, repo] = parts;
+
+      // URL encode owner and repo to handle special characters
+      const encodedOwner = encodeURIComponent(owner);
+      const encodedRepo = encodeURIComponent(repo);
+      const requestUrl = `/api/rag/github/repos/${encodedOwner}/${encodedRepo}/branches?userId=${userId}`;
+
+      // Debug logging
+      console.log("Loading GitHub branches:", {
+        repository: repoFullName,
+        owner,
+        repo,
+        userId,
+        requestUrl
+      });
+
+      const branches = await HttpClient.get<GitHubBranch[]>(
+        requestUrl,
+        { auth: true }
+      );
+
+      setGithubBranches(branches);
+
+      // Auto-select default branch if available
+      const selectedRepoObj = githubRepos.find(r => r.full_name === repoFullName);
+      if (selectedRepoObj && branches.some(b => b.name === selectedRepoObj.default_branch)) {
+        setSelectedBranch(selectedRepoObj.default_branch);
+      } else if (branches.length > 0) {
+        setSelectedBranch(branches[0].name);
+      }
+    } catch (error: any) {
+      console.error("Error loading GitHub branches:", error);
+      console.error("Error details:", {
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        data: error?.response?.data,
+        url: error?.config?.url
+      });
+
+      // Handle authentication errors
+      if (error?.response?.status === 401) {
+        setGithubError("Session expired. Please log in again.");
+      } else if (error?.response?.status === 403) {
+        setGithubError("Access denied. GitHub token may be invalid or expired.");
+      } else if (error?.response?.status === 404) {
+        setGithubError(
+          `Repository branches not found. Please verify:\n` +
+          `1. Repository name format is 'owner/repo'\n` +
+          `2. You have access to this repository\n` +
+          `3. The repository exists on GitHub`
+        );
+      } else {
+        setGithubError(
+          error?.response?.data?.error ||
+            error?.message ||
+            "Failed to load branches. Check console for details."
+        );
+      }
+    } finally {
+      setIsLoadingBranches(false);
+    }
+  };
+
+  // NEW: Index selected branch from GitHub
+  const indexGitHubBranch = async () => {
+    if (!selectedRepo || !selectedBranch) {
+      alert("Please select a repository and branch first");
+      return;
+    }
+
+    setIsIndexingBranch(true);
+    setGithubError("");
+
+    try {
+      // Client-side JWT validation
+      const token = localStorage.getItem("jwtToken");
+      if (!token) {
+        setGithubError("Not authenticated. Please log in.");
+        return;
+      }
+
+      const userStr = localStorage.getItem("user");
+      if (!userStr) {
+        setGithubError("User information not found");
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const userId = user.id;
+
+      const [owner, repo] = selectedRepo.split("/");
+
+      const response = await HttpClient.post<{
+        status: string;
+        totalCommits: number;
+        message: string;
+        repositoryUrl?: string;
+        branch?: string;
+      }>(
+        `/api/rag/github/index-branch?userId=${userId}`,
+        {
+          owner,
+          repo,
+          branch: selectedBranch,
+        },
+        { auth: true }
+      );
+
+      // Show success message
+      alert(
+        `Success! Indexed ${response.totalCommits} commits from ${selectedBranch} branch.\n\n${response.message}`
+      );
+
+      // Refresh commits and stats
+      setCommitOffset(0);
+      setHasMoreCommits(true);
+      loadCommits(true);
+      loadStats();
+      setRepoStatus(`${selectedRepo}/${selectedBranch} indexed ✓`);
+    } catch (error: any) {
+      console.error("Error indexing branch:", error);
+
+      // Handle authentication errors
+      if (error?.response?.status === 401) {
+        setGithubError("Session expired. Please log in again.");
+      } else if (error?.response?.status === 403) {
+        setGithubError("Access denied. GitHub account not linked.");
+      } else {
+        const errorMsg =
+          error?.response?.data?.error ||
+          error?.message ||
+          "Failed to index branch";
+        setGithubError(errorMsg);
+        alert("Error: " + errorMsg);
+      }
+    } finally {
+      setIsIndexingBranch(false);
+    }
+  };
+
+  // NEW: Handle repository selection
+  const handleRepoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const repoFullName = e.target.value;
+    setSelectedRepo(repoFullName);
+    setSelectedBranch("");
+    setGithubBranches([]);
+
+    // BUG FIX 1 & 3: Clear commits and stats when repo changes
+    setCommits([]);
+    setSelectedCommits([]);
+    setCommitOffset(0);
+    setHasMoreCommits(true);
+
+    if (repoFullName) {
+      loadGitHubBranches(repoFullName);
+      // Stats will be reloaded by the useEffect when selectedBranch is set
+    } else {
+      // If repo is cleared, reload default stats
+      loadStats();
+    }
   };
 
   const loadCommits = async (reset: boolean = false) => {
@@ -192,11 +494,16 @@ function Chatbot() {
       setIsLoadingCommits(true);
       const offset = reset ? 0 : commitOffset;
 
+      // PHASE 2 FIX (Problem A): Include repo/branch parameters in API call
+      let apiUrl = `/api/rag/commits?limit=21&offset=${offset}`;
+
+      // Add repo/branch parameters if they are selected
+      if (selectedRepo && selectedBranch) {
+        apiUrl += `&repo=${encodeURIComponent(selectedRepo)}&branch=${encodeURIComponent(selectedBranch)}`;
+      }
+
       // Request one extra to check if there are more commits
-      const data = await HttpClient.get<Commit[]>(
-        `/api/rag/commits?limit=21&offset=${offset}`,
-        { auth: true }
-      );
+      const data = await HttpClient.get<Commit[]>(apiUrl, { auth: true });
 
       // If we got 21 or more, there are more commits available
       const hasMore = data.length > 20;
@@ -258,7 +565,7 @@ function Chatbot() {
         { commitIds: selectedCommits },
         { auth: true }
       );
-      
+
       // Poll for stats update
       setTimeout(() => {
         loadStats();
@@ -330,24 +637,119 @@ function Chatbot() {
   return (
     <div className="flex flex-col lg:flex-row h-full bg-background-main rounded-xl overflow-hidden">
       {/* Sidebar */}
-      <div className="lg:w-80 border-b lg:border-b-0 lg:border-r border-background-contrast 
+      <div className="lg:w-80 border-b lg:border-b-0 lg:border-r border-background-contrast
                     bg-background-paper overflow-y-auto p-4 sm:p-6 max-h-64 lg:max-h-full">
-        
+
+        {/* NEW: GitHub Repository Selection */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Github className="w-4 h-4 text-primary-main" />
+            <h3 className="font-semibold text-base sm:text-lg text-text-primary">
+              GitHub Repository
+            </h3>
+          </div>
+
+          {githubError && (
+            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
+              {githubError}
+            </div>
+          )}
+
+          <select
+            value={selectedRepo}
+            onChange={handleRepoChange}
+            disabled={isLoadingRepos}
+            className="w-full px-3 py-2 mb-2 text-sm border border-background-contrast rounded-lg
+                     bg-background-subtle text-text-primary
+                     focus:outline-none focus:ring-2 focus:ring-primary-main
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <option value="">
+              {isLoadingRepos ? "Loading repositories..." : "Select a repository"}
+            </option>
+            {githubRepos.map((repo) => (
+              <option key={repo.full_name} value={repo.full_name}>
+                {repo.full_name} {repo.private ? "🔒" : ""}
+              </option>
+            ))}
+          </select>
+
+          {/* NEW: Branch Selection */}
+          {selectedRepo && (
+            <div className="flex items-center gap-2 mb-2">
+              <GitBranch className="w-4 h-4 text-primary-main" />
+              <select
+                value={selectedBranch}
+                onChange={(e) => setSelectedBranch(e.target.value)}
+                disabled={isLoadingBranches}
+                className="flex-1 px-3 py-2 text-sm border border-background-contrast rounded-lg
+                         bg-background-subtle text-text-primary
+                         focus:outline-none focus:ring-2 focus:ring-primary-main
+                         disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">
+                  {isLoadingBranches ? "Loading branches..." : "Select a branch"}
+                </option>
+                {githubBranches.map((branch) => (
+                  <option key={branch.name} value={branch.name}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <p className="text-xs text-text-secondary mt-2">
+            {selectedRepo && selectedBranch
+              ? `Selected: ${selectedRepo} (${selectedBranch})`
+              : "Select a GitHub repository and branch to index"
+            }
+          </p>
+        </div>
+
         {/* Repository Status */}
         <div className="mb-6">
           <h3 className="font-semibold text-base sm:text-lg mb-3 text-text-primary">
             Repository Status
           </h3>
-          <button
-            onClick={syncRepo}
-            className="w-full px-4 py-2.5 text-sm bg-primary-main text-primary-contrast rounded-lg 
-                     hover:bg-primary-dark transition-colors shadow-sm flex items-center justify-center gap-2"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Sync Repository
-          </button>
+
+          {/* Show different button based on whether GitHub repo is selected */}
+          {selectedRepo && selectedBranch ? (
+            <button
+              onClick={() => indexGitHubBranch()}
+              disabled={isIndexingBranch}
+              className="w-full px-4 py-2.5 text-sm bg-secondary-main text-secondary-contrast rounded-lg
+                       hover:bg-secondary-dark transition-colors shadow-sm flex items-center justify-center gap-2
+                       disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isIndexingBranch ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Indexing...
+                </>
+              ) : (
+                <>
+                  <Database className="w-4 h-4" />
+                  Index Selected Branch
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={syncRepo}
+              className="w-full px-4 py-2.5 text-sm bg-primary-main text-primary-contrast rounded-lg
+                       hover:bg-primary-dark transition-colors shadow-sm flex items-center justify-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Sync Default Repository
+            </button>
+          )}
+
           <p className="text-xs sm:text-sm text-text-secondary mt-2">
-            {repoStatus}
+            {selectedRepo && selectedBranch
+              ? `Current: ${selectedRepo} (${selectedBranch})`
+              : repoStatus
+            }
           </p>
         </div>
 
@@ -383,7 +785,7 @@ function Chatbot() {
             <button
               onClick={indexCommits}
               disabled={isIndexing}
-              className="w-full px-4 py-2.5 text-sm bg-secondary-main text-secondary-contrast rounded-lg 
+              className="w-full px-4 py-2.5 text-sm bg-secondary-main text-secondary-contrast rounded-lg
                        hover:bg-secondary-dark transition-colors shadow-sm flex items-center justify-center gap-2
                        disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -470,7 +872,7 @@ function Chatbot() {
 
       {/* Chat Area */}
       <div className="flex-1 flex flex-col min-h-0">
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-background-contrast 
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-background-contrast
                       bg-background-paper flex-shrink-0">
           <div>
             <h3 className="font-semibold text-lg sm:text-xl text-text-primary">
@@ -482,7 +884,7 @@ function Chatbot() {
           </div>
           <button
             onClick={newChat}
-            className="px-3 sm:px-4 py-2 text-sm bg-secondary-main text-secondary-contrast 
+            className="px-3 sm:px-4 py-2 text-sm bg-secondary-main text-secondary-contrast
                      rounded-lg hover:bg-secondary-dark transition-colors shadow-sm"
           >
             New Chat
@@ -501,6 +903,7 @@ function Chatbot() {
               <div className="text-xs text-text-secondary max-w-md mx-auto bg-background-subtle p-4 rounded-lg">
                 <p className="font-semibold mb-2">💡 Tips:</p>
                 <ul className="text-left space-y-1">
+                  <li>• Select a GitHub repository and branch to index</li>
                   <li>• Index commits first for better semantic search</li>
                   <li>• Ask specific questions about code changes</li>
                   <li>• Reference file names or functions</li>

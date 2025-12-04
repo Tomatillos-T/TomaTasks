@@ -3,12 +3,14 @@ import { Loader2 } from "lucide-react";
 import KanbanCard from "@/modules/task/components/KanbanCard";
 import type { KanbanColumn as KanbanColumnType } from "@/modules/task/hooks/useKanban";
 import { TaskStatus } from "@/modules/task/models/taskStatus";
+import type Task from "@/modules/task/models/task";
 
 interface KanbanColumnProps {
   column: KanbanColumnType;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, taskId: string, fromStatus: TaskStatus) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, toStatus: TaskStatus) => void;
+  onTaskClick: (task: Task) => void;
 }
 
 const KanbanColumn = memo(function KanbanColumn({
@@ -16,6 +18,7 @@ const KanbanColumn = memo(function KanbanColumn({
   onDragStart,
   onDragOver,
   onDrop,
+  onTaskClick,
 }: KanbanColumnProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragOver, setIsDragOver] = React.useState(false);
@@ -86,13 +89,13 @@ const KanbanColumn = memo(function KanbanColumn({
     >
       {/* Column Header */}
       <div
-        className={`p-4 rounded-t-lg border-b border-border ${getHeaderColor(
+        className={`p-4 rounded-t-lg border-b border-background-contrast ${getHeaderColor(
           column.id
         )} flex-shrink-0`}
       >
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-sm">{column.title}</h3>
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-surface">
+          <span className="px-2 py-1 text-xs font-medium rounded-full bg-background-subtle">
             {column.tasks.length}
           </span>
         </div>
@@ -119,7 +122,7 @@ const KanbanColumn = memo(function KanbanColumn({
             <Loader2 className="w-8 h-8 text-primary-main animate-spin" />
           </div>
         ) : column.tasks.length === 0 ? (
-          <div className="flex items-center justify-center h-32 border-2 border-dashed border-border rounded-lg">
+          <div className="flex items-center justify-center h-32 border-2 border-dashed border-background-contrast rounded-lg">
             <p className="text-text-secondary text-sm">
               Arrastra tareas aquí
             </p>
@@ -131,6 +134,7 @@ const KanbanColumn = memo(function KanbanColumn({
                 key={task.id}
                 task={task}
                 onDragStart={onDragStart}
+                onClick={onTaskClick}
               />
             ))}
 

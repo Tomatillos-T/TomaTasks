@@ -62,22 +62,22 @@ export default function Layout() {
 
       {/* Chatbot Modal */}
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background-overlay-heavy p-4">
           <div
-            className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl
+            className="bg-background-paper rounded-xl shadow-2xl
                        w-full h-full sm:w-[95%] sm:h-[85%]
                        md:w-[85%] md:h-[80%]
                        lg:w-[75%] xl:w-[70%]
                        max-h-[90vh] overflow-hidden flex flex-col"
           >
             {/* Modal Header with Close Button */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-100">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-background-contrast">
+              <h2 className="text-lg sm:text-xl font-semibold text-text-primary">
                 Repository Assistant
               </h2>
               <button
                 onClick={() => setOpen(false)}
-                className="text-gray-400 hover:text-gray-200 text-xl font-bold transition"
+                className="text-text-secondary hover:text-text-primary text-xl font-bold transition"
               >
                 ✖
               </button>

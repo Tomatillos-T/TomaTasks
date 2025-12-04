@@ -36,7 +36,7 @@ export const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) 
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in"
+        className="fixed inset-0 bg-background-overlay backdrop-blur-sm animate-in fade-in"
         onClick={() => onOpenChange(false)}
       />
       {/* Content container */}

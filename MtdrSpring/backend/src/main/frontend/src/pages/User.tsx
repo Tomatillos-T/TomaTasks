@@ -27,14 +27,75 @@ export default function User() {
     message: "",
   });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [telegramToken, setTelegramToken] = useState<string | null>(
-    formData?.telegramToken || null
-  );
+  const [telegramOtp, setTelegramOtp] = useState<string | null>(null);
+  const [otpExpiresAt, setOtpExpiresAt] = useState<Date | null>(null);
+  const [otpCountdown, setOtpCountdown] = useState<string | null>(null);
   const [isConnectingGithub, setIsConnectingGithub] = useState(false);
 
   useEffect(() => {
     if (user) setFormData(user);
   }, [user]);
+
+  // Fetch existing OTP on page load
+  useEffect(() => {
+    const fetchExistingOtp = async () => {
+      if (!formData?.email) return;
+
+      try {
+        const response = await HttpClient.get<{ hasOtp: boolean; otp?: string; expiresAt?: number }>(
+          `/api/bot/otp/current?email=${encodeURIComponent(formData.email)}`,
+          { auth: true }
+        );
+
+        if (response.hasOtp && response.otp && response.expiresAt) {
+          const expiresDate = new Date(response.expiresAt);
+          // Only set if not expired
+          if (expiresDate > new Date()) {
+            setTelegramOtp(response.otp);
+            setOtpExpiresAt(expiresDate);
+          }
+        }
+      } catch (error) {
+        // Silently fail - user can generate a new OTP if needed
+        console.log("No existing OTP found or error fetching:", error);
+      }
+    };
+
+    fetchExistingOtp();
+  }, [formData?.email]);
+
+  // Countdown timer for OTP expiration
+  useEffect(() => {
+    if (!otpExpiresAt || !telegramOtp) {
+      setOtpCountdown(null);
+      return;
+    }
+
+    const updateCountdown = () => {
+      const now = new Date();
+      const diff = otpExpiresAt.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        // OTP expired
+        setTelegramOtp(null);
+        setOtpExpiresAt(null);
+        setOtpCountdown(null);
+        return;
+      }
+
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      setOtpCountdown(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+    };
+
+    // Update immediately
+    updateCountdown();
+
+    // Update every second
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [otpExpiresAt, telegramOtp]);
 
   useEffect(() => {
     // Check if this page is opened in a popup (window.opener exists)
@@ -201,28 +262,27 @@ export default function User() {
     }
   };
 
-  const handleGenerateTelegramToken = async () => {
-    if (!formData) return;
+  const handleGenerateTelegramOtp = async () => {
+    if (!formData?.email) return;
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: "" });
 
     try {
-      const updatedUser = await HttpClient.post<UserType>(
-        `/api/user/${formData.id}/telegram-token`,
+      const response = await HttpClient.post<{ otp: string; message: string; expiresInMinutes: number }>(
+        `/api/bot/otp/generate?email=${encodeURIComponent(formData.email)}`,
         {},
         { auth: true }
       );
-      setFormData(updatedUser);
-      setTelegramToken(updatedUser.telegramToken);
+      setTelegramOtp(response.otp);
+      setOtpExpiresAt(new Date(Date.now() + response.expiresInMinutes * 60 * 1000));
       setSubmitStatus({
         type: "success",
-        message:
-          "Token generado correctamente. Úsalo en el bot de Telegram para vincular tu cuenta.",
+        message: "Código OTP generado. Ingresa este código en el bot de Telegram para iniciar sesión.",
       });
     } catch (error) {
       setSubmitStatus({
         type: "error",
-        message: error instanceof Error ? error.message : "Error al generar el token.",
+        message: error instanceof Error ? error.message : "Error al generar el código OTP.",
       });
     } finally {
       setIsSubmitting(false);
@@ -383,25 +443,38 @@ export default function User() {
           />
         </div>
 
-            <div className="space-y-2">
-              <Input
-                label="Telegram Token"
-                name="telegramToken"
-                value={telegramToken || "No se ha generado un token"}
-                disabled
-              />
+            <div className="space-y-2 border-t pt-4">
+              <h3 className="text-lg font-semibold text-text-primary">
+                Telegram Bot Login
+              </h3>
+              <p className="text-sm text-text-secondary mb-2">
+                Para iniciar sesión en el bot de Telegram, genera un código OTP y
+                ingrésalo cuando el bot te lo solicite.
+              </p>
+              {telegramOtp && (
+                <div className="bg-background-default p-4 rounded-lg border border-primary-light">
+                  <p className="text-sm text-text-secondary mb-1">Tu código OTP:</p>
+                  <p className="text-3xl font-mono font-bold text-primary-main tracking-widest text-center">
+                    {telegramOtp}
+                  </p>
+                  {otpCountdown && (
+                    <p className="text-xs text-text-secondary mt-2 text-center">
+                      Expira en <span className="font-mono font-semibold text-primary-main">{otpCountdown}</span>
+                    </p>
+                  )}
+                </div>
+              )}
               <Button
                 type="button"
                 variant="primary"
-                onClick={handleGenerateTelegramToken}
+                onClick={handleGenerateTelegramOtp}
                 disabled={isSubmitting}
               >
-                Generar Token para Telegram
+                {telegramOtp ? "Generar nuevo código OTP" : "Generar código OTP para Telegram"}
               </Button>
-              {telegramToken && (
+              {telegramOtp && (
                 <p className="text-sm text-text-secondary">
-                  Copia este token y envíalo al bot de Telegram para vincular tu
-                  cuenta.
+                  Ingresa tu email en el bot de Telegram y luego este código cuando te lo solicite.
                 </p>
               )}
             </div>

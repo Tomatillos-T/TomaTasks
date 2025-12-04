@@ -17,6 +17,5 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, String>, JpaSpecificationExecutor<User> {
     Optional<User> findByEmail(String email);
     List<User> findByTeamIsNull();
-    Optional<User> findByTelegramToken(String telegramToken);
     Optional<User> findByGithubId(String githubId);
 }

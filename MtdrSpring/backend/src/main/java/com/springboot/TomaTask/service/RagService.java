@@ -88,22 +88,78 @@ public class RagService {
             context.append("\n");
         }
 
-        // If specific commits were requested, also add overview
+        // PHASE 1 FIX (Problem B): Fetch specific commits by ID directly from cache
         if (commitIds != null && !commitIds.isEmpty()) {
-            context.append("\n=== Commit Overview ===\n");
-            try {
-                List<RepositoryService.CommitInfo> commits = repoService.getRecentCommits(20, 0);
-                for (String commitId : commitIds) {
-                    commits.stream()
-                        .filter(c -> c.hash.equals(commitId))
-                        .findFirst()
-                        .ifPresent(c -> context.append(String.format(
-                            "- [%s] %s by %s\n",
-                            c.hash.substring(0, 7), c.message, c.author
-                        )));
+            context.append("\n=== Commit Details ===\n");
+
+            int foundCommits = 0;
+            int missingCommits = 0;
+
+            for (String commitId : commitIds) {
+                try {
+                    // Fetch commit metadata directly from cache by ID
+                    VectorStoreService.CommitMetadata metadata = vectorStore.getCachedCommitById(commitId);
+
+                    if (metadata != null) {
+                        foundCommits++;
+                        context.append(String.format(
+                            "\n--- Commit %s ---\n",
+                            metadata.hash.substring(0, Math.min(7, metadata.hash.length()))
+                        ));
+                        context.append(String.format("Message: %s\n", metadata.message));
+                        context.append(String.format("Author: %s\n", metadata.author));
+                        context.append(String.format("Time: %d\n", metadata.timestamp));
+
+                        // Fetch and include commit diff
+                        try {
+                            String diff = repoService.getCommitDiff(commitId);
+                            if (diff != null && !diff.isEmpty()) {
+                                context.append("\nDiff:\n");
+                                context.append(diff);
+                                context.append("\n");
+                            } else {
+                                context.append("\n(No diff available for this commit)\n");
+                            }
+                        } catch (Exception e) {
+                            logger.warn("Could not fetch diff for commit {}: {}", commitId, e.getMessage());
+                            context.append("\n(Could not retrieve diff: " + e.getMessage() + ")\n");
+                        }
+                    } else {
+                        missingCommits++;
+                        logger.warn("Commit {} not found in cache", commitId);
+                        context.append(String.format(
+                            "\n--- Commit %s ---\n(Not found in cache - may need to index this branch)\n",
+                            commitId.substring(0, Math.min(7, commitId.length()))
+                        ));
+                    }
+                } catch (Exception e) {
+                    missingCommits++;
+                    logger.error("Error fetching commit {}: {}", commitId, e.getMessage());
+                    context.append(String.format(
+                        "\n--- Commit %s ---\n(Error retrieving: %s)\n",
+                        commitId.substring(0, Math.min(7, commitId.length())),
+                        e.getMessage()
+                    ));
                 }
-            } catch (Exception e) {
-                logger.warn("Could not fetch commit overview: {}", e.getMessage());
+            }
+
+            logger.info("Commit retrieval: {} found, {} missing out of {} requested",
+                       foundCommits, missingCommits, commitIds.size());
+
+            // If NO commits were found, update the context to be more helpful
+            if (foundCommits == 0 && searchResults.isEmpty()) {
+                return String.format(
+                    "I couldn't find information for the requested commit(s). " +
+                    "This could mean:\n" +
+                    "1. The commits are not cached yet - try indexing the branch first\n" +
+                    "2. The commit IDs are incorrect\n" +
+                    "3. The commits are from a different repository or branch\n\n" +
+                    "Requested commit IDs: %s\n\n" +
+                    "Please verify the commit IDs and ensure you've indexed the correct repository branch.",
+                    String.join(", ", commitIds.stream()
+                        .map(id -> id.substring(0, Math.min(7, id.length())))
+                        .toArray(String[]::new))
+                );
             }
         }
 

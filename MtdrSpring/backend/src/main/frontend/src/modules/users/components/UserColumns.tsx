@@ -30,7 +30,11 @@ export const columns: ColumnDef<User>[] = [
         [UserRole.Developer]: "pending",
       };
 
-      return <Badge variant={variantMap[role] || "default"}>{roleLabels[role]}</Badge>;
+      return (
+        <Badge variant={variantMap[role] || "default"}>
+          {roleLabels[role] || role}
+        </Badge>
+      );
     },
   },
   {

@@ -129,7 +129,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       {/* Fondo oscuro al abrir en móviles */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-30 z-30 md:hidden"
+          className="fixed inset-0 bg-background-overlay z-30 md:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}

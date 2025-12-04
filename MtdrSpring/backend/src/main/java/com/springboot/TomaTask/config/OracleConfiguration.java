@@ -10,7 +10,10 @@ import org.springframework.core.env.Environment;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
+import org.springframework.context.annotation.Profile;
+
 @Configuration
+@Profile("!test")
 public class OracleConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(OracleConfiguration.class);

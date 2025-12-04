@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import tomatoLogo from '@/assets/tomato.svg';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 import Alert from '@/components/Alert';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserContext } from '@/contexts/UserContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,12 +13,21 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, loading, error } = useAuth();
+  const { sessionExpiredMessage, clearSessionExpiredMessage } = useUserContext();
+
+  // Clear session expired message when component unmounts or on successful login
+  useEffect(() => {
+    return () => {
+      clearSessionExpiredMessage();
+    };
+  }, [clearSessionExpiredMessage]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
       await login({ email, password });
+      clearSessionExpiredMessage();
 
       // Redirigir al usuario a la página que intentaba acceder o al dashboard
       const from = (location.state as any)?.from?.pathname || '/dashboard';
@@ -55,8 +65,13 @@ export default function Login() {
             disabled={loading}
           />
           
+          {/* Mostrar alerta de sesión expirada si existe */}
+          {sessionExpiredMessage && (
+            <Alert type="error" message={sessionExpiredMessage} />
+          )}
+
           {/* Mostrar alerta de error si existe */}
-          {error && <Alert type="error" message={error} />}
+          {error && !sessionExpiredMessage && <Alert type="error" message={error} />}
           
           <div className="flex justify-center items-center">
             <Button type="submit" variant="primary" disabled={loading}>

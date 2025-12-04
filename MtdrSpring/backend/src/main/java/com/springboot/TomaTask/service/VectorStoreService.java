@@ -25,30 +25,30 @@ public class VectorStoreService {
      * Store embedding in Oracle Vector Store
      */
     @Transactional
-    public void storeEmbedding(String id, String commitHash, String filePath, 
-                               int chunkIndex, String content, float[] embedding, 
+    public void storeEmbedding(String id, String commitHash, String filePath,
+                               int chunkIndex, String content, float[] embedding,
                                Map<String, Object> metadata) {
-        String sql =
-            "MERGE INTO repository_embeddings t\n" +
-            "USING (SELECT ? AS id FROM dual) s\n" +
-            "ON (t.id = s.id)\n" +
-            "WHEN MATCHED THEN\n" +
-            "    UPDATE SET \n" +
-            "        content = ?,\n" +
-            "        embedding = TO_VECTOR(?, 768, FLOAT32),\n" +
-            "        updated_at = CURRENT_TIMESTAMP,\n" +
-            "        metadata = ?\n" +
-            "WHEN NOT MATCHED THEN\n" +
-            "    INSERT (id, commit_hash, file_path, chunk_index, content, embedding, metadata)\n" +
-            "    VALUES (?, ?, ?, ?, ?, TO_VECTOR(?, 768, FLOAT32), ?)";
-
         String embeddingStr = floatArrayToString(embedding);
         String metadataJson = metadata != null ? toJson(metadata) : null;
 
-        jdbcTemplate.update(sql, 
-            id, content, embeddingStr, metadataJson,
-            id, commitHash, filePath, chunkIndex, content, embeddingStr, metadataJson
-        );
+        // Try updating first
+        String updateSql = "UPDATE repository_embeddings SET " +
+            "content = ?, embedding = TO_VECTOR(?, 768, FLOAT32), " +
+            "updated_at = CURRENT_TIMESTAMP, metadata = ? " +
+            "WHERE id = ?";
+
+        int rowsUpdated = jdbcTemplate.update(updateSql,
+            content, embeddingStr, metadataJson, id);
+
+        // If no rows were updated, insert a new one
+        if (rowsUpdated == 0) {
+            String insertSql = "INSERT INTO repository_embeddings " +
+                "(id, commit_hash, file_path, chunk_index, content, embedding, metadata, created_at, updated_at) " +
+                "VALUES (?, ?, ?, ?, ?, TO_VECTOR(?, 768, FLOAT32), ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
+
+            jdbcTemplate.update(insertSql,
+                id, commitHash, filePath, chunkIndex, content, embeddingStr, metadataJson);
+        }
 
         logger.debug("Stored embedding for id: {}", id);
     }
@@ -223,6 +223,35 @@ public class VectorStoreService {
             offset,
             limit
         );
+    }
+
+    /**
+     * PHASE 1 FIX (Problem B): Get specific commit by ID from cache
+     * This allows retrieving commit metadata even if not indexed
+     */
+    public CommitMetadata getCachedCommitById(String commitHash) {
+        String sql =
+            "SELECT commit_hash, message, author, commit_time, processed\n" +
+            "FROM commit_cache\n" +
+            "WHERE commit_hash = ?";
+
+        List<CommitMetadata> results = jdbcTemplate.query(sql,
+            (rs, rowNum) -> {
+                String processed = rs.getString("processed");
+                java.sql.Timestamp timestamp = rs.getTimestamp("commit_time");
+
+                return new CommitMetadata(
+                    rs.getString("commit_hash"),
+                    rs.getString("message"),
+                    rs.getString("author"),
+                    timestamp != null ? timestamp.getTime() / 1000 : 0,
+                    "Y".equals(processed)
+                );
+            },
+            commitHash
+        );
+
+        return results.isEmpty() ? null : results.get(0);
     }
 
     /**

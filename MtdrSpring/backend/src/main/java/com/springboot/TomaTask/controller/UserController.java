@@ -3,7 +3,6 @@ package com.springboot.TomaTask.controller;
 import com.springboot.TomaTask.dto.CreateUserRequest;
 import com.springboot.TomaTask.dto.PaginationRequestDTO;
 import com.springboot.TomaTask.dto.UserDTO;
-import com.springboot.TomaTask.model.User;
 import com.springboot.TomaTask.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -69,27 +68,5 @@ public class UserController {
     public ResponseEntity<Boolean> deleteUser(@PathVariable String id) {
         Boolean flag = userService.deleteUser(id);
         return new ResponseEntity<>(flag, flag ? HttpStatus.OK : HttpStatus.NOT_FOUND);
-    }
-
-    @PostMapping("/{id}/telegram-token")
-    public ResponseEntity<User> generateTelegramToken(@PathVariable String id) {
-        try {
-            User user = userService.generateTelegramToken(id);
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @PostMapping("/telegram/validate")
-    public ResponseEntity<User> validateTelegramToken(
-            @RequestParam String token,
-            @RequestParam String chatId) {
-        try {
-            User user = userService.validateTelegramToken(token, chatId);
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
     }
 }
