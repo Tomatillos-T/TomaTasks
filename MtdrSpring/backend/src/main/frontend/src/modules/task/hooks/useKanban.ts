@@ -5,6 +5,7 @@ import { TaskStatus } from "@/modules/task/models/taskStatus";
 import { TaskPriority, TaskEstimation } from "@/modules/task/models/taskEnums";
 import getTasksAdapter from "@/modules/task/adapters/getTasksAdapter";
 import updateTaskAdapter from "@/modules/task/adapters/updateTaskAdapter";
+import deleteTaskAdapter from "@/modules/task/adapters/deleteTaskAdapter";
 import { mapStatusToBackend } from "@/modules/task/utils/taskMapper";
 
 interface TaskPage {
@@ -29,6 +30,11 @@ export interface KanbanColumn {
   isLoading: boolean;
 }
 
+export interface PendingCompletion {
+  task: Task;
+  fromStatus: TaskStatus;
+}
+
 export interface UseKanbanResult {
   columns: KanbanColumn[];
   isLoading: boolean;
@@ -38,6 +44,14 @@ export interface UseKanbanResult {
   handleDragStart: (e: React.DragEvent<HTMLDivElement>, taskId: string, fromStatus: TaskStatus) => void;
   handleDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   handleDrop: (e: React.DragEvent<HTMLDivElement>, toStatus: TaskStatus) => void;
+  // Task actions
+  deleteTask: (taskId: string) => Promise<void>;
+  isDeleting: boolean;
+  // Task completion flow
+  pendingCompletion: PendingCompletion | null;
+  confirmTaskCompletion: (timeTaken: number) => Promise<void>;
+  cancelTaskCompletion: () => void;
+  isCompletingTask: boolean;
   // Global filters
   selectedPriorities: TaskPriority[];
   setSelectedPriorities: React.Dispatch<React.SetStateAction<TaskPriority[]>>;
@@ -259,6 +273,86 @@ export default function useKanban(): UseKanbanResult {
     },
   });
 
+  // Delete task mutation with optimistic updates
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      return await deleteTaskAdapter({ id: taskId });
+    },
+    onMutate: (taskId: string) => {
+      // Cancel any outgoing refetches
+      queryClient.cancelQueries({ queryKey: ["kanban-tasks"] });
+
+      // Find the task in all columns to get its status
+      let taskStatus: TaskStatus | null = null;
+      const statuses = [TaskStatus.TODO, TaskStatus.INPROGRESS, TaskStatus.TESTING, TaskStatus.DONE];
+
+      for (const status of statuses) {
+        const queryKey = ["kanban-tasks", status, selectedPriorities, selectedEstimations, selectedSprintIds];
+        const data = queryClient.getQueryData<InfiniteTaskData>(queryKey);
+        if (data?.pages) {
+          for (const page of data.pages) {
+            const foundTask = page.data.items.find((t: Task) => t.id === taskId);
+            if (foundTask) {
+              taskStatus = status;
+              break;
+            }
+          }
+        }
+        if (taskStatus) break;
+      }
+
+      if (!taskStatus) return { taskStatus: null, previousData: null };
+
+      // Snapshot the previous values for rollback
+      const queryKey = ["kanban-tasks", taskStatus, selectedPriorities, selectedEstimations, selectedSprintIds];
+      const previousData = queryClient.getQueryData(queryKey);
+
+      // Optimistically remove the task from its column
+      queryClient.setQueryData(queryKey, (old: InfiniteTaskData | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: TaskPage) => ({
+            ...page,
+            data: {
+              ...page.data,
+              items: page.data.items.filter((t: Task) => t.id !== taskId),
+              total: page.data.total - 1,
+            },
+          })),
+        };
+      });
+
+      return { taskStatus, previousData, selectedPriorities, selectedEstimations, selectedSprintIds };
+    },
+    onError: (error, _taskId, context) => {
+      console.error("Error deleting task:", error);
+
+      // Rollback optimistic update on error
+      if (context?.taskStatus && context?.previousData) {
+        const queryKey = ["kanban-tasks", context.taskStatus, context.selectedPriorities, context.selectedEstimations, context.selectedSprintIds];
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
+    },
+    onSuccess: (_data, _taskId, context) => {
+      // On success, invalidate the queries to sync with server
+      if (context?.taskStatus) {
+        const queryKey = ["kanban-tasks", context.taskStatus, context.selectedPriorities, context.selectedEstimations, context.selectedSprintIds];
+        queryClient.invalidateQueries({
+          queryKey: queryKey,
+          refetchType: 'none'
+        });
+      }
+      // Also invalidate tasks query (for the table view)
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
+
+  // Helper function to delete a task
+  const deleteTask = useCallback(async (taskId: string) => {
+    await deleteTaskMutation.mutateAsync(taskId);
+  }, [deleteTaskMutation]);
+
   // Helper function to get all tasks from infinite query pages
   const getTasksFromQuery = useCallback((query: typeof todoQuery): Task[] => {
     if (!query.data) return [];
@@ -308,6 +402,10 @@ export default function useKanban(): UseKanbanResult {
   // Drag & drop state
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [draggedFromStatus, setDraggedFromStatus] = useState<TaskStatus | null>(null);
+
+  // Task completion state (for when dropping to DONE)
+  const [pendingCompletion, setPendingCompletion] = useState<PendingCompletion | null>(null);
+  const [isCompletingTask, setIsCompletingTask] = useState(false);
 
   // Function to move task to new status (internal use only)
   const moveTask = useCallback((taskId: string, newStatus: TaskStatus) => {
@@ -361,13 +459,73 @@ export default function useKanban(): UseKanbanResult {
       return;
     }
 
+    // If dropping to DONE status, show completion modal instead of moving directly
+    if (toStatus === TaskStatus.DONE) {
+      // Find the task
+      let task: Task | undefined;
+      for (const column of columns) {
+        task = column.tasks.find((t) => t.id === draggedTaskId);
+        if (task) break;
+      }
+
+      if (task) {
+        // Store the pending completion and show modal
+        setPendingCompletion({
+          task,
+          fromStatus: draggedFromStatus,
+        });
+        // Reset drag state
+        setDraggedTaskId(null);
+        setDraggedFromStatus(null);
+        return;
+      }
+    }
+
     // Move the task to new status (fire and forget - UI updates immediately)
     moveTask(draggedTaskId, toStatus);
 
     // Reset drag state immediately
     setDraggedTaskId(null);
     setDraggedFromStatus(null);
-  }, [draggedTaskId, draggedFromStatus, moveTask]);
+  }, [draggedTaskId, draggedFromStatus, moveTask, columns]);
+
+  // Confirm task completion with time taken
+  const confirmTaskCompletion = useCallback(async (timeTaken: number) => {
+    if (!pendingCompletion) return;
+
+    setIsCompletingTask(true);
+
+    try {
+      const { task } = pendingCompletion;
+
+      // Create updated task with DONE status, timeTaken, and current date as deliveryDate
+      const updatedTask = {
+        ...task,
+        status: TaskStatus.DONE,
+        timeTaken,
+        deliveryDate: new Date(),
+        endDate: new Date(),
+      };
+
+      // Perform the mutation
+      await updateTaskMutation.mutateAsync({
+        taskId: task.id,
+        task: updatedTask,
+      });
+
+      // Clear pending completion
+      setPendingCompletion(null);
+    } catch (error) {
+      console.error("Error completing task:", error);
+    } finally {
+      setIsCompletingTask(false);
+    }
+  }, [pendingCompletion, updateTaskMutation]);
+
+  // Cancel task completion
+  const cancelTaskCompletion = useCallback(() => {
+    setPendingCompletion(null);
+  }, []);
 
   // Check if any query is loading
   const isLoading =
@@ -397,6 +555,12 @@ export default function useKanban(): UseKanbanResult {
     handleDragStart,
     handleDragOver,
     handleDrop,
+    deleteTask,
+    isDeleting: deleteTaskMutation.isPending,
+    pendingCompletion,
+    confirmTaskCompletion,
+    cancelTaskCompletion,
+    isCompletingTask,
     selectedPriorities,
     setSelectedPriorities,
     selectedEstimations,

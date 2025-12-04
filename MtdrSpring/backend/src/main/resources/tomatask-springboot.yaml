@@ -74,9 +74,6 @@ spec:
                   name: frontendadmin
                   key: password
                   optional: true
-            # GitHub OAuth Configuration
-            - name: GITHUB_REDIRECT_URI
-              value: "http://163.192.133.86/api/oauth/callback/github"
             - name: GITHUB_CLIENT_ID
               valueFrom:
                 secretKeyRef:
@@ -92,6 +89,20 @@ spec:
             # CORS Configuration
             - name: cors.allowed.origins
               value: "http://163.192.133.86"
+            - name: GITHUB_REDIRECT_URI
+              value: "http://163.192.133.86/api/oauth/callback/github"
+            - name: GOOGLE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: google-api-secret
+                  key: api_key
+                  optional: true
+            - name: OAUTH_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: oauth-encryption-secret
+                  key: encryption_key
+                  optional: true
           volumeMounts:
             - name: creds
               mountPath: /mtdrworkshop/creds

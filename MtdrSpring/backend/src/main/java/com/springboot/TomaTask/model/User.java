@@ -65,9 +65,6 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "telegram_token", unique = true)
-    private String telegramToken;
-
     @Column(name = "github_id", unique = true)
     private String githubId;
 
@@ -179,14 +176,6 @@ public class User implements UserDetails {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
-    }
-
-    public String getTelegramToken() {
-        return telegramToken;
-    }
-
-    public void setTelegramToken(String telegramToken) {
-        this.telegramToken = telegramToken;
     }
 
     public String getGithubId() {
