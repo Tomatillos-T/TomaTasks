@@ -210,6 +210,22 @@ function Chatbot() {
     inputFieldRef.current?.focus();
   }, []);
 
+  // BUG FIX 1 & 3: Reload commits and stats when selectedBranch changes
+  useEffect(() => {
+    if (selectedBranch) {
+      // Reset pagination state
+      setCommitOffset(0);
+      setHasMoreCommits(true);
+      setSelectedCommits([]); // Clear selected commits when branch changes
+
+      // Reload commits for the new branch
+      loadCommits(true);
+
+      // Reload stats for the new branch
+      loadStats();
+    }
+  }, [selectedBranch]);
+
   const scrollToBottom = () => {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -456,8 +472,18 @@ function Chatbot() {
     setSelectedBranch("");
     setGithubBranches([]);
 
+    // BUG FIX 1 & 3: Clear commits and stats when repo changes
+    setCommits([]);
+    setSelectedCommits([]);
+    setCommitOffset(0);
+    setHasMoreCommits(true);
+
     if (repoFullName) {
       loadGitHubBranches(repoFullName);
+      // Stats will be reloaded by the useEffect when selectedBranch is set
+    } else {
+      // If repo is cleared, reload default stats
+      loadStats();
     }
   };
 
@@ -468,11 +494,16 @@ function Chatbot() {
       setIsLoadingCommits(true);
       const offset = reset ? 0 : commitOffset;
 
+      // PHASE 2 FIX (Problem A): Include repo/branch parameters in API call
+      let apiUrl = `/api/rag/commits?limit=21&offset=${offset}`;
+
+      // Add repo/branch parameters if they are selected
+      if (selectedRepo && selectedBranch) {
+        apiUrl += `&repo=${encodeURIComponent(selectedRepo)}&branch=${encodeURIComponent(selectedBranch)}`;
+      }
+
       // Request one extra to check if there are more commits
-      const data = await HttpClient.get<Commit[]>(
-        `/api/rag/commits?limit=21&offset=${offset}`,
-        { auth: true }
-      );
+      const data = await HttpClient.get<Commit[]>(apiUrl, { auth: true });
 
       // If we got 21 or more, there are more commits available
       const hasMore = data.length > 20;

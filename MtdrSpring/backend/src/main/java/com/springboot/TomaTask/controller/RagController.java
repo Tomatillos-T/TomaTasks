@@ -54,13 +54,16 @@ public class RagController {
 
     /**
      * Get recent commits with pagination
+     * PHASE 2 FIX (Problem A): Added repo and branch parameters for filtering
      */
     @GetMapping("/commits")
     public ResponseEntity<?> getCommits(
             @RequestParam(defaultValue = "20") int limit,
-            @RequestParam(defaultValue = "0") int offset) {
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(required = false) String repo,
+            @RequestParam(required = false) String branch) {
         try {
-            return ResponseEntity.ok(repoService.getRecentCommits(limit, offset));
+            return ResponseEntity.ok(repoService.getRecentCommits(limit, offset, repo, branch));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                 .body(Map.of("error", e.getMessage()));

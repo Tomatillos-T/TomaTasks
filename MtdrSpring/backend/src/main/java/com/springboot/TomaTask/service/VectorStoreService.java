@@ -226,6 +226,35 @@ public class VectorStoreService {
     }
 
     /**
+     * PHASE 1 FIX (Problem B): Get specific commit by ID from cache
+     * This allows retrieving commit metadata even if not indexed
+     */
+    public CommitMetadata getCachedCommitById(String commitHash) {
+        String sql =
+            "SELECT commit_hash, message, author, commit_time, processed\n" +
+            "FROM commit_cache\n" +
+            "WHERE commit_hash = ?";
+
+        List<CommitMetadata> results = jdbcTemplate.query(sql,
+            (rs, rowNum) -> {
+                String processed = rs.getString("processed");
+                java.sql.Timestamp timestamp = rs.getTimestamp("commit_time");
+
+                return new CommitMetadata(
+                    rs.getString("commit_hash"),
+                    rs.getString("message"),
+                    rs.getString("author"),
+                    timestamp != null ? timestamp.getTime() / 1000 : 0,
+                    "Y".equals(processed)
+                );
+            },
+            commitHash
+        );
+
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    /**
      * Delete embeddings for a specific commit
      */
     @Transactional
