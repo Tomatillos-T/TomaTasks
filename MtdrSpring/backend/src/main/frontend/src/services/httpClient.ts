@@ -1,6 +1,8 @@
 // services/httpClient.ts
 
-const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL;
+// In production (served by Spring Boot), no base URL needed (same origin)
+// In development, Vite proxy handles /api requests to localhost:8080
+const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL || "";
 
 interface HttpOptions extends RequestInit {
   /** Indica si se debe incluir el token JWT automáticamente */

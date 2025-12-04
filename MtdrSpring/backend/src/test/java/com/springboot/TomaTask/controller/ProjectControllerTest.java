@@ -1,6 +1,6 @@
 package com.springboot.TomaTask.controller;
 
-import com.springboot.TomaTask.model.Project;
+import com.springboot.TomaTask.dto.ProjectDTO;
 import com.springboot.TomaTask.service.ProjectService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -27,62 +29,78 @@ public class ProjectControllerTest {
     @InjectMocks
     private ProjectController projectController;
 
-    private Project project1;
-    private Project project2;
+    private ProjectDTO projectDTO1;
+    private ProjectDTO projectDTO2;
 
     @BeforeEach
     void setUp() {
-        project1 = new Project("TomaTask", "active", LocalDate.of(2025, 10, 1));
-        project2 = new Project("Data Migration", "planning", LocalDate.of(2025, 9, 20));
+        projectDTO1 = new ProjectDTO();
+        projectDTO1.setName("TomaTask");
+        projectDTO1.setStatus("active");
+        projectDTO1.setStartDate(LocalDate.of(2025, 10, 1));
+
+        projectDTO2 = new ProjectDTO();
+        projectDTO2.setName("Data Migration");
+        projectDTO2.setStatus("planning");
+        projectDTO2.setStartDate(LocalDate.of(2025, 9, 20));
     }
 
     @Test
     void testGetAllProjects() {
-        when(projectService.getAllProjects()).thenReturn(Arrays.asList(project1, project2));
+        when(projectService.getAllProjects()).thenReturn(Arrays.asList(projectDTO1, projectDTO2));
 
-        List<Project> result = projectController.getAllProjects();
+        ResponseEntity<List<ProjectDTO>> response = projectController.getAllProjects();
 
-        assertEquals(2, result.size());
-        assertEquals("TomaTask", result.get(0).getName());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
+        assertEquals("TomaTask", response.getBody().get(0).getName());
         verify(projectService, times(1)).getAllProjects();
     }
 
     @Test
     void testGetProjectById() {
-        when(projectService.getProjectById("1")).thenReturn(project1);
+        when(projectService.getProjectById("1")).thenReturn(projectDTO1);
 
-        Project result = projectController.getProjectById("1");
+        ResponseEntity<ProjectDTO> response = projectController.getProjectById("1");
 
-        assertEquals("TomaTask", result.getName());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("TomaTask", response.getBody().getName());
         verify(projectService, times(1)).getProjectById("1");
     }
 
     @Test
     void testCreateProject() {
-        when(projectService.createProject(any(Project.class))).thenReturn(project1);
+        when(projectService.createProject(any(ProjectDTO.class))).thenReturn(projectDTO1);
 
-        Project result = projectController.createProject(project1);
+        ResponseEntity<ProjectDTO> response = projectController.createProject(projectDTO1);
 
-        assertEquals("TomaTask", result.getName());
-        verify(projectService, times(1)).createProject(project1);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("TomaTask", response.getBody().getName());
+        verify(projectService, times(1)).createProject(projectDTO1);
     }
 
     @Test
     void testUpdateProject() {
-        when(projectService.updateProject(eq("1"), any(Project.class))).thenReturn(project2);
+        when(projectService.updateProject(eq("1"), any(ProjectDTO.class))).thenReturn(projectDTO2);
 
-        Project result = projectController.updateProject("1", project2);
+        ResponseEntity<ProjectDTO> response = projectController.updateProject("1", projectDTO2);
 
-        assertEquals("Data Migration", result.getName());
-        verify(projectService, times(1)).updateProject(eq("1"), eq(project2));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Data Migration", response.getBody().getName());
+        verify(projectService, times(1)).updateProject(eq("1"), eq(projectDTO2));
     }
 
     @Test
     void testDeleteProject() {
         doNothing().when(projectService).deleteProject("1");
 
-        projectController.deleteProject("1");
+        ResponseEntity<Void> response = projectController.deleteProject("1");
 
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(projectService, times(1)).deleteProject("1");
     }
 }

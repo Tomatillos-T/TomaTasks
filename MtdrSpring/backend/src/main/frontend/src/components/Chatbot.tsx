@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, forwardRef } from "react";
-import geminiService from "../services/geminiService";
+import { HttpClient } from "@/services/httpClient";
+import { Check, RefreshCw, Database, AlertCircle } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 interface ChatBubbleProps {
   role: "user" | "assistant";
@@ -7,52 +9,68 @@ interface ChatBubbleProps {
   isLoading?: boolean;
 }
 
+interface Commit {
+  hash: string;
+  message: string;
+  author: string;
+  timestamp: number;
+}
+
+interface Stats {
+  totalEmbeddings: number;
+  totalCommits: number;
+  processedCommits: number;
+}
+
 function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
   return (
     <div
-      className={`${
-        role === "user" ? "col-start-1 col-end-8" : "col-start-6 col-end-13"
-      } p-1 sm:p-2 rounded-lg`}
+      className={`flex ${
+        role === "user" ? "justify-start" : "justify-end"
+      } w-full`}
     >
       <div
-        className={`flex ${
+        className={`flex items-start gap-3 max-w-[90%] sm:max-w-[88%] lg:max-w-[85%] ${
           role === "user" ? "flex-row" : "flex-row-reverse"
-        } items-center`}
+        }`}
       >
         <div
           className={`flex items-center justify-center rounded-full flex-shrink-0
-                        h-6 w-6 sm:h-8 sm:w-8 ${
-                          role === "user" ? "bg-indigo-300" : "bg-indigo-500"
-                        }`}
+                      h-8 w-8 sm:h-10 sm:w-10 ${
+                        role === "user"
+                          ? "bg-primary-main text-primary-contrast"
+                          : "bg-secondary-main text-secondary-contrast"
+                      }`}
         >
-          <span className="text-xs sm:text-sm font-semibold">
-            {role[0].toUpperCase()}
+          <span className="text-sm sm:text-base font-semibold">
+            {role === "user" ? "U" : "A"}
           </span>
         </div>
+
         <div
-          className={`relative ${
-            role === "user" ? "ml-2 sm:ml-3" : "mr-2 sm:mr-3"
-          } 
-                        p-2 sm:p-3 shadow rounded-xl 
-                        max-w-[70%] sm:max-w-[70%] 
-                        text-xs sm:text-sm 
-                        ${
-                          role === "user"
-                            ? "bg-white dark:bg-cyan-900 text-black dark:text-white"
-                            : "bg-blue-500 dark:bg-sky-900 text-white"
-                        }`}
+          className={`relative p-3 sm:p-4 rounded-2xl shadow-sm
+                      text-sm sm:text-base break-words
+                      ${
+                        role === "user"
+                          ? "bg-background-paper text-text-primary border border-background-contrast"
+                          : "bg-primary-main text-primary-contrast"
+                      }`}
         >
           {isLoading ? (
-            <div className="flex items-center gap-1">
-              <div className="animate-bounce w-2 h-2 bg-white rounded-full"></div>
+            <div className="flex items-center gap-1.5">
+              <div className="animate-bounce w-2 h-2 bg-current rounded-full"></div>
               <div
-                className="animate-bounce w-2 h-2 bg-white rounded-full"
-                style={{ animationDelay: "0.1s" }}
+                className="animate-bounce w-2 h-2 bg-current rounded-full"
+                style={{ animationDelay: "0.15s" }}
               ></div>
               <div
-                className="animate-bounce w-2 h-2 bg-white rounded-full"
-                style={{ animationDelay: "0.2s" }}
+                className="animate-bounce w-2 h-2 bg-current rounded-full"
+                style={{ animationDelay: "0.3s" }}
               ></div>
+            </div>
+          ) : role === "assistant" ? (
+            <div className="prose prose-sm sm:prose-base prose-invert max-w-none">
+              <ReactMarkdown>{content}</ReactMarkdown>
             </div>
           ) : (
             <span className="whitespace-pre-wrap">{content}</span>
@@ -65,7 +83,7 @@ function ChatBubble({ role, content, isLoading = false }: ChatBubbleProps) {
 
 interface Message {
   role: "user" | "assistant";
-  content: { text: string }[];
+  content: string;
 }
 
 interface ChatMessagesProps {
@@ -75,12 +93,12 @@ interface ChatMessagesProps {
 
 function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   return (
-    <div className="grid grid-cols-12 gap-y-2 px-2">
+    <div className="flex flex-col gap-3 px-2 sm:px-4 w-full">
       {messages.map((message, index) => (
         <ChatBubble
           key={index}
           role={message.role}
-          content={message.content.map((block) => block.text).join("\n")}
+          content={message.content}
         />
       ))}
       {isLoading && <ChatBubble role="assistant" content="" isLoading={true} />}
@@ -88,7 +106,6 @@ function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   );
 }
 
-// ChatInput.jsx (dentro de Chatbot.jsx)
 interface ChatInputProps {
   onSendMessage: (input: string) => void;
   disabled?: boolean;
@@ -104,32 +121,37 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
       setInput("");
     };
 
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter" && !disabled) handleSendMessage();
     };
 
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <input
           ref={ref}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           disabled={disabled}
-          className="flex-grow px-2 sm:px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 
-                   dark:bg-gray-700 dark:border-gray-600 dark:text-white 
-                   text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-grow min-w-[200px] px-3 sm:px-4 py-2.5 sm:py-3 border border-background-contrast rounded-xl 
+                   focus:outline-none focus:ring-2 focus:ring-primary-main
+                   bg-background-paper text-text-primary placeholder:text-text-secondary
+                   text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed
+                   transition-all"
           placeholder={
-            disabled ? "Enviando mensaje..." : "Escribe un mensaje..."
+            disabled ? "Sending message..." : "Ask about the repository..."
           }
         />
         <button
           onClick={handleSendMessage}
           disabled={disabled || input.trim() === ""}
-          className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-main text-primary-contrast rounded-xl 
+                   hover:bg-primary-dark text-sm sm:text-base font-medium whitespace-nowrap 
+                   transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+                   shadow-sm hover:shadow-md"
         >
-          {disabled ? "..." : "Enviar"}
+          {disabled ? "..." : "Send"}
         </button>
       </div>
     );
@@ -139,22 +161,21 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
 function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGeminiAvailable, setIsGeminiAvailable] = useState(false);
+  const [commits, setCommits] = useState<Commit[]>([]);
+  const [selectedCommits, setSelectedCommits] = useState<string[]>([]);
+  const [repoStatus, setRepoStatus] = useState<string>("Not synced");
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [isIndexing, setIsIndexing] = useState(false);
+  const [isLoadingCommits, setIsLoadingCommits] = useState(false);
+  const [hasMoreCommits, setHasMoreCommits] = useState(true);
+  const [commitOffset, setCommitOffset] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputFieldRef = useRef<HTMLInputElement | null>(null);
+  const commitListRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // Verificar si Gemini está disponible
-    setIsGeminiAvailable(geminiService.isAvailable());
-
-    if (!geminiService.isAvailable()) {
-      if (typeof geminiService.getModelInfo === "function") {
-        console.log("Gemini Service Info:", geminiService.getModelInfo());
-      } else {
-        console.log("Gemini Service Info: not available");
-      }
-    }
-
+    loadCommits(true);
+    loadStats();
     inputFieldRef.current?.focus();
   }, []);
 
@@ -164,55 +185,118 @@ function Chatbot() {
     }, 100);
   };
 
-  const handleSendMessage = async (input: string) => {
-    if (!isGeminiAvailable) {
-      alert("Gemini no está configurado correctamente. Verifica tu API key.");
+  const loadCommits = async (reset: boolean = false) => {
+    if (isLoadingCommits || (!reset && !hasMoreCommits)) return;
+
+    try {
+      setIsLoadingCommits(true);
+      const offset = reset ? 0 : commitOffset;
+
+      // Request one extra to check if there are more commits
+      const data = await HttpClient.get<Commit[]>(
+        `/api/rag/commits?limit=21&offset=${offset}`,
+        { auth: true }
+      );
+
+      // If we got 21 or more, there are more commits available
+      const hasMore = data.length > 20;
+      setHasMoreCommits(hasMore);
+
+      // Only take the first 20 for display
+      const commitsToShow = hasMore ? data.slice(0, 20) : data;
+
+      if (reset) {
+        setCommits(commitsToShow);
+        setCommitOffset(commitsToShow.length);
+      } else {
+        setCommits((prev) => [...prev, ...commitsToShow]);
+        setCommitOffset((prev) => prev + commitsToShow.length);
+      }
+    } catch (error) {
+      console.error("Error loading commits:", error);
+    } finally {
+      setIsLoadingCommits(false);
+    }
+  };
+
+  const loadStats = async () => {
+    try {
+      const data = await HttpClient.get<Stats>("/api/rag/stats", {
+        auth: true,
+      });
+      setStats(data);
+    } catch (error) {
+      console.error("Error loading stats:", error);
+    }
+  };
+
+  const syncRepo = async () => {
+    try {
+      setRepoStatus("Syncing...");
+      await HttpClient.post("/api/rag/sync", {}, { auth: true });
+      setRepoStatus("Synced ✓");
+      setCommitOffset(0);
+      setHasMoreCommits(true);
+      loadCommits(true);
+      loadStats();
+    } catch (error) {
+      console.error("Error syncing repo:", error);
+      setRepoStatus("Sync failed");
+    }
+  };
+
+  const indexCommits = async () => {
+    if (selectedCommits.length === 0) {
+      alert("Please select commits to index");
       return;
     }
 
-    const newMessage: Message = {
-      role: "user",
-      content: [{ text: input }],
-    };
+    try {
+      setIsIndexing(true);
+      await HttpClient.post(
+        "/api/rag/index",
+        { commitIds: selectedCommits },
+        { auth: true }
+      );
+      
+      // Poll for stats update
+      setTimeout(() => {
+        loadStats();
+        setIsIndexing(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error indexing commits:", error);
+      setIsIndexing(false);
+    }
+  };
 
-    // Agregar mensaje del usuario
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  const handleSendMessage = async (input: string) => {
+    const newMessage: Message = { role: "user", content: input };
+    setMessages((prev) => [...prev, newMessage]);
     setIsLoading(true);
     scrollToBottom();
 
     try {
-      // Enviar mensaje a Gemini
-      const response = await geminiService.sendMessage(
-        input,
-        messages
-          .filter((m) => m.role === "user")
-          .map((m) => m.content.map((block) => block.text).join("\n"))
+      const response = await HttpClient.post<{ answer: string }>(
+        "/api/rag/query",
+        { question: input, commitIds: selectedCommits },
+        { auth: true }
       );
 
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: [{ text: response }],
-      };
-
-      // Agregar respuesta del asistente
-      setMessages((prevMessages) => [...prevMessages, assistantMessage]);
-    } catch (error) {
-      console.error("Error sending message:", error);
-
-      const errorMessage: Message = {
-        role: "assistant",
-        content: [
-          {
-            text:
-              "Error: " +
-              (error && typeof error === "object" && "message" in error
-                ? (error as { message?: string }).message
-                : String(error)),
-          },
-        ],
-      };
-
-      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: response.answer },
+      ]);
+    } catch (error: any) {
+      console.error("❌ Backend error:", error);
+      const message =
+        error?.response?.data?.error ||
+        error?.message ||
+        "There was an error processing your question.";
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Error: " + message },
+      ]);
     } finally {
       setIsLoading(false);
       scrollToBottom();
@@ -222,65 +306,219 @@ function Chatbot() {
 
   const newChat = () => {
     setMessages([]);
+    setSelectedCommits([]);
     inputFieldRef.current?.focus();
   };
 
+  const toggleCommit = (hash: string) => {
+    setSelectedCommits((prev) =>
+      prev.includes(hash) ? prev.filter((h) => h !== hash) : [...prev, hash]
+    );
+  };
+
+  const handleCommitScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const scrollPosition = target.scrollTop + target.clientHeight;
+    const scrollHeight = target.scrollHeight;
+
+    // Load more when scrolled to 80% of the list
+    if (scrollPosition >= scrollHeight * 0.8 && hasMoreCommits && !isLoadingCommits) {
+      loadCommits(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden">
-      {/* Header del chat */}
-      <div className="flex flex-wrap items-center justify-between p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800">
-        <div className="flex flex-wrap items-center gap-3">
-          <h3 className="font-semibold text-gray-900 dark:text-white">
-            Chatbot con Gemini
+    <div className="flex flex-col lg:flex-row h-full bg-background-main rounded-xl overflow-hidden">
+      {/* Sidebar */}
+      <div className="lg:w-80 border-b lg:border-b-0 lg:border-r border-background-contrast 
+                    bg-background-paper overflow-y-auto p-4 sm:p-6 max-h-64 lg:max-h-full">
+        
+        {/* Repository Status */}
+        <div className="mb-6">
+          <h3 className="font-semibold text-base sm:text-lg mb-3 text-text-primary">
+            Repository Status
           </h3>
-          {isGeminiAvailable && (
-            <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-              ✓ Conectado
-            </span>
-          )}
-          {!isGeminiAvailable && (
-            <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
-              ✗ Sin conexión
-            </span>
-          )}
+          <button
+            onClick={syncRepo}
+            className="w-full px-4 py-2.5 text-sm bg-primary-main text-primary-contrast rounded-lg 
+                     hover:bg-primary-dark transition-colors shadow-sm flex items-center justify-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Sync Repository
+          </button>
+          <p className="text-xs sm:text-sm text-text-secondary mt-2">
+            {repoStatus}
+          </p>
         </div>
-        <button
-          onClick={newChat}
-          className="mt-2 sm:mt-0 px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          Nuevo Chat
-        </button>
-      </div>
 
-      {/* Área de mensajes */}
-      <div className="flex-1 overflow-y-auto p-2 sm:p-4">
-        {messages.length === 0 && (
-          <div className="text-center text-gray-500 dark:text-gray-400 mt-4 sm:mt-8 px-4">
-            <p className="mb-2 text-sm sm:text-base">
-              👋 ¡Hola! Soy un chatbot potenciado por Gemini
-            </p>
-            <p className="text-xs sm:text-sm">
-              Escribe un mensaje para comenzar la conversación
+        {/* Statistics */}
+        {stats && (
+          <div className="mb-6 p-4 bg-background-subtle rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Database className="w-4 h-4 text-primary-main" />
+              <h3 className="font-semibold text-sm text-text-primary">
+                Vector Store Stats
+              </h3>
+            </div>
+            <div className="space-y-1 text-xs text-text-secondary">
+              <div className="flex justify-between">
+                <span>Embeddings:</span>
+                <span className="font-medium">{stats.totalEmbeddings}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Commits cached:</span>
+                <span className="font-medium">{stats.totalCommits}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Indexed:</span>
+                <span className="font-medium">{stats.processedCommits}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Index Selected Commits */}
+        {selectedCommits.length > 0 && (
+          <div className="mb-6">
+            <button
+              onClick={indexCommits}
+              disabled={isIndexing}
+              className="w-full px-4 py-2.5 text-sm bg-secondary-main text-secondary-contrast rounded-lg 
+                       hover:bg-secondary-dark transition-colors shadow-sm flex items-center justify-center gap-2
+                       disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isIndexing ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Indexing...
+                </>
+              ) : (
+                <>
+                  <Database className="w-4 h-4" />
+                  Index Selected ({selectedCommits.length})
+                </>
+              )}
+            </button>
+            <p className="text-xs text-text-secondary mt-2 flex items-start gap-1">
+              <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+              Index commits to enable semantic search
             </p>
           </div>
         )}
-        <ChatMessages messages={messages} isLoading={isLoading} />
-        <div ref={messagesEndRef} />
+
+        {/* Commit Selection */}
+        <div>
+          <h3 className="font-semibold text-base sm:text-lg mb-3 text-text-primary">
+            Select Commits ({selectedCommits.length})
+          </h3>
+          <div
+            ref={commitListRef}
+            onScroll={handleCommitScroll}
+            className="space-y-2 max-h-96 overflow-y-auto pr-2"
+          >
+            {commits.map((commit) => (
+              <div key={commit.hash} className="text-xs sm:text-sm">
+                <label className="flex items-start gap-3 cursor-pointer hover:bg-background-subtle
+                               p-3 rounded-lg transition-colors group">
+                  <div className="relative flex items-center justify-center mt-0.5">
+                    <input
+                      type="checkbox"
+                      checked={selectedCommits.includes(commit.hash)}
+                      onChange={() => toggleCommit(commit.hash)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-5 h-5 border-2 border-background-contrast rounded
+                                  peer-checked:bg-primary-main peer-checked:border-primary-main
+                                  transition-all flex items-center justify-center">
+                      {selectedCommits.includes(commit.hash) && (
+                        <Check className="w-3.5 h-3.5 text-primary-contrast" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-mono text-xs sm:text-sm text-primary-main font-medium mb-1">
+                      {commit.hash.substring(0, 7)}
+                    </div>
+                    <div className="text-text-primary font-medium mb-1 line-clamp-2">
+                      {commit.message.split("\n")[0]}
+                    </div>
+                    <div className="text-text-secondary text-xs">
+                      {commit.author}
+                    </div>
+                  </div>
+                </label>
+              </div>
+            ))}
+
+            {/* Loading indicator */}
+            {isLoadingCommits && (
+              <div className="flex items-center justify-center py-4">
+                <RefreshCw className="w-5 h-5 animate-spin text-primary-main" />
+                <span className="ml-2 text-sm text-text-secondary">Loading more commits...</span>
+              </div>
+            )}
+
+            {/* End of list indicator */}
+            {!hasMoreCommits && commits.length > 0 && (
+              <div className="text-center py-4 text-xs text-text-secondary">
+                All commits loaded
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Input de mensaje */}
-      <div className="p-2 sm:p-4 border-t dark:border-gray-700 bg-white dark:bg-gray-800">
-        {!isGeminiAvailable && (
-          <div className="mb-2 sm:mb-3 p-2 bg-yellow-100 border border-yellow-300 rounded-lg text-yellow-800 text-xs sm:text-sm">
-            ⚠️ Configura tu API key de Gemini en las variables de entorno
-            (VITE_APP_GEMINI_API_KEY)
+      {/* Chat Area */}
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-background-contrast 
+                      bg-background-paper flex-shrink-0">
+          <div>
+            <h3 className="font-semibold text-lg sm:text-xl text-text-primary">
+              Repository Assistant (RAG)
+            </h3>
+            <p className="text-xs sm:text-sm text-text-secondary mt-1">
+              Powered by semantic search & vector embeddings
+            </p>
           </div>
-        )}
-        <ChatInput
-          onSendMessage={handleSendMessage}
-          ref={inputFieldRef}
-          disabled={isLoading || !isGeminiAvailable}
-        />
+          <button
+            onClick={newChat}
+            className="px-3 sm:px-4 py-2 text-sm bg-secondary-main text-secondary-contrast 
+                     rounded-lg hover:bg-secondary-dark transition-colors shadow-sm"
+          >
+            New Chat
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 min-h-0">
+          {messages.length === 0 && (
+            <div className="text-center text-text-secondary mt-8 sm:mt-16 px-4">
+              <p className="mb-3 text-base sm:text-lg font-medium">
+                🤖 AI-Powered Repository Analysis
+              </p>
+              <p className="text-sm sm:text-base mb-4">
+                Select commits and ask questions about code changes
+              </p>
+              <div className="text-xs text-text-secondary max-w-md mx-auto bg-background-subtle p-4 rounded-lg">
+                <p className="font-semibold mb-2">💡 Tips:</p>
+                <ul className="text-left space-y-1">
+                  <li>• Index commits first for better semantic search</li>
+                  <li>• Ask specific questions about code changes</li>
+                  <li>• Reference file names or functions</li>
+                </ul>
+              </div>
+            </div>
+          )}
+          <ChatMessages messages={messages} isLoading={isLoading} />
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div className="p-4 sm:p-6 border-t border-background-contrast bg-background-paper flex-shrink-0">
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            ref={inputFieldRef}
+            disabled={isLoading}
+          />
+        </div>
       </div>
     </div>
   );

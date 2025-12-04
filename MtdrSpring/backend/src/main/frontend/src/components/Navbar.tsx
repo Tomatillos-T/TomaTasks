@@ -1,7 +1,7 @@
 import React from "react";
-import { Bell, ChevronDown, Moon, Search, Sun } from "lucide-react";
-import { useTheme } from "../hooks/useTheme";
-import { useUserContext } from "../context/UserContext";
+import { ChevronDown, Moon, Search, Sun } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
+import { useUserContext } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
 const Navbar: React.FC = () => {
@@ -63,11 +63,6 @@ const Navbar: React.FC = () => {
             </div>
           </button>
 
-          <button className="relative p-2 rounded-lg hover:bg-background-subtle transition-colors">
-            <Bell className="w-5 h-5 text-text-secondary" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-error-main rounded-full"></span>
-          </button>
-
           {/* Perfil */}
           <div
             onClick={() => navigate("/user")}
@@ -80,7 +75,7 @@ const Navbar: React.FC = () => {
               <p className="text-sm font-semibold text-text-primary">
                 {user?.firstName} {user?.lastName}
               </p>
-              <p className="text-xs text-text-secondary">{user?.role?.role}</p>
+              <p className="text-xs text-text-secondary">{user?.role}</p>
             </div>
             <ChevronDown className="w-4 h-4 text-text-secondary" />
           </div>

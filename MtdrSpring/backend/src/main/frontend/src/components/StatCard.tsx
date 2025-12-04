@@ -26,13 +26,15 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon: Icon, s
 
       <span
         className={`text-sm font-semibold px-2 py-1 rounded-full ${
-          change >= 0
+          change === 0
+            ? "bg-gray-100 text-gray-600"
+            : change > 0
             ? "bg-[var(--success-bg)] text-[var(--success-dark)]"
             : "bg-[var(--error-bg)] text-[var(--error-dark)]"
         }`}
       >
-        {change >= 0 ? "+" : ""}
-        {change}%
+        {change > 0 ? "+" : ""}
+        {change.toFixed(1)}%
       </span>
     </div>
 

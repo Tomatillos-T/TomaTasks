@@ -1,5 +1,6 @@
 package com.springboot.TomaTask.service;
 
+import com.springboot.TomaTask.dto.ProjectDTO;
 import com.springboot.TomaTask.model.Project;
 import com.springboot.TomaTask.repository.ProjectRepository;
 
@@ -30,18 +31,35 @@ public class ProjectServiceTest {
 
     private Project project1;
     private Project project2;
+    private ProjectDTO projectDTO1;
+    private ProjectDTO projectDTO2;
 
     @BeforeEach
     void setUp() {
         project1 = new Project("TomaTask", "active", LocalDate.of(2025, 10, 1));
+        project1.setDescription("Main project");
+
         project2 = new Project("Data Migration", "planning", LocalDate.of(2025, 9, 20));
+        project2.setDescription("Migration project");
+
+        projectDTO1 = new ProjectDTO();
+        projectDTO1.setName("TomaTask");
+        projectDTO1.setStatus("active");
+        projectDTO1.setStartDate(LocalDate.of(2025, 10, 1));
+        projectDTO1.setDescription("Main project");
+
+        projectDTO2 = new ProjectDTO();
+        projectDTO2.setName("Data Migration");
+        projectDTO2.setStatus("planning");
+        projectDTO2.setStartDate(LocalDate.of(2025, 9, 20));
+        projectDTO2.setDescription("Migration project");
     }
 
     @Test
     void testGetAllProjects() {
         when(projectRepository.findAll()).thenReturn(Arrays.asList(project1, project2));
 
-        List<Project> result = projectService.getAllProjects();
+        List<ProjectDTO> result = projectService.getAllProjects();
 
         assertEquals(2, result.size());
         assertEquals("TomaTask", result.get(0).getName());
@@ -52,7 +70,7 @@ public class ProjectServiceTest {
     void testGetProjectById_Found() {
         when(projectRepository.findById("1")).thenReturn(Optional.of(project1));
 
-        Project result = projectService.getProjectById("1");
+        ProjectDTO result = projectService.getProjectById("1");
 
         assertEquals("TomaTask", result.getName());
         verify(projectRepository, times(1)).findById("1");
@@ -66,29 +84,32 @@ public class ProjectServiceTest {
             projectService.getProjectById("99");
         });
 
-        assertEquals("Proyecto no encontrado", thrown.getMessage());
+        assertEquals("Project not found with ID: 99", thrown.getMessage());
         verify(projectRepository, times(1)).findById("99");
     }
 
     @Test
     void testCreateProject_Success() {
-        when(projectRepository.save(project1)).thenReturn(project1);
+        when(projectRepository.save(any(Project.class))).thenReturn(project1);
 
-        Project result = projectService.createProject(project1);
+        ProjectDTO result = projectService.createProject(projectDTO1);
 
         assertEquals("TomaTask", result.getName());
-        verify(projectRepository, times(1)).save(project1);
+        verify(projectRepository, times(1)).save(any(Project.class));
     }
 
     @Test
     void testCreateProject_ThrowsWhenNameMissing() {
-        Project invalid = new Project("", "active", LocalDate.now());
+        ProjectDTO invalid = new ProjectDTO();
+        invalid.setName("");
+        invalid.setStatus("active");
+        invalid.setStartDate(LocalDate.now());
 
         RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
             projectService.createProject(invalid);
         });
 
-        assertEquals("El nombre del proyecto es obligatorio", thrown.getMessage());
+        assertEquals("Project name is required", thrown.getMessage());
         verify(projectRepository, never()).save(any());
     }
 
@@ -97,11 +118,11 @@ public class ProjectServiceTest {
         when(projectRepository.findById("1")).thenReturn(Optional.of(project1));
         when(projectRepository.save(any(Project.class))).thenReturn(project1);
 
-        project1.setDescription("Updated Description");
-        Project updated = projectService.updateProject("1", project1);
+        projectDTO1.setDescription("Updated Description");
+        ProjectDTO updated = projectService.updateProject("1", projectDTO1);
 
         assertEquals("Updated Description", updated.getDescription());
-        verify(projectRepository, times(1)).save(project1);
+        verify(projectRepository, times(1)).save(any(Project.class));
     }
 
     @Test
@@ -109,10 +130,10 @@ public class ProjectServiceTest {
         when(projectRepository.findById("99")).thenReturn(Optional.empty());
 
         RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
-            projectService.updateProject("99", project2);
+            projectService.updateProject("99", projectDTO2);
         });
 
-        assertEquals("Proyecto no encontrado", thrown.getMessage());
+        assertEquals("Project not found with ID: 99", thrown.getMessage());
         verify(projectRepository, never()).save(any());
     }
 
